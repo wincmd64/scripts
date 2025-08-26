@@ -17,28 +17,49 @@
 
 <details>
   <summary>win10_11_tweaks.bat</summary>
-descr</details>
+
+Быстрая настройка ОС Windows 10 \ 11.
+
+</details>
 
 <details>
   <summary>yt-dlp.bat</summary>
-descr</details>
+
+Враппер для yt-dlp. Качает по ссылке из буфера обмена.
+
+</details>
 
 <details>
   <summary>uwp-remover.ps1</summary>
-descr</details>
+
+Удаляет встроенные UWP-приложения в один клик.
+
+</details>
 
 <details>
   <summary>temp.ps1</summary>
-descr</details>
+
+Рекурсивно удаляет файлы старше Х дней в указанной папке. Конечно, основное предназначение это папка `%temp%` юзера.
+
+</details>
 
 <details>
   <summary>empty.ps1</summary>
-descr</details>
+
+Рекурсивно удаляет пустые файлы и папки.
+
+</details>
 
 <details>
   <summary>filter.ps1</summary>
-descr</details>
+
+Быстрый фильтр строк текстовых файлов.
+
+</details>
 
 <details>
   <summary>notepad-replacer.cmd</summary>
-descr</details>
+
+Замена блокнота по-умолчанию на сторонний.
+
+</details>
