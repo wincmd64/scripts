@@ -17,22 +17,22 @@ echo ===========================================================================
 echo    WINDOWS 10
 echo ==============================================================================
 echo.
-echo ëÆß§†≠®• ‚ÆÁ™® ¢Æ··‚†≠Æ¢´•≠®Ô...
+echo –°–æ–∑–¥–∞–Ω–∏–µ —Ç–æ—á–∫–∏ –≤–æ—Å—Å—Ç–∞–Ω–æ–≤–ª–µ–Ω–∏—è...
 powershell Enable-Computerrestore -drive 'C:\'
 VSSAdmin Resize ShadowStorage /For=C: /On=C: /MaxSize=5%%
 powershell Checkpoint-Computer -Description 'win10 tweaks script'
 @echo on
 
-:: è†≠•´Ï ß†§†Á. ì°®‡†•‚ ™≠ÆØ™„ ≠Æ¢Æ·‚•©
+:: –ü–∞–Ω–µ–ª—å –∑–∞–¥–∞—á. –£–±–∏—Ä–∞–µ—Ç –∫–Ω–æ–ø–∫—É –Ω–æ–≤–æ—Å—Ç–µ–π
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds" /v EnableFeeds /t REG_DWORD /d 0 /f
 
-:: è†‡†¨•‚‡Î > ë®·‚•¨† > å≠Æ£Æß†§†Á≠Æ·‚Ï. OFF "è‡® Ø‡®™‡•Ø´•≠®® Æ™≠† ØÆ™†ßÎ¢†‚Ï, Á‚Æ ¨Æ¶≠Æ Ø‡®™‡•Ø®‚Ï ‡Ô§Æ¨ · ≠®¨" 
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –°–∏—Å—Ç–µ–º–∞ > –ú–Ω–æ–≥–æ–∑–∞–¥–∞—á–Ω–æ—Å—Ç—å. OFF "–ü—Ä–∏ –ø—Ä–∏–∫—Ä–µ–ø–ª–µ–Ω–∏–∏ –æ–∫–Ω–∞ –ø–æ–∫–∞–∑—ã–≤–∞—Ç—å, —á—Ç–æ –º–æ–∂–Ω–æ –ø—Ä–∏–∫—Ä–µ–ø–∏—Ç—å —Ä—è–¥–æ–º —Å –Ω–∏–º" 
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v SnapAssist /t REG_DWORD /d 0 /f
 
-:: è†‡†¨•‚‡Î > ë®·‚•¨† > Ñ®·Ø´•© > ç†·‚‡Æ©™® £‡†‰®™®. ON "ì¨•≠ÏË®‚Ï ¢‡•¨Ô ß†§•‡¶™® ® „¢•´®Á®‚Ï Ø‡Æ®ß¢Æ§®‚•´Ï≠Æ·‚Ï" 
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –°–∏—Å—Ç–µ–º–∞ > –î–∏—Å–ø–ª–µ–π > –ù–∞—Å—Ç—Ä–æ–π–∫–∏ –≥—Ä–∞—Ñ–∏–∫–∏. ON "–£–º–µ–Ω—å—à–∏—Ç—å –≤—Ä–µ–º—è –∑–∞–¥–µ—Ä–∂–∫–∏ –∏ —É–≤–µ–ª–∏—á–∏—Ç—å –ø—Ä–æ–∏–∑–≤–æ–¥–∏—Ç–µ–ª—å–Ω–æ—Å—Ç—å" 
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v HwSchMode /t REG_DWORD /d 2 /f
 
-:: è‡Æ¢Æ§≠®™. ë™‡Î‚Ï Ø†Ø™® ®ß 'ù‚Æ‚ ™Æ¨ØÏÓ‚•‡' : é°Í•¨≠Î• Æ°Í•™‚Î, å„ßÎ™†, á†£‡„ß™®, àßÆ°‡†¶•≠®Ô, Ç®§•Æ, ÑÆ™„¨•≠‚Î, ê†°ÆÁ®© ·‚Æ´ -- https://www.tenforums.com/tutorials/6015-add-remove-folders-pc-windows-10-a.html
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –°–∫—Ä—ã—Ç—å –ø–∞–ø–∫–∏ –∏–∑ '–≠—Ç–æ—Ç –∫–æ–º–ø—å—é—Ç–µ—Ä' : –û–±—ä–µ–º–Ω—ã–µ –æ–±—ä–µ–∫—Ç—ã, –ú—É–∑—ã–∫–∞, –ó–∞–≥—Ä—É–∑–∫–∏, –ò–∑–æ–±—Ä–∞–∂–µ–Ω–∏—è, –í–∏–¥–µ–æ, –î–æ–∫—É–º–µ–Ω—Ç—ã, –†–∞–±–æ—á–∏–π —Å—Ç–æ–ª -- https://www.tenforums.com/tutorials/6015-add-remove-folders-pc-windows-10-a.html
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v ThisPCPolicy /d Hide /f
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v ThisPCPolicy /d Hide /f
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v ThisPCPolicy /d Hide /f
@@ -48,46 +48,46 @@ echo ===========================================================================
 echo    WINDOWS 11
 echo ==============================================================================
 echo.
-echo ëÆß§†≠®• ‚ÆÁ™® ¢Æ··‚†≠Æ¢´•≠®Ô...
+echo –°–æ–∑–¥–∞–Ω–∏–µ —Ç–æ—á–∫–∏ –≤–æ—Å—Å—Ç–∞–Ω–æ–≤–ª–µ–Ω–∏—è...
 powershell Enable-Computerrestore -drive 'C:\'
 VSSAdmin Resize ShadowStorage /For=C: /On=C: /MaxSize=5%%
 powershell Checkpoint-Computer -Description 'win11 tweaks script'
 @echo on
 
-:: ä´†··®Á•·™Æ• ™Æ≠‚•™·‚≠Æ• ¨•≠Ó
+:: –ö–ª–∞—Å—Å–∏—á–µ—Å–∫–æ–µ –∫–æ–Ω—Ç–µ–∫—Å—Ç–Ω–æ–µ –º–µ–Ω—é
 :: reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
 
 :: Enable SUDO
 sudo config --enable normal
 
-:: ì°®‡†•‚ ß†§•‡¶™„ †¢‚Æß†Ø„·™† ëçéÇÄ -- https://superuser.com/questions/1799420/how-to-fix-startupdelayinmsec-trick-does-not-work-anymore
+:: –£–±–∏—Ä–∞–µ—Ç –∑–∞–¥–µ—Ä–∂–∫—É –∞–≤—Ç–æ–∑–∞–ø—É—Å–∫–∞ –°–ù–û–í–ê -- https://superuser.com/questions/1799420/how-to-fix-startupdelayinmsec-trick-does-not-work-anymore
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" /v WaitforIdleState /t REG_DWORD /d 0 /f
 
-:: è†‡†¨•‚‡Î > ë®·‚•¨† > å≠Æ£Æß†§†Á≠Æ·‚Ï. OFF "èÆ™†ßÎ¢†‚Ï ¨†™•‚Î Ø‡®™‡•Ø´•≠®Ô Ø‡® Ø•‡•‚†·™®¢†≠®® Æ™≠†"
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –°–∏—Å—Ç–µ–º–∞ > –ú–Ω–æ–≥–æ–∑–∞–¥–∞—á–Ω–æ—Å—Ç—å. OFF "–ü–æ–∫–∞–∑—ã–≤–∞—Ç—å –º–∞–∫–µ—Ç—ã –ø—Ä–∏–∫—Ä–µ–ø–ª–µ–Ω–∏—è –ø—Ä–∏ –ø–µ—Ä–µ—Ç–∞—Å–∫–∏–≤–∞–Ω–∏–∏ –æ–∫–Ω–∞"
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v EnableSnapBar /t REG_DWORD /d 0 /f
 
-:: è†‡†¨•‚‡Î > ë®·‚•¨† > Ñ®·Ø´•© > É‡†‰®™†. ON "éØ‚®¨®ß†Ê®Ô §´Ô ®£‡ ¢ Æ™Æ≠≠Æ¨ ‡•¶®¨•"
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –°–∏—Å—Ç–µ–º–∞ > –î–∏—Å–ø–ª–µ–π > –ì—Ä–∞—Ñ–∏–∫–∞. ON "–û–ø—Ç–∏–º–∏–∑–∞—Ü–∏—è –¥–ª—è –∏–≥—Ä –≤ –æ–∫–æ–Ω–Ω–æ–º —Ä–µ–∂–∏–º–µ"
 reg add "HKCU\Software\Microsoft\DirectX\UserGpuPreferences" /v DirectXUserGlobalSettings /d "SwapEffectUpgradeEnable=1;" /f
 
-:: è†‡†¨•‚‡Î > ë®·‚•¨† > ëØ•Ê.¢Æß¨Æ¶≠Æ·‚® > ä´†¢®†‚„‡†. OFF "Print screen"
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –°–∏—Å—Ç–µ–º–∞ > –°–ø–µ—Ü.–≤–æ–∑–º–æ–∂–Ω–æ—Å—Ç–∏ > –ö–ª–∞–≤–∏–∞—Ç—É—Ä–∞. OFF "Print screen"
 reg add "HKCU\Control Panel\Keyboard" /v PrintScreenKeyForSnippingEnabled /t REG_DWORD /d 0 /f
 
-:: è†‡†¨•‚‡Î > è•‡·Æ≠†´®ß†Ê®Ô > è„·™ > è†Ø™®. ON "á†£‡„ß™®"
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –ü–µ—Ä—Å–æ–Ω–∞–ª–∏–∑–∞—Ü–∏—è > –ü—É—Å–∫ > –ü–∞–ø–∫–∏. ON "–ó–∞–≥—Ä—É–∑–∫–∏"
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Start" /v "VisiblePlaces" /t REG_BINARY /d 2FB367E3DE895543BFCE61F37B18A937 /f
 
-:: è†≠•´Ï ß†§†Á. ä≠ÆØ™† è„·™ ·´•¢†
+:: –ü–∞–Ω–µ–ª—å –∑–∞–¥–∞—á. –ö–Ω–æ–ø–∫–∞ –ü—É—Å–∫ —Å–ª–µ–≤–∞
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarAl /t REG_DWORD /d 0 /f
 
-::  è†‡†¨•‚‡Î > è•‡·Æ≠†´®ß†Ê®Ô > è†≠•´Ï ß†§†Á. OFF å®≠®-Ø‡®´Æ¶•≠®Ô
+::  –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –ü–µ—Ä—Å–æ–Ω–∞–ª–∏–∑–∞—Ü–∏—è > –ü–∞–Ω–µ–ª—å –∑–∞–¥–∞—á. OFF –ú–∏–Ω–∏-–ø—Ä–∏–ª–æ–∂–µ–Ω–∏—è
 reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\NewsAndInterests\AllowNewsAndInterests" /v "Value" /t REG_DWORD /d 0 /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v "AllowNewsAndInterests" /t REG_DWORD /d 0 /f
 
-:: è‡Æ¢Æ§≠®™. é‚™´ÓÁ†•‚ É†´•‡•Ô
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –û—Ç–∫–ª—é—á–∞–µ—Ç –ì–∞–ª–µ—Ä–µ—è
 reg add "HKCU\Software\Classes\CLSID\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}" /v "System.IsPinnedToNameSpaceTree" /t REG_DWORD /d 0 /f
-:: è‡Æ¢Æ§≠®™. é‚™´ÓÁ†•‚ É´†¢≠†Ô
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –û—Ç–∫–ª—é—á–∞–µ—Ç –ì–ª–∞–≤–Ω–∞—è
 :: reg add "HKCU\Software\Classes\CLSID\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}" /v "System.IsPinnedToNameSpaceTree" /t REG_DWORD /d 0 /f
 
-:: è‡Æ¢Æ§≠®™. äÆ¨Ø†™‚≠Æ• Ø‡•§·‚†¢´•≠®•
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –ö–æ–º–ø–∞–∫—Ç–Ω–æ–µ –ø—Ä–µ–¥—Å—Ç–∞–≤–ª–µ–Ω–∏–µ
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v UseCompactMode /t REG_DWORD /d 1 /f
 
 goto all
@@ -100,95 +100,95 @@ echo    UI Tweaks
 echo ==============================================================================
 @echo on
 
-:: é‚™´ÓÁ†•‚ Lock Screen
+:: –û—Ç–∫–ª—é—á–∞–µ—Ç Lock Screen
 :: reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization" /v NoLockScreen /t REG_DWORD /d 1 /f
-:: é‚™´ÓÁ†•‚ ‰Æ≠Æ¢Æ• ®ßÆ°‡†¶•≠®• Logon Screen
+:: –û—Ç–∫–ª—é—á–∞–µ—Ç —Ñ–æ–Ω–æ–≤–æ–µ –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏–µ Logon Screen
 :: reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v DisableLogonBackgroundImage /t REG_DWORD /d 1 /f
 
-:: è‡Æß‡†Á≠Æ·‚Ï Æ™Æ≠ CMD ® PowerShell
+:: –ü—Ä–æ–∑—Ä–∞—á–Ω–æ—Å—Ç—å –æ–∫–æ–Ω CMD –∏ PowerShell
 reg add HKCU\Console\%%SystemRoot%%_system32_cmd.exe /v WindowAlpha /t REG_DWORD /d 231 /f
 reg add HKCU\Console\%%SystemRoot%%_System32_WindowsPowerShell_v1.0_powershell.exe /v WindowAlpha /t REG_DWORD /d 243 /f
 reg add HKCU\Console\%%SystemRoot%%_SysWOW64_WindowsPowerShell_v1.0_powershell.exe /v WindowAlpha /t REG_DWORD /d 243 /f
 
-:: éØ‡•§•´Ô•‚ ØÆ´Æ¶•≠®• Ø•‡•™´ÓÁ†‚•´•© ¢ Æ™≠• ÅÎ·‚‡Æ§•©·‚¢®• (SystemPropertiesPerformance.exe)
+:: –û–ø—Ä–µ–¥–µ–ª—è–µ—Ç –ø–æ–ª–æ–∂–µ–Ω–∏–µ –ø–µ—Ä–µ–∫–ª—é—á–∞—Ç–µ–ª–µ–π –≤ –æ–∫–Ω–µ –ë—ã—Å—Ç—Ä–æ–¥–µ–π—Å—Ç–≤–∏–µ (SystemPropertiesPerformance.exe)
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 3 /f
 reg add "HKCU\Control Panel\Desktop" /v UserPreferencesMask /t REG_BINARY /d 9032078010000000 /f
 reg add "HKCU\Control Panel\Desktop\WindowMetrics" /v MinAnimate /d 0 /f
 
-:: è‡Æ¢Æ§≠®™. à™Æ≠™† "ù‚Æ‚ ™Æ¨ØÏÓ‚•‡" ≠† ‡†°ÆÁ•¨ ·‚Æ´•
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –ò–∫–æ–Ω–∫–∞ "–≠—Ç–æ—Ç –∫–æ–º–ø—å—é—Ç–µ—Ä" –Ω–∞ —Ä–∞–±–æ—á–µ–º —Å—Ç–æ–ª–µ
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f
 
-:: è‡Æ¢Æ§≠®™. ë™‡Î‚Ï "ÑÆØÆ´≠®‚•´Ï≠Î• ·¢•§•≠®Ô Æ° Ì‚Æ¨ ®ßÆ°‡†¶•≠®®" ≠† ‡†°ÆÁ•¨ ·‚Æ´•
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –°–∫—Ä—ã—Ç—å "–î–æ–ø–æ–ª–Ω–∏—Ç–µ–ª—å–Ω—ã–µ —Å–≤–µ–¥–µ–Ω–∏—è –æ–± —ç—Ç–æ–º –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏–∏" –Ω–∞ —Ä–∞–±–æ—á–µ–º —Å—Ç–æ–ª–µ
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {2cc5ca98-6485-489a-920e-b3e88a6ccce3} /t REG_DWORD /d 1 /f
 
-:: è‡Æ¢Æ§≠®™. á†Ø„·™ ØÆ „¨Æ´Á†≠®Ó "ù‚Æ‚ ™Æ¨ØÏÓ‚•‡" ¢¨•·‚Æ "ÅÎ·‚‡Î© §Æ·‚„Ø"
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –ó–∞–ø—É—Å–∫ –ø–æ —É–º–æ–ª—á–∞–Ω–∏—é "–≠—Ç–æ—Ç –∫–æ–º–ø—å—é—Ç–µ—Ä" –≤–º–µ—Å—Ç–æ "–ë—ã—Å—Ç—Ä—ã–π –¥–æ—Å—Ç—É–ø"
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f
 
-:: è‡Æ¢Æ§≠®™. é‚™´ÓÁ®‚Ï "èÆ™†ßÎ¢†‚Ï Á†·‚Æ ®·ØÆ´Ïß„•¨Î• Ø†Ø™® ≠† Ø†≠•´® °Î·‚‡Æ£Æ §Æ·‚„Ø†"
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –û—Ç–∫–ª—é—á–∏—Ç—å "–ü–æ–∫–∞–∑—ã–≤–∞—Ç—å —á–∞—Å—Ç–æ –∏—Å–ø–æ–ª—å–∑—É–µ–º—ã–µ –ø–∞–ø–∫–∏ –Ω–∞ –ø–∞–Ω–µ–ª–∏ –±—ã—Å—Ç—Ä–æ–≥–æ –¥–æ—Å—Ç—É–ø–∞"
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f
 
-:: è‡Æ¢Æ§≠®™. ÑÆ°†¢´Ô•¨ Ô‡´Î™® ¢ ÅÎ·‚‡Î© §Æ·‚„Ø
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –î–æ–±–∞–≤–ª—è–µ–º —è—Ä–ª—ã–∫–∏ –≤ –ë—ã—Å—Ç—Ä—ã–π –¥–æ—Å—Ç—É–ø
 powershell "(New-Object -ComObject Shell.Application).Namespace('shell:appdata').Self.InvokeVerb('pintohome')"
 powershell "(New-Object -ComObject Shell.Application).Namespace('shell:Local AppData\temp').Self.InvokeVerb('pintohome')"
 powershell "(New-Object -ComObject Shell.Application).Namespace('shell:startup').Self.InvokeVerb('pintohome')"
 
-:: è‡Æ¢Æ§≠®™. ÑÆ°†¢´Ô•¨ "ì·‚‡Æ©·‚¢† ® Ø‡®≠‚•‡Î" ¢ "ù‚Æ‚ ™Æ¨ØÏÓ‚•‡"
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –î–æ–±–∞–≤–ª—è–µ–º "–£—Å—Ç—Ä–æ–π—Å—Ç–≤–∞ –∏ –ø—Ä–∏–Ω—Ç–µ—Ä—ã" –≤ "–≠—Ç–æ—Ç –∫–æ–º–ø—å—é—Ç–µ—Ä"
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{A8A91A66-3A7D-4424-8D24-04E180695C7A}" /f
 
-:: è‡Æ¢Æ§≠®™. Ç·•£§† ØÆ™†ßÎ¢†‚Ï ‡†·Ë®‡•≠®Ô ‰†©´Æ¢
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –í—Å–µ–≥–¥–∞ –ø–æ–∫–∞–∑—ã–≤–∞—Ç—å —Ä–∞—Å—à–∏—Ä–µ–Ω–∏—è —Ñ–∞–π–ª–æ–≤
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f
 
-:: è‡Æ¢Æ§≠®™. é‚Æ°‡†¶†‚Ï ß†È®È•≠≠Î• ·®·‚•¨≠Î• ‰†©´Î (Ø‡® †™‚®¢†Ê®® 'ë™‡Î‚Î• Ì´•¨•≠‚Î')
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –û—Ç–æ–±—Ä–∞–∂–∞—Ç—å –∑–∞—â–∏—â–µ–Ω–Ω—ã–µ —Å–∏—Å—Ç–µ–º–Ω—ã–µ —Ñ–∞–π–ª—ã (–ø—Ä–∏ –∞–∫—Ç–∏–≤–∞—Ü–∏–∏ '–°–∫—Ä—ã—Ç—ã–µ —ç–ª–µ–º–µ–Ω—Ç—ã')
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowSuperHidden /t REG_DWORD /d 1 /f
 
-:: è‡Æ¢Æ§≠®™. é‚™´ÓÁ®‚Ï Ø‡•‰®™· " - Ô‡´Î™" Ø‡® ·Æß§†≠®® ≠Æ¢ÎÂ Ô‡´Î™Æ¢
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –û—Ç–∫–ª—é—á–∏—Ç—å –ø—Ä–µ—Ñ–∏–∫—Å " - —è—Ä–ª—ã–∫" –ø—Ä–∏ —Å–æ–∑–¥–∞–Ω–∏–∏ –Ω–æ–≤—ã—Ö —è—Ä–ª—ã–∫–æ–≤
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\NamingTemplates" /v ShortcutNameTemplate /d \"%%s.lnk\" /f
 
-:: è‡Æ¢Æ§≠®™. é‚™´ÓÁ®‚Ï ·¶†‚®• Æ°Æ•¢
+:: –ü—Ä–æ–≤–æ–¥–Ω–∏–∫. –û—Ç–∫–ª—é—á–∏—Ç—å —Å–∂–∞—Ç–∏–µ –æ–±–æ–µ–≤
 reg add "HKCU\Control Panel\Desktop" /v JPEGImportQuality /t REG_DWORD /d 100 /f
 
-:: è†≠•´Ï ß†§†Á. ì¢•´®Á®‚Ï ·™Æ‡Æ·‚Ï Æ‚™‡Î‚®Ô ¨®≠®†‚Ó‡
+:: –ü–∞–Ω–µ–ª—å –∑–∞–¥–∞—á. –£–≤–µ–ª–∏—á–∏—Ç—å —Å–∫–æ—Ä–æ—Å—Ç—å –æ—Ç–∫—Ä—ã—Ç–∏—è –º–∏–Ω–∏–∞—Ç—é—Ä
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ExtendedUIHoverTime /t REG_DWORD /d 100 /f
 
-:: è†≠•´Ï ß†§†Á. è•‡•ÂÆ§®‚Ï ≠† ØÆ·´•§≠•• Æ‚™‡Î‚Æ• Æ™≠Æ Ø‡® ™´®™• ØÆ ·£‡„ØØ®‡Æ¢†≠≠Î¨ Ø‡®´Æ¶•≠®Ô¨
+:: –ü–∞–Ω–µ–ª—å –∑–∞–¥–∞—á. –ü–µ—Ä–µ—Ö–æ–¥–∏—Ç—å –Ω–∞ –ø–æ—Å–ª–µ–¥–Ω–µ–µ –æ—Ç–∫—Ä—ã—Ç–æ–µ –æ–∫–Ω–æ –ø—Ä–∏ –∫–ª–∏–∫–µ –ø–æ —Å–≥—Ä—É–ø–ø–∏—Ä–æ–≤–∞–Ω–Ω—ã–º –ø—Ä–∏–ª–æ–∂–µ–Ω–∏—è–º
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LastActiveClick /t REG_DWORD /d 1 /f
 
-:: è†≠•´Ï ß†§†Á. ì°®‡†•‚ ™≠ÆØ™® ØÆ®·™† ® ß†§†Á
+:: –ü–∞–Ω–µ–ª—å –∑–∞–¥–∞—á. –£–±–∏—Ä–∞–µ—Ç –∫–Ω–æ–ø–∫–∏ –ø–æ–∏—Å–∫–∞ –∏ –∑–∞–¥–∞—á
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 0 /f
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowTaskViewButton /t REG_DWORD /d 0 /f
 
-:: è„·™. é‚™´ÓÁ®‚Ï ØÆ®·™ ¢ à≠‚•‡≠•‚• 
+:: –ü—É—Å–∫. –û—Ç–∫–ª—é—á–∏—Ç—å –ø–æ–∏—Å–∫ –≤ –ò–Ω—Ç–µ—Ä–Ω–µ—Ç–µ 
 reg add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f
 
-:: è„·™. OFF "é‚Æ°‡†¶•≠®• „¢•§Æ¨´•≠®©, ·¢Ôß†≠≠ÎÂ · „Á•‚≠Æ© ß†Ø®·ÏÓ"
+:: –ü—É—Å–∫. OFF "–û—Ç–æ–±—Ä–∞–∂–µ–Ω–∏–µ —É–≤–µ–¥–æ–º–ª–µ–Ω–∏–π, —Å–≤—è–∑–∞–Ω–Ω—ã—Ö —Å —É—á–µ—Ç–Ω–æ–π –∑–∞–ø–∏—Å—å—é"
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_AccountNotifications /t REG_DWORD /d 0 /f
 
-:: è„·™. ÑÆ°†¢®¨ ≠•·™Æ´Ï™Æ ØÆ´•ß≠ÎÂ Ô‡´Î™Æ¢ ¢ éÅôÖå è„·™•
+:: –ü—É—Å–∫. –î–æ–±–∞–≤–∏–º –Ω–µ—Å–∫–æ–ª—å–∫–æ –ø–æ–ª–µ–∑–Ω—ã—Ö —è—Ä–ª—ã–∫–æ–≤ –≤ –û–ë–©–ï–ú –ü—É—Å–∫–µ
 powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([IO.Path]::Combine($env:ProgramData, 'Microsoft\Windows\Start Menu\Programs\System Tools\Environment Variables.lnk'));$s.TargetPath = 'rundll32.exe'; $s.Arguments = 'sysdm.cpl,EditEnvironmentVariables';$s.IconLocation='sysdm.cpl,1';$s.Save()"
 powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([IO.Path]::Combine($env:ProgramData, 'Microsoft\Windows\Start Menu\Programs\System Tools\Device Center.lnk'));$s.TargetPath='explorer';$s.Arguments='shell:::{A8A91A66-3A7D-4424-8D24-04E180695C7A}';$s.IconLocation='DeviceCenter.dll';$s.Save()"
 powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([IO.Path]::Combine($env:ProgramData, 'Microsoft\Windows\Start Menu\Programs\System Tools\Network Connections.lnk'));$s.TargetPath='ncpa.cpl';$s.IconLocation='ncpa.cpl';$s.Save()"
 powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([IO.Path]::Combine($env:ProgramData, 'Microsoft\Windows\Start Menu\Programs\System Tools\Group Policy Editor.lnk'));$s.TargetPath='mmc.exe';$s.Arguments='gpedit.msc';$s.IconLocation='gpedit.dll';$s.Save()"
 powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([IO.Path]::Combine($env:ProgramData, 'Microsoft\Windows\Start Menu\Programs\System Tools\System Properties.lnk'));$s.TargetPath='control.exe';$s.Arguments='sysdm.cpl';$s.IconLocation='sysdm.cpl';$s.Save()"
 
-:: è†≠•´Ï „Ø‡†¢´•≠®Ô. ä‡„Ø≠Î• ß≠†Á™®
+:: –ü–∞–Ω–µ–ª—å —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è. –ö—Ä—É–ø–Ω—ã–µ –∑–Ω–∞—á–∫–∏
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel" /v StartupPage /t REG_DWORD /d 1 /f
 
-:: è†≠•´Ï „Ø‡†¢´•≠®Ô > á¢„™®. OFF "è‡Æ®£‡Î¢†‚Ï ¨•´Æ§®Ó ß†Ø„·™† Windows"
+:: –ü–∞–Ω–µ–ª—å —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è > –ó–≤—É–∫–∏. OFF "–ü—Ä–æ–∏–≥—Ä—ã–≤–∞—Ç—å –º–µ–ª–æ–¥–∏—é –∑–∞–ø—É—Å–∫–∞ Windows"
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation" /v DisableStartupSound /t REG_DWORD /d 1 /f
 
-:: è†‡†¨•‚‡Î > ë®·‚•¨† > ì¢•§Æ¨´•≠®Ô. OFF "è‡Æ§Æ´¶®‚Ï ·ØÆ·Æ°Î ß†¢•‡Ë•≠®Ô ≠†·‚‡Æ©™® „·‚‡Æ©·‚¢†". ù‚Æ Ø‡•§Æ‚¢‡†‚®‚ ØÆÔ¢´•≠®• ≠†¢ÔßÁ®¢Æ£Æ Æ™≠†, ™Æ‚Æ‡Æ• ØÆÔ¢´Ô•‚·Ô Á•‡•ß ™†™Æ•-‚Æ ¢‡•¨Ô ØÆ·´• „·‚†≠Æ¢™®
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –°–∏—Å—Ç–µ–º–∞ > –£–≤–µ–¥–æ–º–ª–µ–Ω–∏—è. OFF "–ü—Ä–æ–¥–æ–ª–∂–∏—Ç—å —Å–ø–æ—Å–æ–±—ã –∑–∞–≤–µ—Ä—à–µ–Ω–∏—è –Ω–∞—Å—Ç—Ä–æ–π–∫–∏ —É—Å—Ç—Ä–æ–π—Å—Ç–≤–∞". –≠—Ç–æ –ø—Ä–µ–¥–æ—Ç–≤—Ä–∞—Ç–∏—Ç –ø–æ—è–≤–ª–µ–Ω–∏–µ –Ω–∞–≤—è–∑—á–∏–≤–æ–≥–æ –æ–∫–Ω–∞, –∫–æ—Ç–æ—Ä–æ–µ –ø–æ—è–≤–ª—è–µ—Ç—Å—è —á–µ—Ä–µ–∑ –∫–∞–∫–æ–µ-—Ç–æ –≤—Ä–µ–º—è –ø–æ—Å–ª–µ —É—Å—Ç–∞–Ω–æ–≤–∫–∏
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f
 
-:: è†‡†¨•‚‡Î > ë®·‚•¨† > Å„‰•‡ Æ°¨•≠†. ON Ü„‡≠†´ °„‰•‡† Æ°¨•≠† (Win+V)
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –°–∏—Å—Ç–µ–º–∞ > –ë—É—Ñ–µ—Ä –æ–±–º–µ–Ω–∞. ON –ñ—É—Ä–Ω–∞–ª –±—É—Ñ–µ—Ä–∞ –æ–±–º–µ–Ω–∞ (Win+V)
 reg add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f
 
-:: è†‡†¨•‚‡Î > è•‡·Æ≠†´®ß†Ê®Ô > ñ¢•‚†. ON "á†£Æ´Æ¢™® ® £‡†≠®ÊÎ Æ™Æ≠"
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –ü–µ—Ä—Å–æ–Ω–∞–ª–∏–∑–∞—Ü–∏—è > –¶–≤–µ—Ç–∞. ON "–ó–∞–≥–æ–ª–æ–≤–∫–∏ –∏ –≥—Ä–∞–Ω–∏—Ü—ã –æ–∫–æ–Ω"
 reg add "HKCU\Software\Microsoft\Windows\DWM" /v ColorPrevalence /t REG_DWORD /d 1 /f
 
-:: è†‡†¨•‚‡Î > è•‡·Æ≠†´®ß†Ê®Ô > è†≠•´Ï ß†§†Á. ç•·™Æ´Ï™Æ §®·Ø´••¢ > èÆ™†ßÎ¢†‚Ï ™≠ÆØ™® ¢ ™Æ‚Æ‡Æ© Æ‚™‡Î‚Æ Æ™≠Æ
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –ü–µ—Ä—Å–æ–Ω–∞–ª–∏–∑–∞—Ü–∏—è > –ü–∞–Ω–µ–ª—å –∑–∞–¥–∞—á. –ù–µ—Å–∫–æ–ª—å–∫–æ –¥–∏—Å–ø–ª–µ–µ–≤ > –ü–æ–∫–∞–∑—ã–≤–∞—Ç—å –∫–Ω–æ–ø–∫–∏ –≤ –∫–æ—Ç–æ—Ä–æ–π –æ—Ç–∫—Ä—ã—Ç–æ –æ–∫–Ω–æ
 reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced /V MMTaskbarMode /T REG_dWORD /D 2 /F
 
-:: è†‡†¨•‚‡Î > ëØ•Ê.¢Æß¨Æ¶≠Æ·‚® > Ñ®·Ø´•©. OFF "Ä¢‚Æ¨†‚®Á•·™Æ• ·™‡Î‚®• ØÆ´Æ· Ø‡Æ™‡„‚™®"
+:: –ü–∞—Ä–∞–º–µ—Ç—Ä—ã > –°–ø–µ—Ü.–≤–æ–∑–º–æ–∂–Ω–æ—Å—Ç–∏ > –î–∏—Å–ø–ª–µ–π. OFF "–ê–≤—Ç–æ–º–∞—Ç–∏—á–µ—Å–∫–æ–µ —Å–∫—Ä—ã—Ç–∏–µ –ø–æ–ª–æ—Å –ø—Ä–æ–∫—Ä—É—Ç–∫–∏"
 reg add "HKCU\Control Panel\Accessibility" /v DynamicScrollbars /t REG_DWORD /d 0 /f
 
 @echo off
@@ -202,41 +202,41 @@ echo     Extended tweaks
 echo ==============================================================================
 @echo on
 
-:: UserAccountControlSettings.exe - ‚‡•‚Ï• ØÆ´Æ¶•≠®•
+:: UserAccountControlSettings.exe - —Ç—Ä–µ—Ç—å–µ –ø–æ–ª–æ–∂–µ–Ω–∏–µ
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v PromptOnSecureDesktop /t REG_DWORD /d 0 /f
 
-:: ó†·Æ¢Æ© ØÆÔ· UTC+02:00
+:: –ß–∞—Å–æ–≤–æ–π –ø–æ—è—Å UTC+02:00
 tzutil /s "FLE Standard Time"
 
-:: Ä≠£´®©·™®© ™†™ ¨•‚Æ§ ¢¢Æ§† ØÆ-„¨Æ´Á†≠®Ó (UA: 0422:00000422 RU: 0419:00000419)
+:: –ê–Ω–≥–ª–∏–π—Å–∫–∏–π –∫–∞–∫ –º–µ—Ç–æ–¥ –≤–≤–æ–¥–∞ –ø–æ-—É–º–æ–ª—á–∞–Ω–∏—é (UA: 0422:00000422 RU: 0419:00000419)
 powershell Set-WinDefaultInputMethodOverride -InputTip "0409:00000409"
 
-:: é‚™´ÓÁ†•‚ °´Æ™®‡Æ¢™„ ·™†Á†≠≠ÎÂ ‰†©´Æ¢. https://habr.com/ru/post/505194/
+:: –û—Ç–∫–ª—é—á–∞–µ—Ç –±–ª–æ–∫–∏—Ä–æ–≤–∫—É —Å–∫–∞—á–∞–Ω–Ω—ã—Ö —Ñ–∞–π–ª–æ–≤. https://habr.com/ru/post/505194/
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v SaveZoneInformation /t REG_DWORD /d 1 /f
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v SaveZoneInformation /t REG_DWORD /d 1 /f
 
-:: î†©´Î ™†™ ‚•™·‚Æ¢Î•
+:: –§–∞–π–ª—ã –∫–∞–∫ —Ç–µ–∫—Å—Ç–æ–≤—ã–µ
 assoc .=txtfile
 assoc .wer=txtfile
 
-:: é‚™´ÓÁ†•‚ †§¨®≠.Ë†‡Î -- https://admx.help/?Category=SecurityBaseline&Policy=Microsoft.Policies.MSS::Pol_MSS_AutoShareWks
+:: –û—Ç–∫–ª—é—á–∞–µ—Ç –∞–¥–º–∏–Ω.—à–∞—Ä—ã -- https://admx.help/?Category=SecurityBaseline&Policy=Microsoft.Policies.MSS::Pol_MSS_AutoShareWks
 reg add HKLM\SYSTEM\CurrentControlSet\Services\lanmanserver\parameters /v AutoShareWks /t REG_DWORD /d 0 /f
 net share C$ /delete
 net share D$ /delete
 
-:: ì°®‡†•‚ ß†§•‡¶™„ †¢‚Æß†Ø„·™†
+:: –£–±–∏—Ä–∞–µ—Ç –∑–∞–¥–µ—Ä–∂–∫—É –∞–≤—Ç–æ–∑–∞–ø—É—Å–∫–∞
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" /v StartupDelayInMSec /t REG_DWORD /d 0 /f
 
-:: é‚™´ÓÁ®‚Ï †¢‚Æß†Ø„·™ Edge | https://admx.help/?Category=EdgeChromium&Policy=Microsoft.Policies.Edge::StartupBoostEnabled
+:: –û—Ç–∫–ª—é—á–∏—Ç—å –∞–≤—Ç–æ–∑–∞–ø—É—Å–∫ Edge | https://admx.help/?Category=EdgeChromium&Policy=Microsoft.Policies.Edge::StartupBoostEnabled
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v StartupBoostEnabled /t REG_DWORD /d 0 /f
 
-:: í•´•¨•‚‡®Ô -- https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.DataCollection::AllowTelemetry
+:: –¢–µ–ª–µ–º–µ—Ç—Ä–∏—è -- https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.DataCollection::AllowTelemetry
 reg add "HKLM\Software\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
 
-:: é‚™´ÓÁ†•‚ ·´„¶°„ "î„≠™Ê®Æ≠†´Ï≠Î• ¢Æß¨Æ¶≠Æ·‚® §´Ô ØÆ§™´ÓÁ•≠≠ÎÂ ØÆ´ÏßÆ¢†‚•´•© ® ‚•´•¨•‚‡®Ô"
+:: –û—Ç–∫–ª—é—á–∞–µ—Ç —Å–ª—É–∂–±—É "–§—É–Ω–∫—Ü–∏–æ–Ω–∞–ª—å–Ω—ã–µ –≤–æ–∑–º–æ–∂–Ω–æ—Å—Ç–∏ –¥–ª—è –ø–æ–¥–∫–ª—é—á–µ–Ω–Ω—ã—Ö –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª–µ–π –∏ —Ç–µ–ª–µ–º–µ—Ç—Ä–∏—è"
 sc stop "DiagTrack" && sc config "DiagTrack" start=disabled
 
-:: é‚™´ÓÁ†•‚ ß†§†≠®Ô ¢ Ø´†≠®‡Æ¢È®™•
+:: –û—Ç–∫–ª—é—á–∞–µ—Ç –∑–∞–¥–∞–Ω–∏—è –≤ –ø–ª–∞–Ω–∏—Ä–æ–≤—â–∏–∫–µ
 schtasks /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
 :: if still appears: reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\CompatTelRunner.exe" /v Debugger /t REG_SZ /d "%windir%\System32\taskkill.exe" /f
 schtasks /Change /DISABLE /TN "\Microsoft\Windows\Defrag\ScheduledDefrag"
@@ -244,15 +244,15 @@ schtasks /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\Svc
 schtasks /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskLogon"
 schtasks /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskNetwork"
 
-:: OFF "èÆ·´•§≠®• §•©·‚¢®Ô ® ‡•ß„´Ï‚†‚Î ·™†≠®‡Æ¢†≠®Ô" ¢ Windows Defender (Ì‚Æ ™†·†•‚·Ô ™Æ≠™‡•‚≠Æ£Æ „¢•§Æ¨´•≠®Ô - ·†¨ AV Ø‡Æ§Æ´¶†•‚ ‡†°Æ‚„)
+:: OFF "–ü–æ—Å–ª–µ–¥–Ω–∏–µ –¥–µ–π—Å—Ç–≤–∏—è –∏ —Ä–µ–∑—É–ª—å—Ç–∞—Ç—ã —Å–∫–∞–Ω–∏—Ä–æ–≤–∞–Ω–∏—è" –≤ Windows Defender (—ç—Ç–æ –∫–∞—Å–∞–µ—Ç—Å—è –∫–æ–Ω–∫—Ä–µ—Ç–Ω–æ–≥–æ —É–≤–µ–¥–æ–º–ª–µ–Ω–∏—è - —Å–∞–º AV –ø—Ä–æ–¥–æ–ª–∂–∞–µ—Ç —Ä–∞–±–æ—Ç—É)
 reg add "HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection" /v SummaryNotificationDisabled /t REG_DWORD /d 1 /f
 
-:: ù´•™‚‡ÆØ®‚†≠®• - Ø‡®¨•≠Ô‚Ï ´„ÁË• §´Ô ≠†·‚Æ´Ï≠ÎÂ èä, † ≠• ≠Æ„‚°„™Æ¢
-:: é‚™´ÓÁ†•‚ £®°•‡≠†Ê®Ó ® „§†´Ô•‚ ‰†©´ C:\hiberfil.sys
+:: –≠–ª–µ–∫—Ç—Ä–æ–ø–∏—Ç–∞–Ω–∏–µ - –ø—Ä–∏–º–µ–Ω—è—Ç—å –ª—É—á—à–µ –¥–ª—è –Ω–∞—Å—Ç–æ–ª—å–Ω—ã—Ö –ü–ö, –∞ –Ω–µ –Ω–æ—É—Ç–±—É–∫–æ–≤
+:: –û—Ç–∫–ª—é—á–∞–µ—Ç –≥–∏–±–µ—Ä–Ω–∞—Ü–∏—é –∏ —É–¥–∞–ª—è–µ—Ç —Ñ–∞–π–ª C:\hiberfil.sys
 powercfg -h off
-:: è†≠•´Ï „Ø‡†¢´•≠®Ô > ù´•™‚‡ÆØ®‚†≠®•. ëÂ•¨† Ø®‚†≠®Ô "ÇÎ·Æ™†Ô Ø‡Æ®ß¢Æ§®‚•´Ï≠Æ·‚Ï"
+:: –ü–∞–Ω–µ–ª—å —É–ø—Ä–∞–≤–ª–µ–Ω–∏—è > –≠–ª–µ–∫—Ç—Ä–æ–ø–∏—Ç–∞–Ω–∏–µ. –°—Ö–µ–º–∞ –ø–∏—Ç–∞–Ω–∏—è "–í—ã—Å–æ–∫–∞—è –ø—Ä–æ–∏–∑–≤–æ–¥–∏—Ç–µ–ª—å–Ω–æ—Å—Ç—å"
 powercfg /S 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
-:: ç• Æ‚™´ÓÁ†‚Ï ¶•·‚™®© §®·™ | https://www.tenforums.com/tutorials/21454-turn-off-hard-disk-after-idle-windows-10-a.html
+:: –ù–µ –æ—Ç–∫–ª—é—á–∞—Ç—å –∂–µ—Å—Ç–∫–∏–π –¥–∏—Å–∫ | https://www.tenforums.com/tutorials/21454-turn-off-hard-disk-after-idle-windows-10-a.html
 powercfg -change -disk-timeout-ac 0
 
 pause & exit
