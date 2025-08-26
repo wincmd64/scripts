@@ -2,11 +2,12 @@
 На этой странице представлены различные скрипты моего авторства для Windows 10+
 
 <details>
-  <summary>context_menu_extras/</summary>
-Скрипты в этой папке объединяет ряд общих принципов</details>
+  <summary>send2_extras/</summary>
+Скрипты в этой папке представляют собой обёртки (врапперы) для популярных утилит. Их можно использовать, поместив ярлык в папку `Shell:SendTo` (меню `Отправить` в Проводнике) или кнопкой с параметром `%P%S` в [Total Commander](https://github.com/wincmd64/blog/wiki/TotalCmd). Таким образом выбранные файлы будут обработаны в виде массива. 
+</details>
 
 <details>
-  <summary>send2_extras/</summary>
+  <summary>context_menu_extras/</summary>
 Скрипты в этой папке объединяет ряд общих принципов</details>
 
 <details>
