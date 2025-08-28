@@ -37,5 +37,5 @@ color 27 & timeout 2 & exit
 :shortcut
 powershell -NoP -NoL -Ep Bypass -c ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\HandBrake.lnk'); ^
-$s.TargetPath = '%~f0'; $s.IconLocation = 'dfrgui.exe'; $s.Save()"
+$s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,129'; $s.Save()"
 echo. & echo  Shortcut 'HandBrake.lnk' created. & echo. & pause & exit
