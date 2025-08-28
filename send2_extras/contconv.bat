@@ -5,9 +5,15 @@
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%S parameter
 
+:: Command line arguments:
+:: /s - create shortcut in Shell:SendTo folder
+
 @echo off
 for /f "tokens=* delims=" %%a in ('where contconv.exe 2^>nul') do set "app=%%a"
 if not exist "%app%" (echo. & echo  "contconv.exe" not found. & echo  Download it from: https://github.com/DarkHobbit/doublecontact/releases & echo. & pause & exit) else (TITLE %app%)
+
+:: arguments
+if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 
 set count=0
 for %%A in (%*) do set /a count+=1
@@ -29,3 +35,8 @@ echo. & echo. & echo  DONE. & echo. & pause & exit
 FOR %%k IN (%*) DO (echo. & "%app%" -i "%%~k" -o "%%~dpnk.csv" -f csv -op generic -w)
 echo. & echo. & echo  DONE. & echo. & pause & exit
 
+:shortcut
+powershell -NoP -NoL -Ep Bypass -c ^
+"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\VCF converter.lnk'); ^
+$s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,126'; $s.Save()"
+echo. & echo  Shortcut 'VCF converter.lnk' created. & echo. & pause & exit
