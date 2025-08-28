@@ -5,9 +5,15 @@
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%S parameter
 
+:: Command line arguments:
+:: /s - create shortcut in Shell:SendTo folder
+
 @echo off
 for /f "tokens=* delims=" %%a in ('where innounp.exe 2^>nul') do set "app=%%a"
 if not exist "%app%" (echo. & echo  "innounp.exe" not found. & echo  Download it from: https://www.rathlev-home.de/tools/download/innounp-2.zip & echo. & pause & exit) else (TITLE %app%)
+
+:: arguments
+if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 
 set count=0
 for %%A in (%*) do set /a count+=1
@@ -15,4 +21,10 @@ if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
 if %count% equ 1 (echo. & echo  Processing: %* & echo. & pause) else (echo. & echo  Processing %count% objects. & echo. & pause)
 
 FOR %%k IN (%*) DO (echo. & "%app%" -x -d"%%~dpnk_unpacked" "%%~k")
-echo. & echo. & echo  DONE. & echo. & pause
+echo. & echo. & echo  DONE. & echo. & pause & exit
+
+:shortcut
+powershell -NoP -NoL -Ep Bypass -c ^
+"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\InnoUnpacker.lnk'); ^
+$s.TargetPath = '%~f0'; $s.IconLocation = '%app%'; $s.Save()"
+echo. & echo  Shortcut 'InnoUnpacker.lnk' created. & echo. & pause & exit

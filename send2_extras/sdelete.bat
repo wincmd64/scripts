@@ -5,6 +5,9 @@
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%S parameter
 
+:: Command line arguments:
+:: /s - create shortcut in Shell:SendTo folder
+
 @echo off
 for /f "tokens=* delims=" %%a in ('where sdelete64.exe 2^>nul') do set "app=%%a"
 if not exist "%app%" (
@@ -13,10 +16,19 @@ if not exist "%app%" (
     if errorlevel 1 (echo. & echo  Download failed. Try manually: https://learn.microsoft.com/sysinternals/downloads/sdelete & echo. & pause & exit) else (echo. & echo  DONE. Please re-run this script. & echo. & pause & exit)
 ) else (TITLE %app%)
 
+:: arguments
+if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+
 set count=0
 for %%A in (%*) do set /a count+=1
 if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
 if %count% equ 1 (echo. & echo  Delete %* ? & echo. & pause) else (echo. & echo  Delete %count% objects? & echo. & pause)
 
 FOR %%k IN (%*) DO (echo. & "%app%" -nobanner -s "%%~k")
-echo. & echo. & echo  DONE. & echo. & pause
+echo. & echo. & echo  DONE. & echo. & pause & exit
+
+:shortcut
+powershell -NoP -NoL -Ep Bypass -c ^
+"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Secure Delete.lnk'); ^
+$s.TargetPath = '%~f0'; $s.IconLocation = 'imageres.dll,-5320'; $s.Save()"
+echo. & echo  Shortcut 'Secure Delete.lnk' created. & echo. & pause & exit
