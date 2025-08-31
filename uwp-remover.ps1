@@ -1,34 +1,26 @@
-# Uninstall some built-in UWP apps. Tested on Win 10 22H2 (june 25) and Win 11 24H2
+# Uninstall some built-in UWP apps. Tested on Win 11 24H2 (08.2025)
 
 $app2delete = @(
      # Get list of installed apps: Get-AppxPackage | Select Name, PackageFullName
-    "Microsoft.Copilot",
     "Microsoft.Windows.DevHome",
-    "Microsoft.549981C3F5F10",               # Cortana
     "Microsoft.WindowsFeedbackHub",
-    "Microsoft.MicrosoftOfficeHub",          # Office 365
-    "microsoft.windowscommunicationsapps",   # Outlook (Mail and Calendar)
-    "Microsoft.OutlookForWindows",
-    "Microsoft.MicrosoftStickyNotes",
-    "Microsoft.Getstarted",                  # Tips
-    "Microsoft.MixedReality.Portal",
-    "Microsoft.ZuneVideo",                   # Movies & TV
-    "Microsoft.BingWeather",
-    "Microsoft.Office.OneNote",
-    "Microsoft.MSPaint",                     # Paint 3D
-    "Microsoft.YourPhone",
-    "Microsoft.SkypeApp",
-    "Microsoft.MicrosoftSolitaireCollection",
-    "Microsoft.WindowsMaps",
-    "Microsoft.XboxApp",
-    "Microsoft.Microsoft3DViewer",
-    "Microsoft.GetHelp",
-    "Microsoft.People",
-     # Win 11:
+    "Microsoft.MicrosoftOfficeHub",          # MS 365 Copilot
     "Clipchamp.Clipchamp",
+    "Microsoft.MicrosoftStickyNotes",
+    "Microsoft.BingWeather",
     "Microsoft.BingNews",
+    "Microsoft.OutlookForWindows",
     "Microsoft.PowerAutomateDesktop",
-    "Microsoft.GamingApp"
+    "Microsoft.MicrosoftSolitaireCollection",
+    "Microsoft.GamingApp",                   # Xbox
+    "Microsoft.YourPhone",
+    "Microsoft.GetHelp",
+    "A025C540.Yandex.Music",
+    "Microsoft.XboxSpeechToTextOverlay",
+    "Microsoft.BingSearch",
+    "Microsoft.Edge.GameAssist",
+    "Microsoft.XboxIdentityProvider",
+    "Microsoft.Xbox.TCUI"
 )
 
 foreach ($app in $app2delete) {
