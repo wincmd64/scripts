@@ -25,7 +25,7 @@ if not exist "%app%" (
     echo. & echo  i_view64.exe not found. Try to download? & echo. & pause
     :: checking connection
     ping -n 1 www.irfanview.info >nul 2>&1
-    if errorlevel 1 (echo. & echo  Unable to reach www.irfanview.info. Check your internet connection. & echo. & pause & exit)
+    if errorlevel 1 (color C & echo. & echo  Unable to reach www.irfanview.info. Check your internet connection. & echo. & pause & exit)
     :: get latest version
     for /f tokens^=1-3^ delims^=^" %%i in ('curl.exe --ssl-no-revoke -s "https://www.irfanview.com/64bit.htm" ^| FINDSTR /IRC:"href=.*iview[0-9]*_x64\.zip"') do (
         set "mainZip=%%~nxj"
@@ -131,23 +131,21 @@ FOR %%k IN (%*) DO (
     echo  FILE: "%%~k"
     "%app%" "%%~k" /resize=^(50p,50p^) /resample /convert="%%~dpnk_resized%%~xk"
 )
-color 27 & timeout 2 & exit
+color A & timeout 1 & exit
 :Option_2
 FOR %%k IN (%*) DO (
     echo  FILE: "%%~k"
     "%app%" "%%~k" /effect=^(2,6^) /resample /convert="%%~dpnk_blurred%%~xk"
 )
-color 27 & timeout 2 & exit
+color A & timeout 1 & exit
 :Option_3
 pushd "%~dp1"
 for %%i in (%*) do call set args=%%args%%,"%%~nxi"
-"%app%" /panorama=(1%args%)
-color 27 & timeout 1 & exit
+start "" "%app%" /panorama=(1%args%) & exit
 :Option_4
 pushd "%~dp1"
 for %%i in (%*) do call set args=%%args%%,"%%~nxi"
-"%app%" /panorama=(2%args%)
-color 27 & timeout 1 & exit
+start "" "%app%" /panorama=(2%args%) & exit
 :Option_5
 set /p ext=Enter extention (png jpg bmp gif ico ... all supported: https://irfanview.com/main_formats.htm ): 
 if not defined ext (goto Option_5)
@@ -155,7 +153,7 @@ FOR %%k IN (%*) DO (
     echo  FILE: "%%~k"
     "%app%" "%%~k" /resample /convert="%%~dpnk.%ext%" /makecopy
 )
-color 27 & timeout 2 & exit
+color A & timeout 1 & exit
 :Option_6
 pushd "%~dp1"
 for %%i in (%*) do call set args=%%args%%,"%%~nxi"
@@ -164,7 +162,7 @@ echo  2 = convert as TIF
 CHOICE /C 12 /M "Your choice?:" >nul 2>&1
 if errorlevel 2 "%app%" /multitif=(%~n1.tif%args%) /tifc=6 /killmesoftly
 if errorlevel 1 "%app%" /multipdf=(%~n1.pdf%args%) /killmesoftly
-color 27 & timeout 2 & exit
+color A & timeout 1 & exit
 :Option_7
 set /p ext=Enter extention (png jpg bmp gif ico ... all supported: https://irfanview.com/main_formats.htm ): 
 if not defined ext (goto Option_7)
@@ -172,7 +170,7 @@ FOR %%k IN (%*) DO (
     echo  FILE: "%%~k"
     "%app%" "%%~k" /extract=^(.,%ext%^) /killmesoftly
 )
-color 27 & timeout 2 & exit
+color A & timeout 1 & exit
 :Option_8
 if /I not "%~x1"==".jpg" echo  NOTICE: first file is not a .JPG & echo.
 echo  1 = flip vertically
@@ -189,11 +187,10 @@ pushd "%~dp1"
 ) > "listfile.txt"
 "%app%" /filelist="listfile.txt" /jpg_rotate=^(%opt%,1,0,1^) /killmesoftly
 del listfile.txt
-color 27 & timeout 2 & exit
+color A & timeout 1 & exit
 :Option_9
 echo Setting wallpaper: "%~1"
-"%app%" "%~1" /wall=4 /killmesoftly
-color 27 & timeout 2 & exit
+start "" "%app%" "%~1" /wall=4 /killmesoftly & exit
 
 :shortcut
 powershell -NoP -NoL -Ep Bypass -c ^
@@ -203,7 +200,7 @@ echo. & echo  Shortcut 'IrfanView converter.lnk' created. & echo. & pause & exit
 
 :associate
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
-if not exist "%fta%" (color 4 & echo. & echo  SetUserFTA.exe not found. Try download from: https://setuserfta.com/SetUserFTA.zip & echo. & pause & exit)
+if not exist "%fta%" (color C & echo. & echo  SetUserFTA.exe not found. Try download from: https://setuserfta.com/SetUserFTA.zip & echo. & pause & exit)
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
 echo. & echo  Associate image files with "%app%" ? & echo. & pause
 for %%A in ("%app%") do set "app_dir=%%~dpA"
