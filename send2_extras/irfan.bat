@@ -236,6 +236,4 @@ ftype irfan_djvu="%app%" "%%1"
 SetUserFTA.exe .djvu irfan_djvu
 reg add "HKCU\Software\Classes\irfan_djvu\DefaultIcon" /ve /d "%icons%,5" /f
 
-echo.
-SetUserFTA.exe get | findstr /i "irfan"
-pause & exit
+echo. & echo Current associations: & SetUserFTA.exe get | findstr /i "irfan" & echo. & pause & exit
