@@ -206,34 +206,18 @@ echo. & echo  Associate image files with "%app%" ? & echo. & pause
 for %%A in ("%app%") do set "app_dir=%%~dpA"
 set "icons=%app_dir%Plugins\Icons.dll"
 
-assoc .jpg=irfan_jpg
-ftype irfan_jpg="%app%" "%%1"
-SetUserFTA.exe .jpg irfan_jpg
-reg add "HKCU\Software\Classes\irfan_jpg\DefaultIcon" /ve /d "%icons%,14" /f
-
-assoc .png=irfan_png
-ftype irfan_png="%app%" "%%1"
-SetUserFTA.exe .png irfan_png
-reg add "HKCU\Software\Classes\irfan_png\DefaultIcon" /ve /d "%icons%,21" /f
-
-assoc .bmp=irfan_bmp
-ftype irfan_bmp="%app%" "%%1"
-SetUserFTA.exe .bmp irfan_bmp
-reg add "HKCU\Software\Classes\irfan_bmp\DefaultIcon" /ve /d "%icons%" /f
-
-assoc .gif=irfan_gif
-ftype irfan_gif="%app%" "%%1"
-SetUserFTA.exe .gif irfan_gif
-reg add "HKCU\Software\Classes\irfan_gif\DefaultIcon" /ve /d "%icons%,10" /f
-
-assoc .tif=irfan_tif
-ftype irfan_tif="%app%" "%%1"
-SetUserFTA.exe .tif irfan_tif
-reg add "HKCU\Software\Classes\irfan_tif\DefaultIcon" /ve /d "%icons%,31" /f
-
-assoc .djvu=irfan_djvu
-ftype irfan_djvu="%app%" "%%1"
-SetUserFTA.exe .djvu irfan_djvu
-reg add "HKCU\Software\Classes\irfan_djvu\DefaultIcon" /ve /d "%icons%,5" /f
+call :process jpg 14
+call :process png 21
+call :process bmp 0
+call :process gif 10
+call :process tif 31
+call :process djvu 5
 
 echo. & echo Current associations: & SetUserFTA.exe get | findstr /i "irfan" & echo. & pause & exit
+
+:process
+assoc .%1=irfan_%1
+ftype irfan_%1="%app%" "%%1"
+SetUserFTA.exe .%1 irfan_%1
+reg add "HKCU\Software\Classes\irfan_%1\DefaultIcon" /ve /d "%icons%,%2" /f
+exit /b
