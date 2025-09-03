@@ -15,13 +15,11 @@ if not exist "%app%" (echo. & echo  "innounp.exe" not found. & echo  Download it
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 
-set count=0
-for %%A in (%*) do set /a count+=1
-if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
-if %count% equ 1 (echo. & echo  Processing: %* & echo. & pause) else (echo. & echo  Processing %count% objects. & echo. & pause)
-
-FOR %%k IN (%*) DO (echo. & "%app%" -x -d"%%~dpnk_unpacked" "%%~k")
-echo. & echo. & echo  DONE. & echo. & pause & exit
+if "%~1"=="" (echo. & echo  No objects selected & echo. & pause & exit)
+"%app%" "%~1" >nul 2>&1
+if errorlevel 1 ("%app%" "%~1" & echo. & pause & exit)
+"%app%" -x -d"%~dpn1_unpacked" "%~1"
+if errorlevel 1 (echo. & pause & exit) else (timeout 2 & exit)
 
 :shortcut
 powershell -NoP -NoL -Ep Bypass -c ^
