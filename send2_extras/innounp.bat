@@ -1,9 +1,9 @@
-:: Wrapper for InnoUnp CLI — Inno Setup unpacker
+:: Wrapper for InnoUnp CLI â€” Inno Setup unpacker
 :: by github.com/wincmd64
 
 :: Usage:
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
-:: or button in TotalCmd with the %P%S parameter
+:: or button in TotalCmd with the %P%N parameter
 
 :: Command line arguments:
 :: /s - create shortcut in Shell:SendTo folder
