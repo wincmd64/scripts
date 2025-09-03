@@ -1,7 +1,7 @@
 :: Adds "View content" entry to the Explorer context menu
-:: /!\ REQUIRES /!\  Run this in PowerShell once: Install-Module -Name GPRegistryPolicyParser
-:: [area] .pol files
-
+::   /!\ REQUIRES /!\  Run this in PowerShell once: Install-Module -Name GPRegistryPolicyParser
+::   [area] .pol files
+:: by github.com/wincmd64
 
 @ECHO OFF
 :: Use /u to undo changes

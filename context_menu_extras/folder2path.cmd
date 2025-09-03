@@ -1,5 +1,6 @@
 :: Adds "Add folder to PATH" entry to the Explorer context menu (hold Shift to activate)
-:: [area] dirs
+::   [area] dirs
+:: by github.com/wincmd64
 
 @ECHO OFF
 :: Use /u to undo changes

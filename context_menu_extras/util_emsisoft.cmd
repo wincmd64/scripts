@@ -1,6 +1,6 @@
 :: Adds "Emsisoft Scanner" entry to the Explorer context menu
-:: [area] all files and dirs
-
+::   [area] all files and dirs
+:: by github.com/wincmd64
 
 @ECHO OFF
 :: Use /u to undo changes

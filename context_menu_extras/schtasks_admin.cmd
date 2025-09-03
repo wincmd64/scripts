@@ -1,6 +1,6 @@
 :: Adds "Add to Task Scheduler" entry to the Explorer context menu (hold Shift to activate)
-:: [area] .exe .cmd .bat .ps1 files
-
+::   [area] .exe .cmd .bat .ps1 files
+:: by github.com/wincmd64
 
 @ECHO OFF
 :: Use /u to undo changes

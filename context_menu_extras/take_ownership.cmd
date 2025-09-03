@@ -1,7 +1,7 @@
 :: Adds "Take Ownership" entry to the Explorer context menu (hold Shift to activate)
-:: Converted from: https://www.tenforums.com/tutorials/3841-add-take-ownership-context-menu-windows-10-a.html
-:: [area] all files, dirs and drives
-
+::   Converted from: https://www.tenforums.com/tutorials/3841-add-take-ownership-context-menu-windows-10-a.html
+::   [area] all files, dirs and drives
+:: by github.com/wincmd64
 
 @echo off
 set "PowerShell=powershell.exe -NoP -NoL -Ep Bp -w Hidden -w Minimized -c"

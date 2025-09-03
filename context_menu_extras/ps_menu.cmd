@@ -1,6 +1,6 @@
 :: Adds "Run bypass" and "Execution Policy" menu entries to the Explorer context menu
-:: [area] .ps1 files
-
+::   [area] .ps1 files
+:: by github.com/wincmd64
 
 @ECHO OFF
 :: Use /u to undo changes

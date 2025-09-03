@@ -1,6 +1,6 @@
 :: Adds "Boot now!" entry to the Explorer context menu
-:: [area] .wim files
-
+::   [area] .wim files
+:: by github.com/wincmd64
 
 @ECHO OFF
 :: Use /u to undo changes

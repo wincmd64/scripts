@@ -1,5 +1,5 @@
 :: Adds "Remind me!" entry to the Desktop context menu
-
+:: by github.com/wincmd64
 
 @ECHO OFF
 :: Use /u to undo changes
