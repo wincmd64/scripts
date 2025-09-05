@@ -5,12 +5,24 @@
 Скрипты в этой папке представляют собой обёртки (врапперы) для популярных утилит. Чтобы использовать скрипт, нужно перетянуть его на панель инструментов [Total Commander](https://github.com/wincmd64/blog/wiki/TotalCmd) кнопкой с параметром `%P%S`. Еще вариант, создать ярлык на него в папке `Shell:SendTo` (меню `Отправить` в Проводнике) - это же можно сделать автоматом запустив с ключом `/s`.  
 Далее, выделяем нужные файлы и передаем скрипту - они будут обработаны массивом один за одним.
 
-[irfan.bat](https://github.com/wincmd64/scripts/blob/main/send2_extras/irfan.bat). Конвертер и конфигуратор [IrfanView](https://www.irfanview.com). Умеет менять размер картинок, добавлять эффекты, создавать панорамы, конвертировать форматы и прочее. 
+* **irfan.bat**. Конвертер и конфигуратор [IrfanView](https://www.irfanview.com). Умеет менять размер картинок, добавлять эффекты, создавать панорамы, конвертировать форматы и прочее. 
 Если самой программы нет - скрипт предложит скачать и настроить её. Используя ключ `/a` можно проассоциировать нужные форматы.
 
-[ffmpeg.bat](https://github.com/wincmd64/scripts/blob/main/send2_extras/ffmpeg.bat). Работа с видеофайлами через [FFmpeg](https://ffmpeg.org). Умеет поворачивать, объединять, создавать .gif из видео, менять скорость, конвертировать и прочее.
+* **ffmpeg.bat**. Работа с видеофайлами через [FFmpeg](https://ffmpeg.org). Умеет поворачивать, объединять, создавать `.gif` из видео, менять скорость, конвертировать и прочее.
 
-[tesseract.bat](https://github.com/wincmd64/scripts/blob/main/send2_extras/tesseract.bat). Распознает текст из графических файлов используя [Tesseract OCR](https://github.com/UB-Mannheim/tesseract).
+* **handbrake.bat**. Оптимизирует видеофайлы используя [пресеты HandBrake](https://handbrake.fr/docs/en/latest/technical/official-presets.html).
+
+* **caesium.bat**. Оптимизирует изображения с помощью [Caesium CLI](https://github.com/Lymphatus/caesium-clt). 
+
+* **tesseract.bat**. Распознает текст из графических файлов используя [Tesseract OCR](https://github.com/UB-Mannheim/tesseract).
+
+* **contconv.bat**. Конвертирует `.vcf` в читабельный формат (HTML или CSV). Кроме [contconv.exe](https://github.com/DarkHobbit/doublecontact/releases) для правильной работы также требуется `libgcc_s_dw2-1.dll`.
+  
+* **innounp.bat**. Распаковывает содержимое инсталляторов созданных в InnoSutup. 
+
+* **sdelete.bat**. Удаления файлов без возможности восстановления с помощью Sysinternals [SDelete](https://learn.microsoft.com/sysinternals/downloads/sdelete).
+  
+* **sigcheck.bat**. Проверка файлов через сервис VirusTotal с помощью Sysinternals [SigCheck](https://learn.microsoft.com/sysinternals/downloads/sigcheck).
 
 ### context_menu_extras/
 При запуске скрипта из этой папки будет добавлен соотв. пункт в контекстное меню Проводника.  
