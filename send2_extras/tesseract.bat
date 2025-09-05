@@ -22,7 +22,7 @@ if not defined app (for /f "tokens=* delims=" %%a in ('where tesseract.exe 2^>nu
 if not defined app (for /f "tokens=3*" %%a in ('reg query "HKLM\SOFTWARE\Tesseract-OCR" /v Path 2^>nul') do set "tesspath=%%a%%b")
 if defined tesspath set "app=%tesspath%\tesseract.exe"
 :: path to tesseract.exe -- fallback, manual download
-if not exist "%app%" (color 4 & echo. & echo  tesseract.exe not found. Try download from: https://github.com/UB-Mannheim/tesseract/wiki & echo. & pause & exit) else (TITLE %app%)
+if not exist "%app%" (echo. & echo  tesseract.exe not found. Try download from: https://github.com/UB-Mannheim/tesseract/wiki & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
@@ -87,14 +87,14 @@ if "%layout%"=="multiple" (
         "%app%" "%%~k" "%%~dpnk_%lang%" -l %lang% %ext%
         if errorlevel 1 set "err=1"
     )
-    if defined err (color 4 & pause) else (color 27 & timeout 2)
+    if defined err (color C & pause) else (color A & timeout 2)
 ) else (
     pushd "%~dp1"
     (
         for %%i in (%*) do @echo %%~fi
     ) > "listfile.txt"
     "%app%" "listfile.txt" "%~dpn1_%lang%" -l %lang% %ext%
-    if errorlevel 1 (color 4 & pause) else (color 27 & timeout 2)
+    if errorlevel 1 (color C & pause) else (color A & timeout 2)
     del listfile.txt
 )
 exit

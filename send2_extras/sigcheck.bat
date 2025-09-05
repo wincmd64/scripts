@@ -11,9 +11,10 @@
 @echo off
 for /f "tokens=* delims=" %%a in ('where sigcheck64.exe 2^>nul') do set "app=%%a"
 if not exist "%app%" (
-    echo. & echo  "sigcheck64.exe" not found. Try to download? & echo. & pause
+    echo. & echo  "sigcheck64.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
+    cd /d "%~dp0"
     curl.exe --ssl-no-revoke -RO# "https://live.sysinternals.com/sigcheck64.exe"
-    if errorlevel 1 (color C & echo. & pause & exit) else (color A & echo. & echo  DONE. Restart this file. & timeout 3 & exit)
+    if errorlevel 1 (color C & echo. & pause & exit) else (color A & echo. & echo  DONE. Please re-run this script. & echo. & pause & exit)
 ) else (TITLE %app%)
 
 :: arguments

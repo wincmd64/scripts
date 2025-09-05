@@ -1,4 +1,4 @@
-:: Wrapper for InnoUnp CLI â€” Inno Setup unpacker
+:: Wrapper for InnoUnp CLI — Inno Setup unpacker
 :: by github.com/wincmd64
 
 :: Usage:

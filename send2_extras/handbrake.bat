@@ -5,6 +5,9 @@
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%S parameter
 
+:: Command line arguments:
+:: /s - create shortcut in Shell:SendTo folder
+
 @echo off
 for /f "tokens=* delims=" %%a in ('where HandBrakeCLI.exe 2^>nul') do set "app=%%a"
 if not exist "%app%" (echo. & echo  "HandBrakeCLI.exe" not found. & echo  Try: winget install HandBrake.HandBrake.CLI & echo. & pause & exit) else (TITLE %app%)
@@ -32,7 +35,7 @@ FOR %%k IN (%*) DO (
         powershell "Get-ChildItem '%%~dpnk_%preset%.mp4' | ForEach-Object{$_.CreationTime = $_.LastWriteTime = $_.LastAccessTime = New-Object DateTime %%o,%%n,%%m,%%p,%%q,00}"
     )
 )
-color 27 & timeout 2 & exit
+color A & timeout 2 & exit
 
 :shortcut
 powershell -NoP -NoL -Ep Bypass -c ^
