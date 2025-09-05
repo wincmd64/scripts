@@ -18,7 +18,7 @@
 
 * **contconv.bat**. Конвертирует `.vcf` в читабельный формат (HTML или CSV). Кроме [contconv.exe](https://github.com/DarkHobbit/doublecontact/releases) для правильной работы также требуется `libgcc_s_dw2-1.dll`.
   
-* **innounp.bat**. Распаковывает содержимое инсталляторов созданных в InnoSutup. 
+* **innounp.bat**. Распаковывает содержимое инсталляторов созданных в [Inno Setup](https://jrsoftware.org). 
 
 * **sdelete.bat**. Удаления файлов без возможности восстановления с помощью Sysinternals [SDelete](https://learn.microsoft.com/sysinternals/downloads/sdelete).
   
