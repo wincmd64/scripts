@@ -18,7 +18,9 @@
 
 * **contconv.bat**. Конвертирует `.vcf` в читабельный формат (HTML или CSV). Кроме [contconv.exe](https://github.com/DarkHobbit/doublecontact/releases) для правильной работы также требуется `libgcc_s_dw2-1.dll`.
   
-* **innounp.bat**. Распаковывает содержимое инсталляторов созданных в [Inno Setup](https://jrsoftware.org). 
+* **innounp.bat**. Распаковывает содержимое инсталляторов созданных в [Inno Setup](https://jrsoftware.org).
+
+* **scanner.bat**. Работа с консольным антивирусным сканером от [Emsisoft](https://www.emsisoft.com/en/commandline-scanner/). 
 
 * **sdelete.bat**. Удаления файлов без возможности восстановления с помощью Sysinternals [SDelete](https://learn.microsoft.com/sysinternals/downloads/sdelete).
   
