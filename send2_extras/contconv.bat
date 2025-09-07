@@ -27,6 +27,7 @@ echo.
 CHOICE /C 12 /M "Your choice?:" >nul 2>&1
 if errorlevel 2 goto Option_2
 if errorlevel 1 goto Option_1
+exit
 
 :Option_1
 FOR %%k IN (%*) DO (echo. & "%app%" -i "%%~k" -o "%%~dpnk.htm" -f html -w)

@@ -1,0 +1,60 @@
+:: Wrapper for Emsisoft CLI Scanner — anti-malware scanning tool
+:: by github.com/wincmd64
+
+:: Usage:
+:: Create a shortcut to this .bat file in the Shell:SendTo folder
+:: or button in TotalCmd with the %P%S parameter
+
+:: Command line arguments:
+:: /s - create shortcut in Shell:SendTo folder
+
+@echo off
+for /f "tokens=* delims=" %%a in ('where a2cmd.exe 2^>nul') do set "app=%%a"
+if not exist "%app%" (echo. & echo  "a2cmd.exe" not found. & echo  Download it from: https://dl.emsisoft.com/EmsisoftCommandlineScanner64.exe & echo. & pause & exit) else (TITLE %app%)
+
+:: arguments
+if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+
+set count=0
+for %%A in (%*) do set /a count+=1
+if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
+:: UAC
+(Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '%*' & Exit /B)
+:main
+cls
+if %count% equ 1 (echo. & echo  [1] Scan: %*) else (echo. & echo  [1] Scan: %count% objects)
+echo  [2] Scan memory
+echo  [3] Show status
+echo  [4] Update signature
+echo. 
+CHOICE /C 1234 /M "Your choice?:" >nul 2>&1
+if errorlevel 4 goto Option_4
+if errorlevel 3 goto Option_3
+if errorlevel 2 goto Option_2
+if errorlevel 1 goto Option_1
+exit
+
+:Option_1
+FOR %%k IN (%*) DO (
+    echo. & echo  FILE: %%k & echo  ====================================================
+    "%app%" /a /pup /cloud=0 "%%~k"
+)
+echo. & echo  DONE. & echo. & pause & exit
+
+:Option_2
+"%app%" /m
+pause & goto main
+
+:Option_3
+"%app%" /status
+echo. & pause & goto main
+
+:Option_4
+"%app%" /u
+echo. & pause & goto main
+
+:shortcut
+powershell -NoP -NoL -Ep Bypass -c ^
+"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Emsisoft scanner.lnk'); ^
+$s.TargetPath = '%~f0'; $s.IconLocation = '%app%'; $s.Save()"
+echo. & echo  Shortcut 'Emsisoft scanner.lnk' created. & echo. & pause & exit
