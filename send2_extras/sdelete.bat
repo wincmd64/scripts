@@ -20,11 +20,28 @@ if not exist "%app%" (
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 
+:: file counts
 set count=0
+set shown=0
+echo. & echo  Selected for secure deletion:
 for %%A in (%*) do set /a count+=1
-if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
-if %count% equ 1 (echo. & echo  Delete %* ? & echo. & pause) else (echo. & echo  Delete %count% objects? & echo. & pause)
+for %%A in (%*) do (
+    set /a shown+=1
+    if %shown% LEQ 5 (
+        echo    %%~A
+    )
+)
+:: >5
+if %count% GTR 5 (
+    set /a remaining=%count%-5
+    call echo    ... and %%remaining%% more
+)
+if %count% equ 0 (echo. & echo    ^(no objects selected^) & echo. & pause & exit)
 
+:: confirm
+echo.
+set /p confirm="> WARNING: This will permanently erase the selected object(s). Continue? [Y/N]: "
+if /i not "%confirm%"=="Y" (echo. & echo  Operation cancelled. & echo. & pause & exit)
 FOR %%k IN (%*) DO (echo. & "%app%" -nobanner -s "%%~k")
 echo. & echo. & echo  DONE. & echo. & pause & exit
 
