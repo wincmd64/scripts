@@ -10,6 +10,7 @@
 
 @echo off
 for /f "tokens=* delims=" %%a in ('where a2cmd.exe 2^>nul') do set "app=%%a"
+if not defined app if exist "%~dp0a2cmd.exe" set "app=%~dp0a2cmd.exe"
 if not exist "%app%" (echo. & echo  "a2cmd.exe" not found. & echo  Download it from: https://dl.emsisoft.com/EmsisoftCommandlineScanner64.exe & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments
@@ -20,7 +21,7 @@ for %%A in (%*) do set /a count+=1
 if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
 
 :: UAC
-(Net session >nul 2>&1) && goto :elevated
+(Net session >nul 2>&1) && goto :main
 
 set "vbs=%temp%\elevate_%random%.vbs"
 > "%vbs%" echo Set sh = CreateObject("Shell.Application")
@@ -39,10 +40,6 @@ set "vbs=%temp%\elevate_%random%.vbs"
 
 del "%vbs%" 2>nul
 exit /b
-
-:elevated
-cd /d "%~dp0"
-:: ------------------------------------------------
 
 :main
 cls

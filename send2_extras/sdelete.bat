@@ -10,6 +10,7 @@
 
 @echo off
 for /f "tokens=* delims=" %%a in ('where sdelete64.exe 2^>nul') do set "app=%%a"
+if not defined app if exist "%~dp0sdelete64.exe" set "app=%~dp0sdelete64.exe"
 if not exist "%app%" (
     echo. & echo  "sdelete64.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
     cd /d "%~dp0"

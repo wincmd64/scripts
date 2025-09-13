@@ -10,6 +10,7 @@
 
 @echo off
 for /f "tokens=* delims=" %%a in ('where caesiumclt.exe 2^>nul') do set "app=%%a"
+if not defined app if exist "%~dp0caesiumclt.exe" set "app=%~dp0caesiumclt.exe"
 if not exist "%app%" (echo. & echo  "caesiumclt.exe" not found. & echo  Download it from: https://github.com/Lymphatus/caesium-clt & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments

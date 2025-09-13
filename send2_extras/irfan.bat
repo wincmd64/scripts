@@ -19,6 +19,7 @@ set "myapp="
 if defined myapp if exist "%myapp%" (set "app=%myapp%") 
 :: path to i_view64.exe - from PATH or same folder
 if not defined app (for /f "tokens=* delims=" %%a in ('where i_view64.exe 2^>nul') do set "app=%%a")
+if not defined app if exist "%~dp0i_view64.exe" set "app=%~dp0i_view64.exe"
 :: trying to download IrfanView + all plugins + skin + lang + configure .ini
 if not exist "%app%" (
     echo. & echo  i_view64.exe not found. Try to download it to "%~dp0IrfanView\" ? & echo. & pause

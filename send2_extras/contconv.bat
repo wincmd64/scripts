@@ -10,6 +10,7 @@
 
 @echo off
 for /f "tokens=* delims=" %%a in ('where contconv.exe 2^>nul') do set "app=%%a"
+if not defined app if exist "%~dp0contconv.exe" set "app=%~dp0contconv.exe"
 if not exist "%app%" (echo. & echo  "contconv.exe" not found. & echo  Download it from: https://github.com/DarkHobbit/doublecontact/releases & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments

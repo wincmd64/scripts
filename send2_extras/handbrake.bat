@@ -10,6 +10,7 @@
 
 @echo off
 for /f "tokens=* delims=" %%a in ('where HandBrakeCLI.exe 2^>nul') do set "app=%%a"
+if not defined app if exist "%~dp0HandBrakeCLI.exe" set "app=%~dp0HandBrakeCLI.exe"
 if not exist "%app%" (echo. & echo  "HandBrakeCLI.exe" not found. & echo  Try: winget install HandBrake.HandBrake.CLI & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments

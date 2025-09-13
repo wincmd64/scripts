@@ -10,6 +10,7 @@
 
 @echo off
 for /f "tokens=* delims=" %%a in ('where innounp.exe 2^>nul') do set "app=%%a"
+if not defined app if exist "%~dp0innounp.exe" set "app=%~dp0innounp.exe"
 if not exist "%app%" (echo. & echo  "innounp.exe" not found. & echo  Download it from: https://www.rathlev-home.de/tools/download/innounp-2.zip & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments
