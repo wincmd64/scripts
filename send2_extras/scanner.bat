@@ -18,8 +18,32 @@ if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 set count=0
 for %%A in (%*) do set /a count+=1
 if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
+
 :: UAC
-(Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '%*' & Exit /B)
+(Net session >nul 2>&1) && goto :elevated
+
+set "vbs=%temp%\elevate_%random%.vbs"
+> "%vbs%" echo Set sh = CreateObject("Shell.Application")
+>>"%vbs%" echo scriptPath = WScript.Arguments.Item(0)
+>>"%vbs%" echo args = ""
+>>"%vbs%" echo For i = 1 To WScript.Arguments.Count - 1
+>>"%vbs%" echo   args = args ^& " " ^& Chr(34) ^& WScript.Arguments.Item(i) ^& Chr(34)
+>>"%vbs%" echo Next
+>>"%vbs%" echo ' Build the cmd line as: /c "<"scriptPath" arg1 arg2...>"
+>>"%vbs%" echo cmdLine = "/c " ^& Chr(34) ^& Chr(34) ^& scriptPath ^& Chr(34) ^& args ^& Chr(34)
+>>"%vbs%" echo sh.ShellExecute "cmd.exe", cmdLine, "", "runas", 1
+>>"%vbs%" echo WScript.Quit
+
+:: call wscript, first arg = path to this .bat, then all original args
+"%windir%\system32\wscript.exe" "%vbs%" "%~f0" %*
+
+del "%vbs%" 2>nul
+exit /b
+
+:elevated
+cd /d "%~dp0"
+:: ------------------------------------------------
+
 :main
 cls
 if %count% equ 1 (echo. & echo  [1] Scan: %*) else (echo. & echo  [1] Scan: %count% objects)
@@ -36,7 +60,7 @@ exit
 
 :Option_1
 FOR %%k IN (%*) DO (
-    echo. & echo  FILE: %%k & echo  ====================================================
+    echo. & echo  Object: %%k & echo  ====================================================
     "%app%" /a /pup /cloud=0 "%%~k"
 )
 echo. & echo  DONE. & echo. & pause & exit
