@@ -21,14 +21,15 @@ if not exist "%app%" (
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 
-:: file counts
+:: file counts -- WARNING! The character "!" in file or folder paths is not supported.
+setlocal enabledelayedexpansion
 set count=0
 set shown=0
 echo. & echo  Selected for secure deletion:
 for %%A in (%*) do set /a count+=1
 for %%A in (%*) do (
     set /a shown+=1
-    if %shown% LEQ 5 (
+    if !shown! LEQ 5 (
         echo    %%~A
     )
 )
@@ -43,7 +44,7 @@ if %count% equ 0 (echo. & echo    ^(no objects selected^) & echo. & pause & exit
 echo.
 set /p confirm="> WARNING: This will permanently erase the selected object(s). Continue? [Y/N]: "
 if /i not "%confirm%"=="Y" (echo. & echo  Operation cancelled. & echo. & pause & exit)
-FOR %%k IN (%*) DO (echo. & "%app%" -nobanner -s "%%~k")
+FOR %%k IN (%*) DO (echo. & "%app%" -nobanner -accepteula -s "%%~k")
 echo. & echo. & echo  DONE. & echo. & pause & exit
 
 :shortcut
