@@ -16,10 +16,6 @@ if not exist "%app%" (echo. & echo  "a2cmd.exe" not found. & echo  Download it f
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 
-set count=0
-for %%A in (%*) do set /a count+=1
-if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
-
 :: UAC
 (Net session >nul 2>&1) && goto :main
 
@@ -43,24 +39,42 @@ exit /b
 
 :main
 cls
-if %count% equ 1 (echo. & echo  [1] Scan: %*) else (echo. & echo  [1] Scan: %count% objects)
+set count=0
+for %%A in (%*) do set /a count+=1
+echo.
+if %count% equ 0 (echo  [1] Scan: ^(nothing selected^)) else if %count% equ 1 (echo  [1] Scan: %*) else (echo  [1] Scan: %count% objects)
 echo  [2] Scan memory
 echo  [3] Show status
 echo  [4] Update signature
 echo. 
-CHOICE /C 1234 /M "Your choice?:" >nul 2>&1
-if errorlevel 4 goto Option_4
-if errorlevel 3 goto Option_3
-if errorlevel 2 goto Option_2
-if errorlevel 1 goto Option_1
+if %count% equ 0 (
+    CHOICE /C 234 /M "Your choice?:" >nul 2>&1
+    if errorlevel 3 goto Option_4
+    if errorlevel 2 goto Option_3
+    if errorlevel 1 goto Option_2
+) else (
+    CHOICE /C 1234 /M "Your choice?:" >nul 2>&1
+    if errorlevel 4 goto Option_4
+    if errorlevel 3 goto Option_3
+    if errorlevel 2 goto Option_2
+    if errorlevel 1 goto Option_1
+)
 exit
 
 :Option_1
+set i=0
+set found=0
 FOR %%k IN (%*) DO (
-    echo. & echo  Object: %%k & echo  ====================================================
-    "%app%" /a /pup /cloud=0 "%%~k"
+    set /a i+=1
+    call :processFile %%i%% %count% "%%~fk"
+    if errorlevel 1 set found=1
 )
-echo. & echo  DONE. & echo. & pause & exit
+if %found%==1 (color C) else (color A)
+echo. & echo  [DONE] & echo. & pause >nul & exit
+:processFile
+echo. & echo  [%1/%2] "%~3"
+"%app%" /a /pup /cloud=0 "%~3"
+exit /b
 
 :Option_2
 "%app%" /m
