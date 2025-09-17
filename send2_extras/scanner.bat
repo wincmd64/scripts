@@ -1,4 +1,4 @@
-:: Wrapper for Emsisoft CLI Scanner — anti-malware scanning tool
+:: Wrapper for Emsisoft CLI Scanner â€” anti-malware scanning tool
 :: by github.com/wincmd64
 
 :: Usage:
@@ -28,7 +28,7 @@ set "vbs=%temp%\elevate_%random%.vbs"
 >>"%vbs%" echo Next
 >>"%vbs%" echo ' Build the cmd line as: /c "<"scriptPath" arg1 arg2...>"
 >>"%vbs%" echo cmdLine = "/c " ^& Chr(34) ^& Chr(34) ^& scriptPath ^& Chr(34) ^& args ^& Chr(34)
->>"%vbs%" echo sh.ShellExecute "cmd.exe", cmdLine, "", "runas", 1
+>>"%vbs%" echo sh.ShellExecute "cmd.exe", cmdLine, "", "runas", 3
 >>"%vbs%" echo WScript.Quit
 
 :: call wscript, first arg = path to this .bat, then all original args
@@ -70,10 +70,10 @@ FOR %%k IN (%*) DO (
     if errorlevel 1 set found=1
 )
 if %found%==1 (color C) else (color A)
-echo. & echo  [DONE] & echo. & pause >nul & exit
+echo. & echo  [DONE] & echo. & pause & exit
 :processFile
 echo. & echo  [%1/%2] "%~3"
-"%app%" /a /pup /cloud=0 "%~3"
+"%app%" "%~3" /a /pup /cloud=0
 exit /b
 
 :Option_2
