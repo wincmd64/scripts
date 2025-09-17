@@ -88,6 +88,13 @@ echo  "%app%" %prm%
 echo.
 set "prm="
 set /p prm=Enter new parameters (for example /log=filepath): 
+:: findstr /C:"&" but with all "dangerous" symbols
+echo("%prm%" | findstr /R "[&|<>%%!^]" >nul
+if not errorlevel 1 (
+    echo  Forbidden symbols detected!
+    set "prm="
+    pause
+)
 if not defined prm (set "prm=")
 goto main
 
