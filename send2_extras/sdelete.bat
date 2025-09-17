@@ -21,7 +21,7 @@ if not exist "%app%" (
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 
-:: file counts -- WARNING! The character "!" in file or folder paths is not supported.
+:: file counts
 setlocal enabledelayedexpansion
 set count=0
 set shown=0
@@ -41,6 +41,7 @@ if %count% GTR 5 (
 if %count% equ 0 (echo. & echo    ^(no objects selected^) & echo. & pause & exit)
 
 :: confirm
+endlocal
 echo.
 set /p confirm="> WARNING: This will permanently erase the selected object(s). Continue? [Y/N]: "
 if /i not "%confirm%"=="Y" (echo. & echo  Operation cancelled. & echo. & pause & exit)
