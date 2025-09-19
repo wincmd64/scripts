@@ -11,7 +11,14 @@
 @echo off
 for /f "tokens=* delims=" %%a in ('where innounp.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0innounp.exe" set "app=%~dp0innounp.exe"
-if not exist "%app%" (echo. & echo  "innounp.exe" not found. & echo  Download it from: https://www.rathlev-home.de/tools/download/innounp-2.zip & echo. & pause & exit) else (TITLE %app%)
+if not exist "%app%" (
+    echo. & echo  "innounp.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
+    cd /d "%~dp0"
+    curl.exe --ssl-no-revoke -RO# "https://www.rathlev-home.de/tools/download/innounp-2.zip"
+    tar -xf innounp-2.zip innounp.exe
+    del innounp-2.zip
+    if errorlevel 1 (color C & echo. & pause & exit) else (color A & echo. & echo  DONE. Please re-run this script. & echo. & pause & exit)
+) else (TITLE %app%)
 
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
