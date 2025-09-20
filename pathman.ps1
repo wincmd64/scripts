@@ -12,11 +12,12 @@ $arrPath = if ([string]::IsNullOrEmpty($currentPath)) { @() } else { $currentPat
 $exists = ($arrPath | ForEach-Object TrimEnd('\')) -contains $Path.TrimEnd('\')
 
 if ($exists) {
+    Write-Host "Remove from PATH? " -ForegroundColor Magenta -NoNewline; Write-Host $Path.TrimEnd('\'); pause
     $newPath = ($arrPath | Where-Object { $_.TrimEnd('\') -ne $Path.TrimEnd('\') }) -join [IO.Path]::PathSeparator
-    Write-Host "Removed from PATH: " -ForegroundColor Magenta -NoNewline; Write-Host $Path.TrimEnd('\')
 } else {
     $newPath = ($arrPath + $Path.TrimEnd('\')) -join [IO.Path]::PathSeparator
     Write-Host "Added to PATH: " -ForegroundColor Green -NoNewline; Write-Host $Path.TrimEnd('\')
 }
 [System.Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
+Write-Host "`nDONE."
 sleep 2
