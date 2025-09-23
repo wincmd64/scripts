@@ -2,13 +2,12 @@
 :: by github.com/wincmd64
 
 @echo off
+for /f "tokens=* delims=" %%a in ('where yt-dlp.exe 2^>nul') do set "app=%%a"
+if not exist "%app%" (color C & echo. & echo  yt-dlp not found. Try: winget install yt-dlp.yt-dlp & echo. & pause & exit) else (TITLE %app%)
 :: gets downloads folder path
 for /f "delims=" %%a in ('powershell -command "(New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path"') do set "DOWNLOADS=%%a"
 :: gets URL, priority: parameter > clipboard
 if "%~1" neq "" (set "url=%~1") else (for /f "delims=" %%i in ('powershell Get-Clipboard') do set "url=%%i")
-:: gets yt-dlp path
-for /f "tokens=* delims=" %%a in ('where yt-dlp.exe 2^>nul') do set "app=%%a"
-if not exist "%app%" (color C & echo. & echo  yt-dlp not found. Try: winget install yt-dlp.yt-dlp & echo. & pause & exit) else (TITLE %app%)
 :check
 yt-dlp.exe -F -S vext "%url%"
 if ERRORLEVEL 1 (
@@ -19,17 +18,10 @@ if ERRORLEVEL 1 (
 )
 echo.
 set num=
-set /p num=Enter yt-dlp options or press Enter for best quality: 
-echo.
-if not defined num (
-	:: For video, mp4 > mov > webm > flv. For audio, m4a > aac > mp3 ...
-	echo Running: yt-dlp.exe -S "ext" "%url%" -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part
-	yt-dlp.exe -S "ext" "%url%" -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part
-	if ERRORLEVEL 1 (goto check)
-) else (
-	:: Example: -f 18 --write-auto-subs --embed-chapters
-	echo Running: yt-dlp.exe %num% "%url%" -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part
-	yt-dlp.exe %num% "%url%" -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part
-	if ERRORLEVEL 1 (goto check)
-)
-color A & timeout 2 & explorer "%DOWNLOADS%"
+echo Enter yt-dlp options (like: -f 18 --write-auto-subs --embed-chapters)
+set /p num=or press Enter for best default: 
+echo. & echo Running: "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part "%url%"
+"%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part "%url%"
+if ERRORLEVEL 1 (goto check)
+color A & pause
+if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /T /A /R="%DOWNLOADS%") else (explorer "%DOWNLOADS%")
