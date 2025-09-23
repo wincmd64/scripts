@@ -17,9 +17,10 @@ if ERRORLEVEL 1 (
 	goto check
 )
 echo.
-set num=
+:: user options, leave empty for default
+set num=-S "ext"
 echo Enter yt-dlp options (like: -f 18 --write-auto-subs --embed-chapters)
-set /p num=or press Enter for best default: 
+set /p num=or press Enter for defined %num%: 
 echo. & echo Running: "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part "%url%"
 "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part "%url%"
 if ERRORLEVEL 1 (goto check)
