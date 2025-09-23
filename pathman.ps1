@@ -3,6 +3,7 @@
 param([string]$Path)
 if (-not $Path) {Write-Host "Usage: .\pathman.ps1 'X:\your\path'" ; exit 1 }
 if (-not (Test-Path -Path $Path)) { Write-Warning "The directory '$Path' does not exist." ; exit 1 }
+if ($Path -match '^[.]|^\\(?!\\)') {Write-Warning "Only absolute paths or UNC are allowed." ; exit 1}
 
 # Get current User PATH
 $currentPath = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
