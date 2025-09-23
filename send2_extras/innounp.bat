@@ -27,7 +27,8 @@ if "%~1"=="" (echo. & echo  No objects selected & echo. & pause & exit)
 "%app%" "%~1" >nul 2>&1
 if errorlevel 1 ("%app%" "%~1" & echo. & pause & exit)
 "%app%" -x -d"%~dpn1_unpacked" "%~1"
-if errorlevel 1 (echo. & pause & exit) else (timeout 2 & exit)
+if errorlevel 1 (echo. & pause & exit) else (if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /T "%~dpn1_unpacked") else (explorer "%~dpn1_unpacked"))
+color A & timeout 2 & exit
 
 :shortcut
 powershell -NoP -NoL -Ep Bypass -c ^
