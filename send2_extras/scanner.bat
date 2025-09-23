@@ -11,7 +11,16 @@
 @echo off
 for /f "tokens=* delims=" %%a in ('where a2cmd.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0a2cmd.exe" set "app=%~dp0a2cmd.exe"
-if not exist "%app%" (echo. & echo  "a2cmd.exe" not found. & echo  Download it from: https://dl.emsisoft.com/EmsisoftCommandlineScanner64.exe & echo. & pause & exit) else (TITLE %app%)
+if not exist "%app%" (
+    echo. & echo  "a2cmd.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
+    cd /d "%~dp0"
+    curl.exe --ssl-no-revoke -RO# "https://dl.emsisoft.com/EmsisoftCommandlineScanner64.exe"
+    echo  Extracting...
+    EmsisoftCommandlineScanner64.exe -s -o+ -d"EmsisoftCommandlineScanner64\"
+    del EmsisoftCommandlineScanner64.exe
+    if errorlevel 1 (color C & echo. & pause & exit) else (color A & echo. & echo  DONE. & echo  Add the folder "%~dp0EmsisoftCommandlineScanner64\" to PATH ^(or move this file into that folder^) and run this file. & echo. & pause & exit)
+) else (TITLE %app%)
+:: default parameters
 set "prm=/a /pup /cloud=0"
 
 :: arguments

@@ -73,7 +73,7 @@ if not exist "%app%" (
     )>temp.txt
     :: to UTF-16
     powershell -command "Get-Content 'temp.txt' | Out-File 'IrfanView\i_view64.ini' -Encoding Unicode; Remove-Item 'temp.txt'"
-    echo. & echo. & echo  DONE. & echo  Add the folder "%~dp0IrfanView" to PATH ^(or move this file into that folder^) and run this file. & echo. & pause & exit
+    echo. & echo. & echo  DONE. & echo  Add the folder "%~dp0IrfanView\" to PATH ^(or move this file into that folder^) and run this file. & echo. & pause & exit
 ) else (TITLE %app%)
 
 :: arguments
@@ -89,10 +89,9 @@ echo  ÛÛºÛÛº  ÛÛºÛÛº     ÛÛº  ÛÛºÛÛº ÈÛÛÛÛº ÈÛÛÛÛÉ¼ ÛÛºÛÛÛÛÛÛÛ»ÈÛÛÛÉÛÛÛÉ¼
 echo  ÈÍ¼ÈÍ¼  ÈÍ¼ÈÍ¼     ÈÍ¼  ÈÍ¼ÈÍ¼  ÈÍÍÍ¼  ÈÍÍÍ¼  ÈÍ¼ÈÍÍÍÍÍÍ¼ ÈÍÍ¼ÈÍÍ¼ 
 echo.
 chcp 1251 >nul
-:: checking the number of selected files
+
 set count=0
 for %%A in (%*) do set /a count+=1
-
 if %count% equ 0 (
     echo  No files selected & echo.
     echo  1 = create shortcut in Shell:SendTo folder
