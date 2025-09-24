@@ -22,19 +22,15 @@ if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
 if %count% equ 1 (echo. & echo  Processing: %* & echo.) else (echo. & echo  Processing %count% objects. & echo.)
 if /I not "%~x1"==".vcf" echo  NOTICE: extension is not .VCF & echo.
 
-echo  1 = convert to HTML
-echo  2 = convert to CSV
+echo  [1] convert to HTML
+echo  [2] convert to CSV
 echo. 
 CHOICE /C 12 /M "Your choice?:" >nul 2>&1
-if errorlevel 2 goto Option_2
-if errorlevel 1 goto Option_1
-exit
-
-:Option_1
-FOR %%k IN (%*) DO (echo. & "%app%" -i "%%~k" -o "%%~dpnk.htm" -f html -w)
-echo. & echo. & echo  DONE. & echo. & pause & exit
-:Option_2
-FOR %%k IN (%*) DO (echo. & "%app%" -i "%%~k" -o "%%~dpnk.csv" -f csv -op generic -w)
+if %errorlevel%==2 (set "fmt=csv" & set "opt=-op generic") else (set "fmt=html" & set "opt=")
+for %%k in (%*) do (
+    echo. & echo  FILE: %%k
+    "%app%" -i "%%~k" -o "%%~dpnk.%fmt%" -f %fmt% %opt% -w
+)
 echo. & echo. & echo  DONE. & echo. & pause & exit
 
 :shortcut
