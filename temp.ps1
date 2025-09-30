@@ -1,6 +1,6 @@
 # Recursively deletes files older than X days in specified folder
 #
-# Example usage: powershell -Ep Bypass clean.ps1 -d 7 -dir "C:\temp" -ext ".tmp .log"
+# Example usage: powershell -Ep Bypass temp.ps1 -d 7 -dir "C:\temp" -ext ".tmp .log"
 #
 # Parameters (optional):
 # -d X                    : Specifies that files older than X days will be deleted; default is 30
