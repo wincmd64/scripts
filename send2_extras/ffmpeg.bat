@@ -28,24 +28,22 @@ echo  ÛÛÉÍÍ¼  ÛÛÉÍÍ¼  ÛÛºÈÛÛÉ¼ÛÛºÛÛÉÍÍÍ¼ ÛÛÉÍÍ¼  ÛÛº   ÛÛº
 echo  ÛÛº     ÛÛº     ÛÛº ÈÍ¼ ÛÛºÛÛº     ÛÛÛÛÛÛÛ»ÈÛÛÛÛÛÛÉ¼
 echo  ÈÍ¼     ÈÍ¼     ÈÍ¼     ÈÍ¼ÈÍ¼     ÈÍÍÍÍÍÍ¼ ÈÍÍÍÍÍ¼ 
 echo.
-:: checking the number of selected files
+
 set count=0
 for %%A in (%*) do set /a count+=1
-
 if %count% equ 0 (echo  No files selected & echo. & pause & exit)
-
 if %count% equ 1 (
     echo  Processing: %* & echo.
     if "%~x1"=="" echo  NOTICE: first argument is likely a folder or has no extension. & echo.
-    echo  1 = Remove audio
-    echo  2 = Extract audio
-    echo  3 = Create GIF
-    echo  4 = Cut video
-    echo  5 = 2x fast
-    echo  6 = 0.5x speed
-    echo  7 = Convert to 1080p ^(x264^)
-    echo  8 = Rotate right
-    echo  9 = Rotate left
+    echo  [1] Remove audio
+    echo  [2] Extract audio
+    echo  [3] Create GIF
+    echo  [4] Cut video
+    echo  [5] 2x fast
+    echo  [6] 0.5x speed
+    echo  [7] Convert to 1080p ^(x264^)
+    echo  [8] Rotate right
+    echo  [9] Rotate left
     echo.
     CHOICE /C 123456789 /M "Your choice?:" >nul 2>&1
     if errorlevel 9 goto Option_9
@@ -62,6 +60,7 @@ if %count% equ 1 (
     goto :MultiFile
 )
 goto :eof
+
 :Option_1
 "%app%" -i %1 -an -vcodec copy "%~dpn1_noaudio%~x1"
 color A & timeout 2 & exit
@@ -98,13 +97,32 @@ color A & timeout 2 & exit
 
 :MultiFile
 if "%~x1"=="" echo  NOTICE: first argument is likely a folder or has no extension. & echo.
-echo  Merge %count% files? & echo. & pause
 chcp 65001 >nul
 pushd "%~dp1"
+echo  [1] Merge %count% files
+echo  [2] Create slideshow with %count% files
+echo.
+CHOICE /C 12 /M "Your choice?:" >nul 2>&1
+if errorlevel 2 goto Moption_2
+if errorlevel 1 goto Moption_1
+exit
+
+:Moption_1
 (
     for %%i in (%*) do @echo file '%%~fi'
 ) > "listfile.txt"
-"%app%" -f concat -safe 0 -i listfile.txt -c copy "MergeOutput.mp4"
+"%app%" -f concat -safe 0 -i listfile.txt -c copy "MergeOutput_%random%.mp4"
+del listfile.txt
+color A & timeout 2 & exit
+
+:Moption_2
+(
+  for %%i in (%*) do (
+    echo file '%%~fi'
+    echo duration 2
+  )
+) > listfile.txt
+"%app%" -f concat -safe 0 -i listfile.txt -vf "fps=1,scale=1280:-2,format=yuv420p" -r 30 "Slideshow_%random%.mp4"
 del listfile.txt
 color A & timeout 2 & exit
 
