@@ -108,23 +108,13 @@ if errorlevel 1 goto Moption_1
 exit
 
 :Moption_1
-(
-    for %%i in (%*) do @echo file '%%~fi'
-) > "listfile.txt"
-"%app%" -f concat -safe 0 -i listfile.txt -c copy "MergeOutput_%random%.mp4"
-del listfile.txt
-color A & timeout 2 & exit
-
+(for %%i in (%*) do @echo file '%%~fi') > "listfile.txt"
+"%app%" -f concat -safe 0 -i "listfile.txt" -c copy -movflags +faststart "MergeOutput_%random%.mp4"
+del listfile.txt & color A & timeout 2 & exit
 :Moption_2
-(
-  for %%i in (%*) do (
-    echo file '%%~fi'
-    echo duration 2
-  )
-) > listfile.txt
-"%app%" -f concat -safe 0 -i listfile.txt -vf "fps=1,scale=1280:-2,format=yuv420p" -r 30 "Slideshow_%random%.mp4"
-del listfile.txt
-color A & timeout 2 & exit
+(for %%i in (%*) do echo file '%%~fi' & echo duration 2) > "listfile.txt"
+"%app%" -f concat -safe 0 -i "listfile.txt" -vf "fps=1,scale=1280:-2,format=yuv420p" -r 30 "Slideshow_%random%.mp4"
+del listfile.txt & color A & timeout 2 & exit
 
 :shortcut
 powershell -NoP -NoL -Ep Bypass -c ^
