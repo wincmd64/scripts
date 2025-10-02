@@ -48,28 +48,26 @@ del "%vbs%" 2>nul
 exit /b
 
 :main
-cls
+color 07 & cls
 set count=0
 for %%A in (%*) do set /a count+=1
 echo.
 if %count% equ 0 (echo  [1] Scan: ^(nothing selected^)) else if %count% equ 1 (echo  [1] Scan: %*) else (echo  [1] Scan: %count% objects)
 if "%prm%"=="" (echo  [2] Change parameters, current: n\a) else (echo  [2] Change parameters, current: %prm%)
-echo  [3] Scan memory
-echo  [4] Show status
-echo  [5] Update signature
+echo  [3] Quick Scan: memory, traces
+for /f "delims=" %%A in ('a2cmd.exe /status %1 2^>^&1 ^| findstr /C:"Last Update:"') do set "lastupdate=%%A"
+echo  [4] Update signature  --  %lastupdate%
 echo  [0] Exit
 echo. 
 if %count% equ 0 (
-    CHOICE /C 23450 /M "Your choice?:" >nul 2>&1
-    if errorlevel 5 goto exit
-    if errorlevel 4 goto Option_5
+    CHOICE /C 2340 /M "Your choice?:" >nul 2>&1
+    if errorlevel 4 goto exit
     if errorlevel 3 goto Option_4
     if errorlevel 2 goto Option_3
     if errorlevel 1 goto Option_2
 ) else (
-    CHOICE /C 123450 /M "Your choice?:" >nul 2>&1
-    if errorlevel 6 goto exit
-    if errorlevel 5 goto Option_5
+    CHOICE /C 12340 /M "Your choice?:" >nul 2>&1
+    if errorlevel 5 goto exit
     if errorlevel 4 goto Option_4
     if errorlevel 3 goto Option_3
     if errorlevel 2 goto Option_2
@@ -86,7 +84,7 @@ FOR %%k IN (%*) DO (
     if errorlevel 1 set found=1
 )
 if %found%==1 (color C) else (color A)
-echo. & echo  [DONE] & echo. & pause & exit
+echo. & echo  [DONE] & echo. & pause & goto main
 :processFile
 echo. & echo  [%1/%2] a2cmd.exe "%~3" %prm%
 "%app%" "%~3" %prm%
@@ -108,14 +106,11 @@ if not defined prm (set "prm=")
 goto main
 
 :Option_3
-"%app%" /m
+echo. & echo  "%app%" /quick %prm%
+"%app%" /quick %prm%
 pause & goto main
 
 :Option_4
-"%app%" /status
-echo. & pause & goto main
-
-:Option_5
 "%app%" /u
 echo. & pause & goto main
 
