@@ -2,7 +2,7 @@
 :: by github.com/wincmd64
 
 @echo off
-echo  Loading...
+echo. & echo  Loading...
 
 :: get url
 for /f tokens^=1-3^ delims^=^" %%i in ('curl.exe --ssl-no-revoke -s "https://www.ghisler.com/download.htm" ^| FINDSTR /IRC:"href=.*tcmd[0-9]*x64\.exe"') do (
@@ -17,7 +17,16 @@ for /f "delims=" %%a in ('powershell -NoP -C "(New-Object -ComObject Shell.Appli
 if not exist "%commander_path%" set "commander_path=n\a"
 
 cls
-echo.
+::: 
+:::   _____     _        _    ____                                          _           
+:::  |_   _|__ | |_ __ _| |  / ___|___  _ __ ___  _ __ ___   __ _ _ __   __| | ___ _ __ 
+:::    | |/ _ \| __/ _` | | | |   / _ \| '_ ` _ \| '_ ` _ \ / _` | '_ \ / _` |/ _ \ '__|
+:::    | | (_) | || (_| | | | |__| (_) | | | | | | | | | | | (_| | | | | (_| |  __/ |   
+:::    |_|\___/ \__\__,_|_|  \____\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_|\___|_|   
+:::                                                                                     
+:::
+for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do @echo(%%A
+
 echo  URL: %url%
 echo  Download folder: %DOWNLOADS%
 echo.
