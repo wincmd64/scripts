@@ -26,6 +26,8 @@
   
 * **sigcheck.bat**. Проверка файлов через сервис VirusTotal с помощью Sysinternals [SigCheck](https://learn.microsoft.com/sysinternals/downloads/sigcheck).
 
+* **PassFinder.bat**. Ищет пароль от архива по списку из одноимённого TXT. Если файла нет, используется [default-passwords.txt](https://github.com/danielmiessler/SecLists/blob/master/Passwords/Default-Credentials/default-passwords.txt).
+
 ### context_menu_extras/
 Скрипты в этой папке используют только встроенный ф-л ОС. При запуске добавляет соотв. пункт(ы) в контекстное меню. С ключом `/u` можно откатить изменения.
 
