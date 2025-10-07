@@ -25,18 +25,18 @@ if "%~1"=="" (echo. & echo  No objects selected & echo. & pause & exit)
 set "pw_list=%~dpn1.txt"
 :: if there is no local password list, download a default one
 if not exist "%pw_list%" (
-  echo  "%~dpn1.txt" not found. Downloading default list...
+  echo. & echo  "%~n1.txt" not found. Downloading default list...
   powershell -C "iwr 'https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Default-Credentials/default-passwords.txt' -OutFile '%pw_list%'"
   if not exist "%pw_list%" (echo. & echo  Failed to get password list. & pause & exit) else (echo  Downloaded.)
 )
 
-echo. & echo  Starting search passwords from list...
+echo. & echo  Starting search passwords from: "%~n1.txt"
 set /a count=0
 for /F "usebackq delims=" %%P in ("%pw_list%") do (
     if not "%%P"=="" (
         set /a count+=1
         set /p "=." <nul
-        if !count! EQU 100 (
+        if !count! EQU 80 (
             echo.
             set count=0
         )
@@ -53,7 +53,7 @@ for /F "usebackq delims=" %%P in ("%pw_list%") do (
         )
     )
 )
-echo. & echo  Finished. No valid password found. & pause & exit
+echo. & echo. & echo  Finished. No valid password found. & echo. & pause & exit
 
 :shortcut
 powershell -NoP -NoL -Ep Bypass -c ^
