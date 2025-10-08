@@ -8,10 +8,8 @@
 :: Command line arguments:
 :: /s - create shortcut in Shell:SendTo folder
 
-:: Note: this file must use code page OEM 866
-
 @echo off
-setlocal
+chcp 1251 >nul
 
 :: path to tesseract.exe -- custom if nedded
 set "myapp="
@@ -32,24 +30,23 @@ set layout=single
 set lang=ukr+rus
 set ext=pdf
 :main
-chcp 866 >nul
 cls
-echo.
-echo  ÛÛÛÛÛÛÛÛ»ÛÛÛÛÛÛÛ»ÛÛÛÛÛÛÛ»ÛÛÛÛÛÛÛ»ÛÛÛÛÛÛÛ»ÛÛÛÛÛÛ»  ÛÛÛÛÛ»  ÛÛÛÛÛÛ»ÛÛÛÛÛÛÛÛ»
-echo  ÈÍÍÛÛÉÍÍ¼ÛÛÉÍÍÍÍ¼ÛÛÉÍÍÍÍ¼ÛÛÉÍÍÍÍ¼ÛÛÉÍÍÍÍ¼ÛÛÉÍÍÛÛ»ÛÛÉÍÍÛÛ»ÛÛÉÍÍÍÍ¼ÈÍÍÛÛÉÍÍ¼
-echo     ÛÛº   ÛÛÛÛÛ»  ÛÛÛÛÛÛÛ»ÛÛÛÛÛÛÛ»ÛÛÛÛÛ»  ÛÛÛÛÛÛÉ¼ÛÛÛÛÛÛÛºÛÛº        ÛÛº   
-echo     ÛÛº   ÛÛÉÍÍ¼  ÈÍÍÍÍÛÛºÈÍÍÍÍÛÛºÛÛÉÍÍ¼  ÛÛÉÍÍÛÛ»ÛÛÉÍÍÛÛºÛÛº        ÛÛº   
-echo     ÛÛº   ÛÛÛÛÛÛÛ»ÛÛÛÛÛÛÛºÛÛÛÛÛÛÛºÛÛÛÛÛÛÛ»ÛÛº  ÛÛºÛÛº  ÛÛºÈÛÛÛÛÛÛ»   ÛÛº   
-echo     ÈÍ¼   ÈÍÍÍÍÍÍ¼ÈÍÍÍÍÍÍ¼ÈÍÍÍÍÍÍ¼ÈÍÍÍÍÍÍ¼ÈÍ¼  ÈÍ¼ÈÍ¼  ÈÍ¼ ÈÍÍÍÍÍ¼   ÈÍ¼   
-echo.
-chcp 1251 >nul
-:: checking the number of selected files
+::: 
+:::   _____                                 _      ___   ____ ____  
+:::  |_   _|__  ___ ___  ___ _ __ __ _  ___| |_   / _ \ / ___|  _ \ 
+:::    | |/ _ \/ __/ __|/ _ \ '__/ _` |/ __| __| | | | | |   | |_) |
+:::    | |  __/\__ \__ \  __/ | | (_| | (__| |_  | |_| | |___|  _ < 
+:::    |_|\___||___/___/\___|_|  \__,_|\___|\__|  \___/ \____|_| \_\
+:::                                                                 
+:::
+for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do @echo(%%A
+
 set count=0
 for %%A in (%*) do set /a count+=1
 if %count% equ 0 (echo  No files selected & echo. & pause & exit)
-
 if %count% equ 1 (echo  Processing: %* & echo.) else (echo  Processing: %count% files & echo.)
 if "%~x1"=="" echo  NOTICE: first argument is likely a folder or has no extension. & echo.
+
 echo  Options:
 echo  1 = layout: as %layout% file
 echo  2 = specify language(s) used for OCR: %lang%
