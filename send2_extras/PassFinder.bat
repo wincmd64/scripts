@@ -1,6 +1,5 @@
 :: Tries to open a archive using a list of passwords.
-::   If no local password list <archive_name>.txt is found,
-::   downloads a default list from SecLists on GitHub.
+::   If no local password list <archive_name>.txt is found, downloads a default list from SecLists on GitHub.
 :: by github.com/wincmd64
 
 :: Usage:
@@ -23,14 +22,15 @@ if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 if "%~1"=="" (echo. & echo  No objects selected & echo. & pause & exit)
 :: e.g. "secret.zip" > "secret.txt"
 set "pw_list=%~dpn1.txt"
-:: if there is no local password list, download a default one
 if not exist "%pw_list%" (
-  echo. & echo  "%~n1.txt" not found. Downloading default list...
-  powershell -C "iwr 'https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Default-Credentials/default-passwords.txt' -OutFile '%pw_list%'"
-  if not exist "%pw_list%" (echo. & echo  Failed to get password list. & pause & exit) else (echo  Downloaded.)
+    echo. & echo  Use default-passwords.txt ^(will be downloaded^) to search password for "%~nx1" ? & echo. & pause
+    powershell -C "iwr 'https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Default-Credentials/default-passwords.txt' -OutFile '%pw_list%'"
+    if not exist "%pw_list%" (echo. & echo  Failed to get password list. & pause & exit)
+) else (
+    echo. & echo  Use "%~n1.txt" to search password for "%~nx1" ? & echo. & pause
 )
 
-echo. & echo  Starting search passwords from: "%~n1.txt"
+echo. & echo  Searching passwords from: "%~n1.txt"
 set /a count=0
 for /F "usebackq delims=" %%P in ("%pw_list%") do (
     if not "%%P"=="" (
@@ -53,7 +53,7 @@ for /F "usebackq delims=" %%P in ("%pw_list%") do (
         )
     )
 )
-echo. & echo. & echo  Finished. No valid password found. & echo. & pause & exit
+echo. & echo. & echo  Finished. No matching password found. & echo. & pause & exit
 
 :shortcut
 powershell -NoP -NoL -Ep Bypass -c ^
