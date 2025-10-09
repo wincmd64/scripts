@@ -1,6 +1,6 @@
-:: Windows quick setup v25.8
-:: tested on: Win 11 24H2, Win 10 22H2
-:: by t.me/wincmd64
+:: Windows quick setup v25.10
+::   tested on: Win 11 24H2, Win 10 22H2
+:: by github.com/wincmd64
 
 @echo off
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs & Exit /B)
@@ -9,7 +9,7 @@
 for /f %%a in ('powershell.exe -NoP -NoL -NonI -EP Bp -c "(gwmi Win32_OperatingSystem).Caption -Replace '\D'"') do (
    if "%%a"=="10" echo. & echo  RUN SCRIPT for Windows 10 ? & echo. & pause & echo. & goto 10
    if "%%a"=="11" echo. & echo  RUN SCRIPT for Windows 11 ? & echo. & pause & echo. & goto 11
-   color 4 & echo The detected system is older than Windows 10. & echo. & pause & goto :eof
+   color C & echo The detected system is older than Windows 10. & echo. & pause & goto :eof
 ) 
 
 :10
@@ -17,22 +17,22 @@ echo ===========================================================================
 echo    WINDOWS 10
 echo ==============================================================================
 echo.
-echo ╨б╨╛╨╖╨┤╨░╨╜╨╕╨╡ ╤В╨╛╤З╨║╨╕ ╨▓╨╛╤Б╤Б╤В╨░╨╜╨╛╨▓╨╗╨╡╨╜╨╕╤П...
+echo Создание точки восстановления...
 powershell Enable-Computerrestore -drive 'C:\'
 VSSAdmin Resize ShadowStorage /For=C: /On=C: /MaxSize=5%%
 powershell Checkpoint-Computer -Description 'win10 tweaks script'
 @echo on
 
-:: ╨Я╨░╨╜╨╡╨╗╤М ╨╖╨░╨┤╨░╤З. ╨г╨▒╨╕╤А╨░╨╡╤В ╨║╨╜╨╛╨┐╨║╤Г ╨╜╨╛╨▓╨╛╤Б╤В╨╡╨╣
+:: Панель задач. Убирает кнопку новостей
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds" /v EnableFeeds /t REG_DWORD /d 0 /f
 
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨б╨╕╤Б╤В╨╡╨╝╨░ > ╨Ь╨╜╨╛╨│╨╛╨╖╨░╨┤╨░╤З╨╜╨╛╤Б╤В╤М. OFF "╨Я╤А╨╕ ╨┐╤А╨╕╨║╤А╨╡╨┐╨╗╨╡╨╜╨╕╨╕ ╨╛╨║╨╜╨░ ╨┐╨╛╨║╨░╨╖╤Л╨▓╨░╤В╤М, ╤З╤В╨╛ ╨╝╨╛╨╢╨╜╨╛ ╨┐╤А╨╕╨║╤А╨╡╨┐╨╕╤В╤М ╤А╤П╨┤╨╛╨╝ ╤Б ╨╜╨╕╨╝" 
+:: Параметры > Система > Многозадачность. OFF "При прикреплении окна показывать, что можно прикрепить рядом с ним" 
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v SnapAssist /t REG_DWORD /d 0 /f
 
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨б╨╕╤Б╤В╨╡╨╝╨░ > ╨Ф╨╕╤Б╨┐╨╗╨╡╨╣ > ╨Э╨░╤Б╤В╤А╨╛╨╣╨║╨╕ ╨│╤А╨░╤Д╨╕╨║╨╕. ON "╨г╨╝╨╡╨╜╤М╤И╨╕╤В╤М ╨▓╤А╨╡╨╝╤П ╨╖╨░╨┤╨╡╤А╨╢╨║╨╕ ╨╕ ╤Г╨▓╨╡╨╗╨╕╤З╨╕╤В╤М ╨┐╤А╨╛╨╕╨╖╨▓╨╛╨┤╨╕╤В╨╡╨╗╤М╨╜╨╛╤Б╤В╤М" 
+:: Параметры > Система > Дисплей > Настройки графики. ON "Уменьшить время задержки и увеличить производительность" 
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v HwSchMode /t REG_DWORD /d 2 /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨б╨║╤А╤Л╤В╤М ╨┐╨░╨┐╨║╨╕ ╨╕╨╖ '╨н╤В╨╛╤В ╨║╨╛╨╝╨┐╤М╤О╤В╨╡╤А' : ╨Ю╨▒╤К╨╡╨╝╨╜╤Л╨╡ ╨╛╨▒╤К╨╡╨║╤В╤Л, ╨Ь╤Г╨╖╤Л╨║╨░, ╨Ч╨░╨│╤А╤Г╨╖╨║╨╕, ╨Ш╨╖╨╛╨▒╤А╨░╨╢╨╡╨╜╨╕╤П, ╨Т╨╕╨┤╨╡╨╛, ╨Ф╨╛╨║╤Г╨╝╨╡╨╜╤В╤Л, ╨а╨░╨▒╨╛╤З╨╕╨╣ ╤Б╤В╨╛╨╗ -- https://www.tenforums.com/tutorials/6015-add-remove-folders-pc-windows-10-a.html
+:: Проводник. Скрыть папки из 'Этот компьютер' : Объемные объекты, Музыка, Загрузки, Изображения, Видео, Документы, Рабочий стол -- https://www.tenforums.com/tutorials/6015-add-remove-folders-pc-windows-10-a.html
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v ThisPCPolicy /d Hide /f
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v ThisPCPolicy /d Hide /f
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v ThisPCPolicy /d Hide /f
@@ -48,47 +48,47 @@ echo ===========================================================================
 echo    WINDOWS 11
 echo ==============================================================================
 echo.
-echo ╨б╨╛╨╖╨┤╨░╨╜╨╕╨╡ ╤В╨╛╤З╨║╨╕ ╨▓╨╛╤Б╤Б╤В╨░╨╜╨╛╨▓╨╗╨╡╨╜╨╕╤П...
+echo Создание точки восстановления...
 powershell Enable-Computerrestore -drive 'C:\'
 VSSAdmin Resize ShadowStorage /For=C: /On=C: /MaxSize=5%%
 powershell Checkpoint-Computer -Description 'win11 tweaks script'
 @echo on
 
-:: ╨Ъ╨╗╨░╤Б╤Б╨╕╤З╨╡╤Б╨║╨╛╨╡ ╨║╨╛╨╜╤В╨╡╨║╤Б╤В╨╜╨╛╨╡ ╨╝╨╡╨╜╤О
-:: reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
-
 :: Enable SUDO
 sudo config --enable normal
 
-:: ╨г╨▒╨╕╤А╨░╨╡╤В ╨╖╨░╨┤╨╡╤А╨╢╨║╤Г ╨░╨▓╤В╨╛╨╖╨░╨┐╤Г╤Б╨║╨░ ╨б╨Э╨Ю╨Т╨Р -- https://superuser.com/questions/1799420/how-to-fix-startupdelayinmsec-trick-does-not-work-anymore
+:: Убирает задержку автозапуска СНОВА -- https://superuser.com/questions/1799420/how-to-fix-startupdelayinmsec-trick-does-not-work-anymore
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" /v WaitforIdleState /t REG_DWORD /d 0 /f
 
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨б╨╕╤Б╤В╨╡╨╝╨░ > ╨Ь╨╜╨╛╨│╨╛╨╖╨░╨┤╨░╤З╨╜╨╛╤Б╤В╤М. OFF "╨Я╨╛╨║╨░╨╖╤Л╨▓╨░╤В╤М ╨╝╨░╨║╨╡╤В╤Л ╨┐╤А╨╕╨║╤А╨╡╨┐╨╗╨╡╨╜╨╕╤П ╨┐╤А╨╕ ╨┐╨╡╤А╨╡╤В╨░╤Б╨║╨╕╨▓╨░╨╜╨╕╨╕ ╨╛╨║╨╜╨░"
+:: Параметры > Система > Многозадачность. OFF "Показывать макеты прикрепления при перетаскивании окна"
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v EnableSnapBar /t REG_DWORD /d 0 /f
 
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨б╨╕╤Б╤В╨╡╨╝╨░ > ╨Ф╨╕╤Б╨┐╨╗╨╡╨╣ > ╨У╤А╨░╤Д╨╕╨║╨░. ON "╨Ю╨┐╤В╨╕╨╝╨╕╨╖╨░╤Ж╨╕╤П ╨┤╨╗╤П ╨╕╨│╤А ╨▓ ╨╛╨║╨╛╨╜╨╜╨╛╨╝ ╤А╨╡╨╢╨╕╨╝╨╡"
+:: Параметры > Система > Дисплей > Графика. ON "Оптимизация для игр в оконном режиме"
 reg add "HKCU\Software\Microsoft\DirectX\UserGpuPreferences" /v DirectXUserGlobalSettings /d "SwapEffectUpgradeEnable=1;" /f
 
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨б╨╕╤Б╤В╨╡╨╝╨░ > ╨б╨┐╨╡╤Ж.╨▓╨╛╨╖╨╝╨╛╨╢╨╜╨╛╤Б╤В╨╕ > ╨Ъ╨╗╨░╨▓╨╕╨░╤В╤Г╤А╨░. OFF "Print screen"
-reg add "HKCU\Control Panel\Keyboard" /v PrintScreenKeyForSnippingEnabled /t REG_DWORD /d 0 /f
-
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨Я╨╡╤А╤Б╨╛╨╜╨░╨╗╨╕╨╖╨░╤Ж╨╕╤П > ╨Я╤Г╤Б╨║ > ╨Я╨░╨┐╨║╨╕. ON "╨Ч╨░╨│╤А╤Г╨╖╨║╨╕"
+:: Параметры > Персонализация > Пуск > Папки. ON "Загрузки"
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Start" /v "VisiblePlaces" /t REG_BINARY /d 2FB367E3DE895543BFCE61F37B18A937 /f
 
-:: ╨Я╨░╨╜╨╡╨╗╤М ╨╖╨░╨┤╨░╤З. ╨Ъ╨╜╨╛╨┐╨║╨░ ╨Я╤Г╤Б╨║ ╤Б╨╗╨╡╨▓╨░
+:: Панель задач. Кнопка Пуск слева
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarAl /t REG_DWORD /d 0 /f
 
-::  ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨Я╨╡╤А╤Б╨╛╨╜╨░╨╗╨╕╨╖╨░╤Ж╨╕╤П > ╨Я╨░╨╜╨╡╨╗╤М ╨╖╨░╨┤╨░╤З. OFF ╨Ь╨╕╨╜╨╕-╨┐╤А╨╕╨╗╨╛╨╢╨╡╨╜╨╕╤П
+::  Параметры > Персонализация > Панель задач. OFF Мини-приложения
 reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\NewsAndInterests\AllowNewsAndInterests" /v "Value" /t REG_DWORD /d 0 /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v "AllowNewsAndInterests" /t REG_DWORD /d 0 /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ю╤В╨║╨╗╤О╤З╨░╨╡╤В ╨У╨░╨╗╨╡╤А╨╡╤П
+:: Проводник. Компактное представление
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v UseCompactMode /t REG_DWORD /d 1 /f
+
+:: Проводник. Отключает Галерея
 reg add "HKCU\Software\Classes\CLSID\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}" /v "System.IsPinnedToNameSpaceTree" /t REG_DWORD /d 0 /f
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ю╤В╨║╨╗╤О╤З╨░╨╡╤В ╨У╨╗╨░╨▓╨╜╨░╤П
+:: Проводник. Отключает Главная
 :: reg add "HKCU\Software\Classes\CLSID\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}" /v "System.IsPinnedToNameSpaceTree" /t REG_DWORD /d 0 /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ъ╨╛╨╝╨┐╨░╨║╤В╨╜╨╛╨╡ ╨┐╤А╨╡╨┤╤Б╤В╨░╨▓╨╗╨╡╨╜╨╕╨╡
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v UseCompactMode /t REG_DWORD /d 1 /f
+:: Классическое контекстное меню
+:: reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
+
+:: Параметры > Система > Спец.возможности > Клавиатура. OFF "Print screen"
+:: reg add "HKCU\Control Panel\Keyboard" /v PrintScreenKeyForSnippingEnabled /t REG_DWORD /d 0 /f
 
 goto all
 
@@ -100,143 +100,133 @@ echo    UI Tweaks
 echo ==============================================================================
 @echo on
 
-:: ╨Ю╤В╨║╨╗╤О╤З╨░╨╡╤В Lock Screen
-:: reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization" /v NoLockScreen /t REG_DWORD /d 1 /f
-:: ╨Ю╤В╨║╨╗╤О╤З╨░╨╡╤В ╤Д╨╛╨╜╨╛╨▓╨╛╨╡ ╨╕╨╖╨╛╨▒╤А╨░╨╢╨╡╨╜╨╕╨╡ Logon Screen
-:: reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v DisableLogonBackgroundImage /t REG_DWORD /d 1 /f
-
-:: ╨Я╤А╨╛╨╖╤А╨░╤З╨╜╨╛╤Б╤В╤М ╨╛╨║╨╛╨╜ CMD ╨╕ PowerShell
-reg add HKCU\Console\%%SystemRoot%%_system32_cmd.exe /v WindowAlpha /t REG_DWORD /d 231 /f
-reg add HKCU\Console\%%SystemRoot%%_System32_WindowsPowerShell_v1.0_powershell.exe /v WindowAlpha /t REG_DWORD /d 243 /f
-reg add HKCU\Console\%%SystemRoot%%_SysWOW64_WindowsPowerShell_v1.0_powershell.exe /v WindowAlpha /t REG_DWORD /d 243 /f
-
-:: ╨Ю╨┐╤А╨╡╨┤╨╡╨╗╤П╨╡╤В ╨┐╨╛╨╗╨╛╨╢╨╡╨╜╨╕╨╡ ╨┐╨╡╤А╨╡╨║╨╗╤О╤З╨░╤В╨╡╨╗╨╡╨╣ ╨▓ ╨╛╨║╨╜╨╡ ╨С╤Л╤Б╤В╤А╨╛╨┤╨╡╨╣╤Б╤В╨▓╨╕╨╡ (SystemPropertiesPerformance.exe)
+:: Определяет положение переключателей в окне Быстродействие (SystemPropertiesPerformance.exe)
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 3 /f
 reg add "HKCU\Control Panel\Desktop" /v UserPreferencesMask /t REG_BINARY /d 9032078010000000 /f
 reg add "HKCU\Control Panel\Desktop\WindowMetrics" /v MinAnimate /d 0 /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ш╨║╨╛╨╜╨║╨░ "╨н╤В╨╛╤В ╨║╨╛╨╝╨┐╤М╤О╤В╨╡╤А" ╨╜╨░ ╤А╨░╨▒╨╛╤З╨╡╨╝ ╤Б╤В╨╛╨╗╨╡
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f
+:: Проводник. Иконка "Этот компьютер" на рабочем столе
+:: reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {20D04FE0-3AEA-1069-A2D8-08002B30309D} /t REG_DWORD /d 0 /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨б╨║╤А╤Л╤В╤М "╨Ф╨╛╨┐╨╛╨╗╨╜╨╕╤В╨╡╨╗╤М╨╜╤Л╨╡ ╤Б╨▓╨╡╨┤╨╡╨╜╨╕╤П ╨╛╨▒ ╤Н╤В╨╛╨╝ ╨╕╨╖╨╛╨▒╤А╨░╨╢╨╡╨╜╨╕╨╕" ╨╜╨░ ╤А╨░╨▒╨╛╤З╨╡╨╝ ╤Б╤В╨╛╨╗╨╡
+:: Проводник. Скрыть "Дополнительные сведения об этом изображении" на рабочем столе
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v {2cc5ca98-6485-489a-920e-b3e88a6ccce3} /t REG_DWORD /d 1 /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ч╨░╨┐╤Г╤Б╨║ ╨┐╨╛ ╤Г╨╝╨╛╨╗╤З╨░╨╜╨╕╤О "╨н╤В╨╛╤В ╨║╨╛╨╝╨┐╤М╤О╤В╨╡╤А" ╨▓╨╝╨╡╤Б╤В╨╛ "╨С╤Л╤Б╤В╤А╤Л╨╣ ╨┤╨╛╤Б╤В╤Г╨┐"
+:: Проводник. Запуск по умолчанию "Этот компьютер" вместо "Быстрый доступ"
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ю╤В╨║╨╗╤О╤З╨╕╤В╤М "╨Я╨╛╨║╨░╨╖╤Л╨▓╨░╤В╤М ╤З╨░╤Б╤В╨╛ ╨╕╤Б╨┐╨╛╨╗╤М╨╖╤Г╨╡╨╝╤Л╨╡ ╨┐╨░╨┐╨║╨╕ ╨╜╨░ ╨┐╨░╨╜╨╡╨╗╨╕ ╨▒╤Л╤Б╤В╤А╨╛╨│╨╛ ╨┤╨╛╤Б╤В╤Г╨┐╨░"
+:: Проводник. Отключить "Показывать часто используемые папки на панели быстрого доступа"
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" /v ShowFrequent /t REG_DWORD /d 0 /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ф╨╛╨▒╨░╨▓╨╗╤П╨╡╨╝ ╤П╤А╨╗╤Л╨║╨╕ ╨▓ ╨С╤Л╤Б╤В╤А╤Л╨╣ ╨┤╨╛╤Б╤В╤Г╨┐
+:: Проводник. Добавляем ярлыки в Быстрый доступ
 powershell "(New-Object -ComObject Shell.Application).Namespace('shell:appdata').Self.InvokeVerb('pintohome')"
 powershell "(New-Object -ComObject Shell.Application).Namespace('shell:Local AppData\temp').Self.InvokeVerb('pintohome')"
 powershell "(New-Object -ComObject Shell.Application).Namespace('shell:startup').Self.InvokeVerb('pintohome')"
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ф╨╛╨▒╨░╨▓╨╗╤П╨╡╨╝ "╨г╤Б╤В╤А╨╛╨╣╤Б╤В╨▓╨░ ╨╕ ╨┐╤А╨╕╨╜╤В╨╡╤А╤Л" ╨▓ "╨н╤В╨╛╤В ╨║╨╛╨╝╨┐╤М╤О╤В╨╡╤А"
+:: Проводник. Добавляем "Устройства и принтеры" в "Этот компьютер"
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{A8A91A66-3A7D-4424-8D24-04E180695C7A}" /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Т╤Б╨╡╨│╨┤╨░ ╨┐╨╛╨║╨░╨╖╤Л╨▓╨░╤В╤М ╤А╨░╤Б╤И╨╕╤А╨╡╨╜╨╕╤П ╤Д╨░╨╣╨╗╨╛╨▓
+:: Проводник. Всегда показывать расширения файлов
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ю╤В╨╛╨▒╤А╨░╨╢╨░╤В╤М ╨╖╨░╤Й╨╕╤Й╨╡╨╜╨╜╤Л╨╡ ╤Б╨╕╤Б╤В╨╡╨╝╨╜╤Л╨╡ ╤Д╨░╨╣╨╗╤Л (╨┐╤А╨╕ ╨░╨║╤В╨╕╨▓╨░╤Ж╨╕╨╕ '╨б╨║╤А╤Л╤В╤Л╨╡ ╤Н╨╗╨╡╨╝╨╡╨╜╤В╤Л')
+:: Проводник. Отображать защищенные системные файлы (при активации 'Скрытые элементы')
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowSuperHidden /t REG_DWORD /d 1 /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ю╤В╨║╨╗╤О╤З╨╕╤В╤М ╨┐╤А╨╡╤Д╨╕╨║╤Б " - ╤П╤А╨╗╤Л╨║" ╨┐╤А╨╕ ╤Б╨╛╨╖╨┤╨░╨╜╨╕╨╕ ╨╜╨╛╨▓╤Л╤Е ╤П╤А╨╗╤Л╨║╨╛╨▓
+:: Проводник. Отключить префикс " - ярлык" при создании новых ярлыков
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\NamingTemplates" /v ShortcutNameTemplate /d \"%%s.lnk\" /f
 
-:: ╨Я╤А╨╛╨▓╨╛╨┤╨╜╨╕╨║. ╨Ю╤В╨║╨╗╤О╤З╨╕╤В╤М ╤Б╨╢╨░╤В╨╕╨╡ ╨╛╨▒╨╛╨╡╨▓
+:: Проводник. Отключить сжатие обоев
 reg add "HKCU\Control Panel\Desktop" /v JPEGImportQuality /t REG_DWORD /d 100 /f
 
-:: ╨Я╨░╨╜╨╡╨╗╤М ╨╖╨░╨┤╨░╤З. ╨г╨▓╨╡╨╗╨╕╤З╨╕╤В╤М ╤Б╨║╨╛╤А╨╛╤Б╤В╤М ╨╛╤В╨║╤А╤Л╤В╨╕╤П ╨╝╨╕╨╜╨╕╨░╤В╤О╤А
+:: Панель задач. Увеличить скорость открытия миниатюр
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ExtendedUIHoverTime /t REG_DWORD /d 100 /f
 
-:: ╨Я╨░╨╜╨╡╨╗╤М ╨╖╨░╨┤╨░╤З. ╨Я╨╡╤А╨╡╤Е╨╛╨┤╨╕╤В╤М ╨╜╨░ ╨┐╨╛╤Б╨╗╨╡╨┤╨╜╨╡╨╡ ╨╛╤В╨║╤А╤Л╤В╨╛╨╡ ╨╛╨║╨╜╨╛ ╨┐╤А╨╕ ╨║╨╗╨╕╨║╨╡ ╨┐╨╛ ╤Б╨│╤А╤Г╨┐╨┐╨╕╤А╨╛╨▓╨░╨╜╨╜╤Л╨╝ ╨┐╤А╨╕╨╗╨╛╨╢╨╡╨╜╨╕╤П╨╝
+:: Панель задач. Переходить на последнее открытое окно при клике по сгруппированным приложениям
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LastActiveClick /t REG_DWORD /d 1 /f
 
-:: ╨Я╨░╨╜╨╡╨╗╤М ╨╖╨░╨┤╨░╤З. ╨г╨▒╨╕╤А╨░╨╡╤В ╨║╨╜╨╛╨┐╨║╨╕ ╨┐╨╛╨╕╤Б╨║╨░ ╨╕ ╨╖╨░╨┤╨░╤З
+:: Панель задач. Убирает кнопки поиска и задач
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 0 /f
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowTaskViewButton /t REG_DWORD /d 0 /f
 
-:: ╨Я╤Г╤Б╨║. ╨Ю╤В╨║╨╗╤О╤З╨╕╤В╤М ╨┐╨╛╨╕╤Б╨║ ╨▓ ╨Ш╨╜╤В╨╡╤А╨╜╨╡╤В╨╡ 
+:: Пуск. Отключить поиск в Интернете 
 reg add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f
 
-:: ╨Я╤Г╤Б╨║. OFF "╨Ю╤В╨╛╨▒╤А╨░╨╢╨╡╨╜╨╕╨╡ ╤Г╨▓╨╡╨┤╨╛╨╝╨╗╨╡╨╜╨╕╨╣, ╤Б╨▓╤П╨╖╨░╨╜╨╜╤Л╤Е ╤Б ╤Г╤З╨╡╤В╨╜╨╛╨╣ ╨╖╨░╨┐╨╕╤Б╤М╤О"
+:: Пуск. OFF "Отображение уведомлений, связанных с учетной записью"
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_AccountNotifications /t REG_DWORD /d 0 /f
 
-:: ╨Я╤Г╤Б╨║. ╨Ф╨╛╨▒╨░╨▓╨╕╨╝ ╨╜╨╡╤Б╨║╨╛╨╗╤М╨║╨╛ ╨┐╨╛╨╗╨╡╨╖╨╜╤Л╤Е ╤П╤А╨╗╤Л╨║╨╛╨▓ ╨▓ ╨Ю╨С╨й╨Х╨Ь ╨Я╤Г╤Б╨║╨╡
+:: Пуск. Добавим несколько полезных ярлыков в ОБЩЕМ Пуске
 powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([IO.Path]::Combine($env:ProgramData, 'Microsoft\Windows\Start Menu\Programs\System Tools\Environment Variables.lnk'));$s.TargetPath = 'rundll32.exe'; $s.Arguments = 'sysdm.cpl,EditEnvironmentVariables';$s.IconLocation='sysdm.cpl,1';$s.Save()"
 powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([IO.Path]::Combine($env:ProgramData, 'Microsoft\Windows\Start Menu\Programs\System Tools\Device Center.lnk'));$s.TargetPath='explorer';$s.Arguments='shell:::{A8A91A66-3A7D-4424-8D24-04E180695C7A}';$s.IconLocation='DeviceCenter.dll';$s.Save()"
 powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([IO.Path]::Combine($env:ProgramData, 'Microsoft\Windows\Start Menu\Programs\System Tools\Network Connections.lnk'));$s.TargetPath='ncpa.cpl';$s.IconLocation='ncpa.cpl';$s.Save()"
 powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([IO.Path]::Combine($env:ProgramData, 'Microsoft\Windows\Start Menu\Programs\System Tools\Group Policy Editor.lnk'));$s.TargetPath='mmc.exe';$s.Arguments='gpedit.msc';$s.IconLocation='gpedit.dll';$s.Save()"
 powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([IO.Path]::Combine($env:ProgramData, 'Microsoft\Windows\Start Menu\Programs\System Tools\System Properties.lnk'));$s.TargetPath='control.exe';$s.Arguments='sysdm.cpl';$s.IconLocation='sysdm.cpl';$s.Save()"
 
-:: ╨Я╨░╨╜╨╡╨╗╤М ╤Г╨┐╤А╨░╨▓╨╗╨╡╨╜╨╕╤П. ╨Ъ╤А╤Г╨┐╨╜╤Л╨╡ ╨╖╨╜╨░╤З╨║╨╕
+:: Панель управления. Крупные значки
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel" /v StartupPage /t REG_DWORD /d 1 /f
 
-:: ╨Я╨░╨╜╨╡╨╗╤М ╤Г╨┐╤А╨░╨▓╨╗╨╡╨╜╨╕╤П > ╨Ч╨▓╤Г╨║╨╕. OFF "╨Я╤А╨╛╨╕╨│╤А╤Л╨▓╨░╤В╤М ╨╝╨╡╨╗╨╛╨┤╨╕╤О ╨╖╨░╨┐╤Г╤Б╨║╨░ Windows"
+:: Панель управления > Звуки. OFF "Проигрывать мелодию запуска Windows"
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation" /v DisableStartupSound /t REG_DWORD /d 1 /f
 
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨б╨╕╤Б╤В╨╡╨╝╨░ > ╨г╨▓╨╡╨┤╨╛╨╝╨╗╨╡╨╜╨╕╤П. OFF "╨Я╤А╨╛╨┤╨╛╨╗╨╢╨╕╤В╤М ╤Б╨┐╨╛╤Б╨╛╨▒╤Л ╨╖╨░╨▓╨╡╤А╤И╨╡╨╜╨╕╤П ╨╜╨░╤Б╤В╤А╨╛╨╣╨║╨╕ ╤Г╤Б╤В╤А╨╛╨╣╤Б╤В╨▓╨░". ╨н╤В╨╛ ╨┐╤А╨╡╨┤╨╛╤В╨▓╤А╨░╤В╨╕╤В ╨┐╨╛╤П╨▓╨╗╨╡╨╜╨╕╨╡ ╨╜╨░╨▓╤П╨╖╤З╨╕╨▓╨╛╨│╨╛ ╨╛╨║╨╜╨░, ╨║╨╛╤В╨╛╤А╨╛╨╡ ╨┐╨╛╤П╨▓╨╗╤П╨╡╤В╤Б╤П ╤З╨╡╤А╨╡╨╖ ╨║╨░╨║╨╛╨╡-╤В╨╛ ╨▓╤А╨╡╨╝╤П ╨┐╨╛╤Б╨╗╨╡ ╤Г╤Б╤В╨░╨╜╨╛╨▓╨║╨╕
+:: Параметры > Система > Уведомления. OFF "Продолжить способы завершения настройки устройства". Это предотвратит появление навязчивого окна, которое появляется через какое-то время после установки
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f
 
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨б╨╕╤Б╤В╨╡╨╝╨░ > ╨С╤Г╤Д╨╡╤А ╨╛╨▒╨╝╨╡╨╜╨░. ON ╨Ц╤Г╤А╨╜╨░╨╗ ╨▒╤Г╤Д╨╡╤А╨░ ╨╛╨▒╨╝╨╡╨╜╨░ (Win+V)
+:: Параметры > Система > Буфер обмена. ON Журнал буфера обмена (Win+V)
 reg add "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory /t REG_DWORD /d 1 /f
 
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨Я╨╡╤А╤Б╨╛╨╜╨░╨╗╨╕╨╖╨░╤Ж╨╕╤П > ╨ж╨▓╨╡╤В╨░. ON "╨Ч╨░╨│╨╛╨╗╨╛╨▓╨║╨╕ ╨╕ ╨│╤А╨░╨╜╨╕╤Ж╤Л ╨╛╨║╨╛╨╜"
+:: Параметры > Персонализация > Цвета. ON "Заголовки и границы окон"
 reg add "HKCU\Software\Microsoft\Windows\DWM" /v ColorPrevalence /t REG_DWORD /d 1 /f
 
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨Я╨╡╤А╤Б╨╛╨╜╨░╨╗╨╕╨╖╨░╤Ж╨╕╤П > ╨Я╨░╨╜╨╡╨╗╤М ╨╖╨░╨┤╨░╤З. ╨Э╨╡╤Б╨║╨╛╨╗╤М╨║╨╛ ╨┤╨╕╤Б╨┐╨╗╨╡╨╡╨▓ > ╨Я╨╛╨║╨░╨╖╤Л╨▓╨░╤В╤М ╨║╨╜╨╛╨┐╨║╨╕ ╨▓ ╨║╨╛╤В╨╛╤А╨╛╨╣ ╨╛╤В╨║╤А╤Л╤В╨╛ ╨╛╨║╨╜╨╛
+:: Параметры > Персонализация > Панель задач. Несколько дисплеев > Показывать кнопки в которой открыто окно
 reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced /V MMTaskbarMode /T REG_dWORD /D 2 /F
 
-:: ╨Я╨░╤А╨░╨╝╨╡╤В╤А╤Л > ╨б╨┐╨╡╤Ж.╨▓╨╛╨╖╨╝╨╛╨╢╨╜╨╛╤Б╤В╨╕ > ╨Ф╨╕╤Б╨┐╨╗╨╡╨╣. OFF "╨Р╨▓╤В╨╛╨╝╨░╤В╨╕╤З╨╡╤Б╨║╨╛╨╡ ╤Б╨║╤А╤Л╤В╨╕╨╡ ╨┐╨╛╨╗╨╛╤Б ╨┐╤А╨╛╨║╤А╤Г╤В╨║╨╕"
+:: Параметры > Спец.возможности > Дисплей. OFF "Автоматическое скрытие полос прокрутки"
 reg add "HKCU\Control Panel\Accessibility" /v DynamicScrollbars /t REG_DWORD /d 0 /f
 
 @echo off
-echo. & echo The settings below have a more advanced format!
-echo Please view and edit this file for your needs. & echo.
-echo Do you want to continue? & echo.
-pause
 echo.
 echo ==============================================================================
 echo     Extended tweaks
 echo ==============================================================================
+echo. 
+echo  The settings below have a more advanced format!
+echo  Please view and edit this file for your needs. & echo.
+echo  Do you want to continue? & echo.
+pause
 @echo on
 
-:: UserAccountControlSettings.exe - ╤В╤А╨╡╤В╤М╨╡ ╨┐╨╛╨╗╨╛╨╢╨╡╨╜╨╕╨╡
+:: UserAccountControlSettings.exe - третье положение
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v PromptOnSecureDesktop /t REG_DWORD /d 0 /f
 
-:: ╨з╨░╤Б╨╛╨▓╨╛╨╣ ╨┐╨╛╤П╤Б UTC+02:00
+:: Часовой пояс UTC+02:00
 tzutil /s "FLE Standard Time"
 
-:: ╨Р╨╜╨│╨╗╨╕╨╣╤Б╨║╨╕╨╣ ╨║╨░╨║ ╨╝╨╡╤В╨╛╨┤ ╨▓╨▓╨╛╨┤╨░ ╨┐╨╛-╤Г╨╝╨╛╨╗╤З╨░╨╜╨╕╤О (UA: 0422:00000422 RU: 0419:00000419)
+:: Английский как метод ввода по-умолчанию (UA: 0422:00000422 RU: 0419:00000419)
 powershell Set-WinDefaultInputMethodOverride -InputTip "0409:00000409"
 
-:: ╨Ю╤В╨║╨╗╤О╤З╨░╨╡╤В ╨▒╨╗╨╛╨║╨╕╤А╨╛╨▓╨║╤Г ╤Б╨║╨░╤З╨░╨╜╨╜╤Л╤Е ╤Д╨░╨╣╨╗╨╛╨▓. https://habr.com/ru/post/505194/
+:: Отключает блокировку скачанных файлов. https://habr.com/ru/post/505194/
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v SaveZoneInformation /t REG_DWORD /d 1 /f
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v SaveZoneInformation /t REG_DWORD /d 1 /f
 
-:: ╨д╨░╨╣╨╗╤Л ╨║╨░╨║ ╤В╨╡╨║╤Б╤В╨╛╨▓╤Л╨╡
-assoc .=txtfile
-assoc .wer=txtfile
-
-:: ╨Ю╤В╨║╨╗╤О╤З╨░╨╡╤В ╨░╨┤╨╝╨╕╨╜.╤И╨░╤А╤Л -- https://admx.help/?Category=SecurityBaseline&Policy=Microsoft.Policies.MSS::Pol_MSS_AutoShareWks
+:: Отключает админ.шары -- https://admx.help/?Category=SecurityBaseline&Policy=Microsoft.Policies.MSS::Pol_MSS_AutoShareWks
 reg add HKLM\SYSTEM\CurrentControlSet\Services\lanmanserver\parameters /v AutoShareWks /t REG_DWORD /d 0 /f
 net share C$ /delete
 net share D$ /delete
 
-:: ╨г╨▒╨╕╤А╨░╨╡╤В ╨╖╨░╨┤╨╡╤А╨╢╨║╤Г ╨░╨▓╤В╨╛╨╖╨░╨┐╤Г╤Б╨║╨░
+:: Убирает задержку автозапуска
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" /v StartupDelayInMSec /t REG_DWORD /d 0 /f
 
-:: ╨Ю╤В╨║╨╗╤О╤З╨╕╤В╤М ╨░╨▓╤В╨╛╨╖╨░╨┐╤Г╤Б╨║ Edge | https://admx.help/?Category=EdgeChromium&Policy=Microsoft.Policies.Edge::StartupBoostEnabled
+:: Ускоряет открытие под-меню (по-умолчанию 400)
+reg add "HKCU\Control Panel\Desktop" /v MenuShowDelay /d 200 /f
+
+:: Отключить автозапуск Edge | https://admx.help/?Category=EdgeChromium&Policy=Microsoft.Policies.Edge::StartupBoostEnabled
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v StartupBoostEnabled /t REG_DWORD /d 0 /f
 
-:: ╨в╨╡╨╗╨╡╨╝╨╡╤В╤А╨╕╤П -- https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.DataCollection::AllowTelemetry
+:: Телеметрия -- https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.DataCollection::AllowTelemetry
 reg add "HKLM\Software\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
 
-:: ╨Ю╤В╨║╨╗╤О╤З╨░╨╡╤В ╤Б╨╗╤Г╨╢╨▒╤Г "╨д╤Г╨╜╨║╤Ж╨╕╨╛╨╜╨░╨╗╤М╨╜╤Л╨╡ ╨▓╨╛╨╖╨╝╨╛╨╢╨╜╨╛╤Б╤В╨╕ ╨┤╨╗╤П ╨┐╨╛╨┤╨║╨╗╤О╤З╨╡╨╜╨╜╤Л╤Е ╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╨╡╨╗╨╡╨╣ ╨╕ ╤В╨╡╨╗╨╡╨╝╨╡╤В╤А╨╕╤П"
+:: Отключает службу "Функциональные возможности для подключенных пользователей и телеметрия"
 sc stop "DiagTrack" && sc config "DiagTrack" start=disabled
 
-:: ╨Ю╤В╨║╨╗╤О╤З╨░╨╡╤В ╨╖╨░╨┤╨░╨╜╨╕╤П ╨▓ ╨┐╨╗╨░╨╜╨╕╤А╨╛╨▓╤Й╨╕╨║╨╡
+:: Отключает задания в планировщике
 schtasks /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
 :: if still appears: reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\CompatTelRunner.exe" /v Debugger /t REG_SZ /d "%windir%\System32\taskkill.exe" /f
 schtasks /Change /DISABLE /TN "\Microsoft\Windows\Defrag\ScheduledDefrag"
@@ -244,15 +234,15 @@ schtasks /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\Svc
 schtasks /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskLogon"
 schtasks /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskNetwork"
 
-:: OFF "╨Я╨╛╤Б╨╗╨╡╨┤╨╜╨╕╨╡ ╨┤╨╡╨╣╤Б╤В╨▓╨╕╤П ╨╕ ╤А╨╡╨╖╤Г╨╗╤М╤В╨░╤В╤Л ╤Б╨║╨░╨╜╨╕╤А╨╛╨▓╨░╨╜╨╕╤П" ╨▓ Windows Defender (╤Н╤В╨╛ ╨║╨░╤Б╨░╨╡╤В╤Б╤П ╨║╨╛╨╜╨║╤А╨╡╤В╨╜╨╛╨│╨╛ ╤Г╨▓╨╡╨┤╨╛╨╝╨╗╨╡╨╜╨╕╤П - ╤Б╨░╨╝ AV ╨┐╤А╨╛╨┤╨╛╨╗╨╢╨░╨╡╤В ╤А╨░╨▒╨╛╤В╤Г)
+:: OFF "Последние действия и результаты сканирования" в Windows Defender (это касается конкретного уведомления - сам AV продолжает работу)
 reg add "HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection" /v SummaryNotificationDisabled /t REG_DWORD /d 1 /f
 
-:: ╨н╨╗╨╡╨║╤В╤А╨╛╨┐╨╕╤В╨░╨╜╨╕╨╡ - ╨┐╤А╨╕╨╝╨╡╨╜╤П╤В╤М ╨╗╤Г╤З╤И╨╡ ╨┤╨╗╤П ╨╜╨░╤Б╤В╨╛╨╗╤М╨╜╤Л╤Е ╨Я╨Ъ, ╨░ ╨╜╨╡ ╨╜╨╛╤Г╤В╨▒╤Г╨║╨╛╨▓
-:: ╨Ю╤В╨║╨╗╤О╤З╨░╨╡╤В ╨│╨╕╨▒╨╡╤А╨╜╨░╤Ж╨╕╤О ╨╕ ╤Г╨┤╨░╨╗╤П╨╡╤В ╤Д╨░╨╣╨╗ C:\hiberfil.sys
+:: Электропитание - применять лучше для настольных ПК, а не ноутбуков
+:: Отключает гибернацию и удаляет файл C:\hiberfil.sys
 powercfg -h off
-:: ╨Я╨░╨╜╨╡╨╗╤М ╤Г╨┐╤А╨░╨▓╨╗╨╡╨╜╨╕╤П > ╨н╨╗╨╡╨║╤В╤А╨╛╨┐╨╕╤В╨░╨╜╨╕╨╡. ╨б╤Е╨╡╨╝╨░ ╨┐╨╕╤В╨░╨╜╨╕╤П "╨Т╤Л╤Б╨╛╨║╨░╤П ╨┐╤А╨╛╨╕╨╖╨▓╨╛╨┤╨╕╤В╨╡╨╗╤М╨╜╨╛╤Б╤В╤М"
+:: Панель управления > Электропитание. Схема питания "Высокая производительность"
 powercfg /S 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
-:: ╨Э╨╡ ╨╛╤В╨║╨╗╤О╤З╨░╤В╤М ╨╢╨╡╤Б╤В╨║╨╕╨╣ ╨┤╨╕╤Б╨║ | https://www.tenforums.com/tutorials/21454-turn-off-hard-disk-after-idle-windows-10-a.html
+:: Не отключать жесткий диск | https://www.tenforums.com/tutorials/21454-turn-off-hard-disk-after-idle-windows-10-a.html
 powercfg -change -disk-timeout-ac 0
 
 pause & exit
