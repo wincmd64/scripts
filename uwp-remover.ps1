@@ -1,4 +1,4 @@
-# Uninstall some built-in UWP apps. Tested on Win 11 24H2 (08.2025)
+# Uninstall some built-in UWP apps. Tested on Win 11 25H2
 
 $app2delete = @(
      # Get list of installed apps: Get-AppxPackage | Select Name, PackageFullName
@@ -36,5 +36,6 @@ foreach ($app in $app2delete) {
         Write-Warning "$app - error deleting"
     }
 }
+
 
 pause
