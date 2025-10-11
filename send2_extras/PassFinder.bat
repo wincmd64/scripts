@@ -6,6 +6,8 @@
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%N parameter
 
+:: NOTICE: filenames containing the character "!" are not supported.
+
 :: Command line arguments:
 :: /s - create shortcut in Shell:SendTo folder
 
@@ -22,6 +24,7 @@ if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 if "%~1"=="" (echo. & echo  No objects selected & echo. & pause & exit)
 :: e.g. "secret.zip" > "secret.txt"
 set "pw_list=%~dpn1.txt"
+if "%~x1"=="" echo. & echo     NOTICE: first argument is likely a folder or has no extension.
 if not exist "%pw_list%" (
     echo. & echo  Use default-passwords.txt ^(will be downloaded^) to search password for "%~nx1" ? & echo. & pause
     powershell -C "iwr 'https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Default-Credentials/default-passwords.txt' -OutFile '%pw_list%'"
