@@ -13,7 +13,7 @@ if "%~1" neq "" (set "url=%~1") else (for /f "delims=" %%i in ('powershell Get-C
 :: set default options
 set num=-S "ext"
 :: get ver
-for /f "delims=" %%A in ('yt-dlp --version') do set "lastupdate=%%A"
+for /f "delims=" %%A in ('"%app%" --version') do set "lastupdate=%%A"
 :: check URL
 "%app%" --simulate "%url%" >nul 2>&1
 if ERRORLEVEL 1 (set uCHK=not valid) else (set uCHK=tested OK)
@@ -81,7 +81,7 @@ goto main
 
 :Option_4
 "%app%" -U
-for /f "delims=" %%A in ('yt-dlp --version') do set "lastupdate=%%A"
+for /f "delims=" %%A in ('"%app%" --version') do set "lastupdate=%%A"
 goto main
 
 :start
