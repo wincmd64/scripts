@@ -21,4 +21,5 @@ if ($exists) {
 }
 [System.Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
 Write-Host "`nDONE."
-sleep 2
+
+sleep 1
