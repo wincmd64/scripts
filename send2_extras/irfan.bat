@@ -218,6 +218,7 @@ echo. & echo Current associations: & SetUserFTA.exe get | findstr /i "irfan" & e
 :process
 assoc .%1=irfan_%1
 ftype irfan_%1="%app%" "%%1"
+reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f
 SetUserFTA.exe .%1 irfan_%1
 reg add "HKCU\Software\Classes\irfan_%1\DefaultIcon" /ve /d "%icons%,%2" /f
 exit /b
