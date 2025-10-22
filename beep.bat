@@ -21,15 +21,14 @@ if errorlevel 1 goto Option_1
 exit
 
 :Option_1
-set /p "custom_text=Enter location text [current time]: "
-if "%custom_text%"=="" set "custom_text=current time"
-
+set /p "custom_text=Enter text before time (optional): "
+if "%custom_text%"=="" (set "speak_text=Left^(Time, 5^)") else (set "speak_text="%custom_text%:" ^& Left^(Time, 5^)")
 set "vbs=%temp%\hourly_speak.vbs"
 > "%vbs%" (
   echo Dim Voice
   echo On Error Resume Next
   echo Set Voice = CreateObject^("Sapi.spVoice"^)
-  echo Voice.Speak "%custom_text%:" ^& Left^(Time, 5^)
+  echo Voice.Speak %speak_text%
   echo Set Voice = Nothing
 )
 schtasks /delete /tn "wincmd64beep" /f >nul 2>&1
