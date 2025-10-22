@@ -25,17 +25,18 @@ if "%~1"=="" (echo. & echo  No objects selected & echo. & pause & exit)
 :: e.g. "secret.zip" > "secret.txt"
 set "pw_list=%~dpn1.txt"
 if "%~x1"=="" echo. & echo     NOTICE: first argument is likely a folder or has no extension.
-if not exist "%pw_list%" (
+if not exist "!pw_list!" (
     echo. & echo  Use default-passwords.txt ^(will be downloaded^) to search password for "%~nx1" ? & echo. & pause
-    powershell -C "iwr 'https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Default-Credentials/default-passwords.txt' -OutFile '%pw_list%'"
-    if not exist "%pw_list%" (echo. & echo  Failed to get password list. & pause & exit)
+    set "pw_list=%~dpn1_%random%.txt"
+    powershell -C "iwr 'https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Default-Credentials/default-passwords.txt' -OutFile '!pw_list!'"
+    if not exist "!pw_list!" (echo. & echo  Failed to get password list. & pause & exit)
 ) else (
     echo. & echo  Use "%~n1.txt" to search password for "%~nx1" ? & echo. & pause
 )
 
-echo. & echo  Searching passwords from: "%~n1.txt"
+echo. & echo  Searching passwords from: "!pw_list!"
 set /a count=0
-for /F "usebackq delims=" %%P in ("%pw_list%") do (
+for /F "usebackq delims=" %%P in ("!pw_list!") do (
     if not "%%P"=="" (
         set /a count+=1
         set /p "=." <nul
