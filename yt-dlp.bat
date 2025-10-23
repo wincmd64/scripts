@@ -15,8 +15,10 @@ set num=-S "ext"
 :: get ver
 for /f "delims=" %%A in ('"%app%" --version') do set "lastupdate=%%A"
 :: check URL
-"%app%" --simulate "%url%" >nul 2>&1
-if ERRORLEVEL 1 (set uCHK=not valid) else (set uCHK=tested OK)
+if "%url%"=="" (set "uCHK=not valid") else (
+    "%app%" --simulate "%url%" >nul 2>&1
+    if errorlevel 1 (set "uCHK=not valid") else (set "uCHK=tested OK")
+)
 :main
 cls
 ::: 
