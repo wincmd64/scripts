@@ -30,6 +30,7 @@ if ($exists) {
     Write-Host "Remove from PATH? " -ForegroundColor Magenta -NoNewline; Write-Host $Path.TrimEnd('\'); pause
     $newPath = ($arrPath | Where-Object { $_.TrimEnd('\') -ne $Path.TrimEnd('\') }) -join [IO.Path]::PathSeparator
 } else {
+    if (-not $PSBoundParameters.ContainsKey('Path')) {Write-Host "Add current directory to PATH?"; pause}
     $newPath = ($arrPath + $Path.TrimEnd('\')) -join [IO.Path]::PathSeparator
     Write-Host "Added to PATH: " -ForegroundColor Green -NoNewline; Write-Host $Path.TrimEnd('\')
 }
