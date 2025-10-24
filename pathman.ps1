@@ -1,6 +1,16 @@
 # Adds or removes if exist a directory from the user PATH environment variable
 
-param([string]$Path)
+param(
+    [string]$Path,
+    [switch]$List
+)
+# List current user PATH if -List is specified
+if ($List) {
+    $currentPath = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
+    $currentPath -split [IO.Path]::PathSeparator | ForEach-Object { Write-Host $_ }
+    exit 0
+}
+# If no path provided, use current directory
 if (-not $Path) {
     $pwd = Get-Location
     if ($pwd.Provider.Name -ne 'FileSystem') { Write-Warning "Not a filesystem path."; exit 1 }
