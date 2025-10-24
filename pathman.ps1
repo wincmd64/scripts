@@ -1,7 +1,11 @@
 # Adds or removes if exist a directory from the user PATH environment variable
 
 param([string]$Path)
-if (-not $Path) {Write-Host "Usage: .\pathman.ps1 'X:\your\path'" ; exit 1 }
+if (-not $Path) {
+    $pwd = Get-Location
+    if ($pwd.Provider.Name -ne 'FileSystem') { Write-Warning "Not a filesystem path."; exit 1 }
+    $Path = $pwd.ProviderPath
+}
 if (-not (Test-Path -Path $Path)) { Write-Warning "The directory '$Path' does not exist." ; exit 1 }
 if ($Path -match '^[.]|^\\(?!\\)') {Write-Warning "Only absolute paths or UNC are allowed." ; exit 1}
 
@@ -21,5 +25,4 @@ if ($exists) {
 }
 [System.Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
 Write-Host "`nDONE."
-
 sleep 1
