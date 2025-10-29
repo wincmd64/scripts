@@ -5,7 +5,7 @@
 ; Right Ctrl - Russian  
 ; AppsKey - Ukrainian
 ;
-; Ctrl+Alt+Shift+F12 - Show installed layouts (for testing/debugging)
+; Ctrl+Alt+Shift+F12 - Show installed layouts (for testing/customization)
 
 #Requires AutoHotkey v2.0
 #SingleInstance Force
@@ -59,3 +59,4 @@ SwitchLayout(layoutID) {
         SoundBeep(750, 500)
     }
 }
+
