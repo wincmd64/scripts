@@ -16,13 +16,13 @@ installedLayouts := GetInstalledLayoutsWithNames()
 ~LControl::SwitchLayout(0x4090409) ; EN
 ~RControl::SwitchLayout(0x4190419) ; RU
 AppsKey::SwitchLayout(0x04220422)  ; UA
-!^+F12::
+!^+F12:: ; List of installed layouts
 {
     allLayoutsStr := ""
     for layoutID, langName in installedLayouts {
         allLayoutsStr .= Format("0x{:08X}", layoutID) . " - " . langName . "`n"
     }
-    MsgBox(Trim(allLayoutsStr, "`n") . "`n`nTotal: " installedLayouts.Count " layouts")
+    MsgBox(Trim(allLayoutsStr, "`n"), "Installed layouts")
 }
 
 ; Get all installed layouts with their names
