@@ -10,8 +10,8 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-; Get installed keyboard layouts once
-installedLayouts := GetInstalledLayouts()
+; Get installed keyboard layouts once at startup
+installedLayouts := GetInstalledLayoutsWithNames()
 
 ~LControl::SwitchLayout(0x4090409) ; EN
 ~RControl::SwitchLayout(0x4190419) ; RU
@@ -19,14 +19,14 @@ AppsKey::SwitchLayout(0x04220422)  ; UA
 !^+F12::
 {
     allLayoutsStr := ""
-    for layoutID in installedLayouts {
-        allLayoutsStr .= Format("0x{:08X}", layoutID) . "`n"
+    for layoutID, langName in installedLayouts {
+        allLayoutsStr .= Format("0x{:08X}", layoutID) . " - " . langName . "`n"
     }
     MsgBox(Trim(allLayoutsStr, "`n") . "`n`nTotal: " installedLayouts.Count " layouts")
 }
 
-; Function to get all installed keyboard layouts from system
-GetInstalledLayouts() {
+; Get all installed layouts with their names
+GetInstalledLayoutsWithNames() {
     layouts := Map()
     
     ; Get the number of installed layouts
@@ -39,10 +39,20 @@ GetInstalledLayouts() {
         ; Retrieve the list of keyboard layout handles
         DllCall("GetKeyboardLayoutList", "Int", count, "Ptr", layoutListBuf, "Int")
         
-        ; Store each layout in a Map for fast lookup
+        ; Get name for each layout and store in Map
         Loop count {
             hkl := NumGet(layoutListBuf, (A_Index - 1) * A_PtrSize, "Ptr")
-            layouts[hkl] := true
+            
+            ; Extract language ID and get name directly
+            langID := hkl & 0xFFFF
+            buf := Buffer(256)
+            if DllCall("GetLocaleInfo", "UInt", langID, "UInt", 0x2, "Ptr", buf, "Int", 256) {
+                langName := StrGet(buf)
+            } else {
+                langName := "Unknown"
+            }
+            
+            layouts[hkl] := langName
         }
     }
     
@@ -59,4 +69,3 @@ SwitchLayout(layoutID) {
         SoundBeep(750, 500)
     }
 }
-
