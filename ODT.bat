@@ -1,12 +1,14 @@
 :: Office Deployment Tool
-:: You need to specify YOUR configuration .xml for XML_SOURCE
-:: Both local files and web links are supported.
-:: You can use https://config.office.com/deploymentsettings to configure .xml 
+::   You need to specify YOUR configuration .xml for XML_SOURCE
+::   Both local files and web links are supported.
+::   You can use https://config.office.com/deploymentsettings to configure .xml 
 :: by github.com/wincmd64
 
 @echo off
 chcp 1251 >nul
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs & Exit /B)
+for /F "tokens=3 delims=." %%O in ('reg query "HKCR\Word.Application\CurVer" 2^>nul') do set officeVer=%%O
+if defined officeVer (TITLE Office v%officeVer% detected) else (TITLE Office not found)
 
 :: ===== USER XML =====
 :: This example for Office 2021 x64 ru
