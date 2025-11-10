@@ -11,22 +11,35 @@ $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIde
 if (-not $isAdmin) {Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -FilePath `"$FilePath`"" -Verb RunAs; exit}
 # Verify target file exists
 if (-not (Test-Path $FilePath)) {Write-Warning "File not found: $FilePath"; exit 1}
+# Verify .ext
+$allowedExtensions = @('.exe', '.cmd', '.bat', '.ps1')
+$fileExtension = [System.IO.Path]::GetExtension($FilePath)
+if ($allowedExtensions -notcontains $fileExtension) {
+    Write-Warning "Unsupported file type: $fileExtension. Allowed: $($allowedExtensions -join ', ')"; pause; exit 1
+}
 
 # Remove existing task
-$taskName = "[hideUAC] " + [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
+$taskName = "[hideUAC] " + [System.IO.Path]::GetFileName($FilePath)
 schtasks /Delete /TN $taskName /F 2>&1 | Out-Null
 
-# .ps1 exception
-if ([System.IO.Path]::GetExtension($FilePath) -eq '.ps1') {
-    # Ask for PowerShell script parameters
-    $params = Read-Host "Enter parameters for PowerShell script (or press Enter for none)"
-    $action = if ($params) {
-        New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoP -EP Bypass -File `"$FilePath`" `"$params`""
+# Ask for parameters
+$params = Read-Host "Enter parameters (or press Enter for none)"
+
+if ($fileExtension -eq '.ps1') {
+    if ($params) {
+        $command = "& '$FilePath' $params"
+        $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
+        $encodedCommand = [Convert]::ToBase64String($bytes)
+        $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoP -EP Bypass -EncodedCommand $encodedCommand"
     } else {
-        New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoP -EP Bypass -File `"$FilePath`""
+        $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoP -EP Bypass -File `"$FilePath`""
     }
 } else {
-    $action = New-ScheduledTaskAction -Execute $FilePath
+    $action = if ($params) {
+        New-ScheduledTaskAction -Execute $FilePath -Argument $params
+    } else {
+        New-ScheduledTaskAction -Execute $FilePath
+    }
 }
 
 $trigger = New-ScheduledTaskTrigger -AtLogOn
@@ -38,7 +51,8 @@ try {
     Write-Host "`nDONE." -ForegroundColor Green
 }
 catch {
-    Write-Warning "`nERROR: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Warning "`nERROR: $($_.Exception.Message)"
     exit 1
 }
+
 Sleep 1
