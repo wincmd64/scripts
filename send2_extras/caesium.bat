@@ -28,4 +28,4 @@ echo. & echo. & echo  DONE. & echo. & pause & exit
 powershell -NoP -NoL -Ep Bypass -c ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Image compression.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,127'; $s.Save()"
-echo. & echo  Shortcut 'Image compression.lnk' created. & echo. & pause & exit
+echo. & echo  Shortcut 'Image compression.lnk' created. & echo. & timeout 2

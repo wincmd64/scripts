@@ -34,4 +34,4 @@ color A & timeout 2 & exit
 powershell -NoP -NoL -Ep Bypass -c ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\InnoUnpacker.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = '%app%'; $s.Save()"
-echo. & echo  Shortcut 'InnoUnpacker.lnk' created. & echo. & pause & exit
+echo. & echo  Shortcut 'InnoUnpacker.lnk' created. & echo. & timeout 2

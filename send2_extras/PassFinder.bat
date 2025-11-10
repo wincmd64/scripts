@@ -63,4 +63,4 @@ echo. & echo. & echo  Finished. No matching password found. & echo. & pause & ex
 powershell -NoP -NoL -Ep Bypass -c ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Password Finder.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,47'; $s.Save()"
-echo. & echo  Shortcut 'Password Finder.lnk' created. & echo. & pause & exit
+echo. & echo  Shortcut 'Password Finder.lnk' created. & echo. & timeout 2

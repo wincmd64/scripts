@@ -196,7 +196,7 @@ start "" "%app%" "%~1" /wall=4 /killmesoftly & exit
 powershell -NoP -NoL -Ep Bypass -c ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\IrfanView converter.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = '%app%'; $s.Save()"
-echo. & echo  Shortcut 'IrfanView converter.lnk' created. & echo. & pause & exit
+echo. & echo  Shortcut 'IrfanView converter.lnk' created. & echo. & timeout 2 & exit
 
 :associate
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"

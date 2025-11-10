@@ -118,4 +118,4 @@ echo. & pause & goto main
 powershell -NoP -NoL -Ep Bypass -c ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Emsisoft scanner.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = '%app%'; $s.Save()"
-echo. & echo  Shortcut 'Emsisoft scanner.lnk' created. & echo. & pause & exit
+echo. & echo  Shortcut 'Emsisoft scanner.lnk' created. & echo. & timeout 2

@@ -42,4 +42,4 @@ exit
 powershell -NoP -NoL -Ep Bypass -c ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Temp hoster.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,130'; $s.Save()"
-echo. & echo  Shortcut 'Temp hoster.lnk' created. & echo. & pause & exit
+echo. & echo  Shortcut 'Temp hoster.lnk' created. & echo. & timeout 2

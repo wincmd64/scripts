@@ -52,4 +52,4 @@ echo. & echo. & echo  DONE. & echo. & pause & exit
 powershell -NoP -NoL -Ep Bypass -c ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Secure Delete.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'imageres.dll,-5320'; $s.Save()"
-echo. & echo  Shortcut 'Secure Delete.lnk' created. & echo. & pause & exit
+echo. & echo  Shortcut 'Secure Delete.lnk' created. & echo. & timeout 2

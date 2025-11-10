@@ -37,4 +37,4 @@ echo. & echo. & echo  DONE. & echo. & pause & exit
 powershell -NoP -NoL -Ep Bypass -c ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\VCF converter.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,126'; $s.Save()"
-echo. & echo  Shortcut 'VCF converter.lnk' created. & echo. & pause & exit
+echo. & echo  Shortcut 'VCF converter.lnk' created. & echo. & timeout 2

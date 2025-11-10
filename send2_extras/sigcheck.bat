@@ -46,4 +46,4 @@ echo. & echo. & echo  DONE. & echo. & pause & exit
 powershell -NoP -NoL -Ep Bypass -c ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\VirusTotal.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'imageres.dll,101'; $s.Save()"
-echo. & echo  Shortcut 'VirusTotal.lnk' created. & echo. & pause & exit
+echo. & echo  Shortcut 'VirusTotal.lnk' created. & echo. & timeout 2
