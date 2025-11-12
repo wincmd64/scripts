@@ -64,9 +64,25 @@ goto :eof
 :Option_1
 "%app%" -i %1 -an -vcodec copy "%~dpn1_noaudio%~x1"
 color A & timeout 2 & exit
+
 :Option_2
+"%app%" -i %1 2>&1 | findstr "Audio:"
+if errorlevel 1 (echo  no audio found!)
+echo.
+echo  [1] Save original
+echo  [2] Save as MP3
+echo.
+CHOICE /C 12 /M "Your choice?:" >nul 2>&1
+if errorlevel 2 goto 2option_2_2
+if errorlevel 1 goto 2option_2_1
+exit
+:2option_2_1
 "%app%" -i %1 -map 0:a:0 -c:a copy -vn "%~dpn1_audio%~x1"
 color A & timeout 2 & exit
+:2option_2_2
+"%app%" -i %1 -map 0:a:0 -c:a libmp3lame -q:a 0 -vn "%~dpn1.mp3"
+color A & timeout 2 & exit
+
 :Option_3
 "%app%" -i %1 -vf "fps=15,scale=320:-1:flags=lanczos" "%~dpn1.gif"
 color A & timeout 2 & exit
@@ -101,8 +117,10 @@ chcp 65001 >nul
 pushd "%~dp1"
 echo  [1] Merge %count% files
 echo  [2] Create slideshow with %count% files
+echo  [3] Add audio track to video files
 echo.
-CHOICE /C 12 /M "Your choice?:" >nul 2>&1
+CHOICE /C 123 /M "Your choice?:" >nul 2>&1
+if errorlevel 3 goto Moption_3
 if errorlevel 2 goto Moption_2
 if errorlevel 1 goto Moption_1
 exit
@@ -115,6 +133,12 @@ del listfile.txt & color A & timeout 2 & exit
 (for %%i in (%*) do echo file '%%~fi' & echo duration 2) > "listfile.txt"
 "%app%" -f concat -safe 0 -i "listfile.txt" -vf "fps=1,scale=1280:-2,format=yuv420p" -r 30 "Slideshow_%random%.mp4"
 del listfile.txt & color A & timeout 2 & exit
+:Moption_3
+echo  audio: "%~nx1"
+echo  video: "%~nx2"
+echo. & echo  Start ? & echo. & pause
+"%app%" -i "%~2" -i "%~1" -c:v copy -c:a copy -map 0:v:0 -map 1:a:0 "%~n2_with_audio%~x2"
+color A & timeout 2 & exit
 
 :shortcut
 powershell -NoP -NoL -Ep Bypass -c ^
