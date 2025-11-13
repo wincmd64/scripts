@@ -8,10 +8,8 @@
 :: Command line arguments:
 :: /s - create shortcut in Shell:SendTo folder
 
-:: Note: this file must use code page OEM 866
-
 @echo off
-setlocal
+chcp 65001 >nul
 :: get ffmpeg path
 for /f "tokens=* delims=" %%a in ('where ffmpeg.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0ffmpeg.exe" set "app=%~dp0ffmpeg.exe"
@@ -20,14 +18,15 @@ if not exist "%app%" (echo. & echo  ffmpeg.exe not found. Try: winget install Gy
 :: arguments
 if "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 
-echo.
-echo  ÛÛÛÛÛÛÛ»ÛÛÛÛÛÛÛ»ÛÛÛ»   ÛÛÛ»ÛÛÛÛÛÛ» ÛÛÛÛÛÛÛ» ÛÛÛÛÛÛ» 
-echo  ÛÛÉÍÍÍÍ¼ÛÛÉÍÍÍÍ¼ÛÛÛÛ» ÛÛÛÛºÛÛÉÍÍÛÛ»ÛÛÉÍÍÍÍ¼ÛÛÉÍÍÍÍ¼ 
-echo  ÛÛÛÛÛ»  ÛÛÛÛÛ»  ÛÛÉÛÛÛÛÉÛÛºÛÛÛÛÛÛÉ¼ÛÛÛÛÛ»  ÛÛº  ÛÛÛ»
-echo  ÛÛÉÍÍ¼  ÛÛÉÍÍ¼  ÛÛºÈÛÛÉ¼ÛÛºÛÛÉÍÍÍ¼ ÛÛÉÍÍ¼  ÛÛº   ÛÛº
-echo  ÛÛº     ÛÛº     ÛÛº ÈÍ¼ ÛÛºÛÛº     ÛÛÛÛÛÛÛ»ÈÛÛÛÛÛÛÉ¼
-echo  ÈÍ¼     ÈÍ¼     ÈÍ¼     ÈÍ¼ÈÍ¼     ÈÍÍÍÍÍÍ¼ ÈÍÍÍÍÍ¼ 
-echo.
+:::
+:::  _____   _____                                    
+::: |  ___| |  ___|  _ __ ___    _ __     ___    __ _ 
+::: | |_    | |_    | '_ ` _ \  | '_ \   / _ \  / _` |
+::: |  _|   |  _|   | | | | | | | |_) | |  __/ | (_| |
+::: |_|     |_|     |_| |_| |_| | .__/   \___|  \__, |
+:::                             |_|             |___/ 
+:::
+for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do @echo(%%A
 
 set count=0
 for %%A in (%*) do set /a count+=1
@@ -40,7 +39,7 @@ if %count% equ 1 (
     echo  [3] Create GIF
     echo  [4] Cut
     echo  [5] 2x fast
-    echo  [6] 0.5x speed
+    echo  [6] 0.5x slow
     echo  [7] Convert to 1080p ^(x264^)
     echo  [8] Rotate right
     echo  [9] Rotate left
@@ -67,25 +66,28 @@ echo. & pause & exit
 
 :Option_2
 set "tmp=%temp%\ffinfo.txt"
-ffmpeg -i "%~1" >"%tmp%" 2>&1
+"%app%" -i "%~1" >"%tmp%" 2>&1
 findstr /C:"Audio:" /C:"title" "%tmp%" | findstr /V "Subtitle" || (echo  ^(no audio found^))
+:: detect multiple audio
+findstr /C:"Audio:" "%tmp%" | findstr /N "Audio:" | find "2:" >nul && (set "multi=1") || (set "multi=0")
 del "%tmp%"
+set track=0
+if "%multi%"=="1" (
+    echo.
+    set /p track="Select track number (0 = default): "
+)
 echo.
 echo  [1] Save original
 echo  [2] Save as MP3
 echo.
 CHOICE /C 12 /M "Your choice?:" >nul 2>&1
-if errorlevel 2 goto 2option_2_2
-if errorlevel 1 goto 2option_2_1
+if errorlevel 2 goto Option_2_1
+if errorlevel 1 goto Option_2_2
 exit
-:2option_2_1
-set /p track="Select track number (0 = default): "
-if "%track%"=="" set track=0
+:Option_2_1
 "%app%" -i %1 -map 0:a:%track% -c:a copy -vn "%~dpn1_audio_%track%%~x1"
 echo. & pause & exit
-:2option_2_2
-set /p track="Select track number (0 = default): "
-if "%track%"=="" set track=0
+:Option_2_2
 "%app%" -i %1 -map 0:a:%track% -c:a libmp3lame -q:a 0 -vn "%~dpn1_audio_%track%.mp3"
 echo. & pause & exit
 
@@ -126,7 +128,7 @@ if "%~x1"=="" echo  NOTICE: first argument is likely a folder or has no extensio
 chcp 65001 >nul
 pushd "%~dp1"
 echo  [1] Merge %count% files
-echo  [2] Create slideshow with %count% files
+echo  [2] Create slideshow with %count% IMG files
 echo  [3] Add "%~nx1" as audio track to "%~nx2"
 echo.
 CHOICE /C 123 /M "Your choice?:" >nul 2>&1
