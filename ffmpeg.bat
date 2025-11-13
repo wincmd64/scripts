@@ -8,10 +8,8 @@
 :: Command line arguments:
 :: /s - create shortcut in Shell:SendTo folder
 
-:: Note: this file must use code page OEM 866
-
 @echo off
-setlocal
+chcp 65001 >nul
 :: get ffmpeg path
 for /f "tokens=* delims=" %%a in ('where ffmpeg.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0ffmpeg.exe" set "app=%~dp0ffmpeg.exe"
@@ -20,14 +18,15 @@ if not exist "%app%" (echo. & echo  ffmpeg.exe not found. Try: winget install Gy
 :: arguments
 if "%~1"=="/s" (if "%~2"=="" goto :shortcut)
 
-echo.
-echo  ÛÛÛÛÛÛÛ»ÛÛÛÛÛÛÛ»ÛÛÛ»   ÛÛÛ»ÛÛÛÛÛÛ» ÛÛÛÛÛÛÛ» ÛÛÛÛÛÛ» 
-echo  ÛÛÉÍÍÍÍ¼ÛÛÉÍÍÍÍ¼ÛÛÛÛ» ÛÛÛÛºÛÛÉÍÍÛÛ»ÛÛÉÍÍÍÍ¼ÛÛÉÍÍÍÍ¼ 
-echo  ÛÛÛÛÛ»  ÛÛÛÛÛ»  ÛÛÉÛÛÛÛÉÛÛºÛÛÛÛÛÛÉ¼ÛÛÛÛÛ»  ÛÛº  ÛÛÛ»
-echo  ÛÛÉÍÍ¼  ÛÛÉÍÍ¼  ÛÛºÈÛÛÉ¼ÛÛºÛÛÉÍÍÍ¼ ÛÛÉÍÍ¼  ÛÛº   ÛÛº
-echo  ÛÛº     ÛÛº     ÛÛº ÈÍ¼ ÛÛºÛÛº     ÛÛÛÛÛÛÛ»ÈÛÛÛÛÛÛÉ¼
-echo  ÈÍ¼     ÈÍ¼     ÈÍ¼     ÈÍ¼ÈÍ¼     ÈÍÍÍÍÍÍ¼ ÈÍÍÍÍÍ¼ 
-echo.
+:::
+:::  _____   _____                                    
+::: |  ___| |  ___|  _ __ ___    _ __     ___    __ _ 
+::: | |_    | |_    | '_ ` _ \  | '_ \   / _ \  / _` |
+::: |  _|   |  _|   | | | | | | | |_) | |  __/ | (_| |
+::: |_|     |_|     |_| |_| |_| | .__/   \___|  \__, |
+:::                             |_|             |___/ 
+:::
+for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do @echo(%%A
 
 set count=0
 for %%A in (%*) do set /a count+=1
@@ -126,7 +125,7 @@ if "%~x1"=="" echo  NOTICE: first argument is likely a folder or has no extensio
 chcp 65001 >nul
 pushd "%~dp1"
 echo  [1] Merge %count% files
-echo  [2] Create slideshow with %count% files
+echo  [2] Create slideshow with %count% IMG files
 echo  [3] Add "%~nx1" as audio track to "%~nx2"
 echo.
 CHOICE /C 123 /M "Your choice?:" >nul 2>&1
