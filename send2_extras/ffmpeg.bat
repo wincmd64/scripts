@@ -61,7 +61,7 @@ if %count% equ 1 (
 goto :eof
 
 :Option_1
-"%app%" -i %1 -an -vcodec copy "%~dpn1_noaudio%~x1"
+"%app%" -hide_banner -i %1 -an -vcodec copy "%~dpn1_noaudio%~x1"
 echo. & pause & exit
 
 :Option_2
@@ -85,14 +85,14 @@ if errorlevel 2 goto Option_2_1
 if errorlevel 1 goto Option_2_2
 exit
 :Option_2_1
-"%app%" -i %1 -map 0:a:%track% -c:a copy -vn "%~dpn1_audio_%track%%~x1"
+"%app%" -hide_banner -i %1 -map 0:a:%track% -c:a copy -vn "%~dpn1_audio_%track%%~x1"
 echo. & pause & exit
 :Option_2_2
-"%app%" -i %1 -map 0:a:%track% -c:a libmp3lame -q:a 0 -vn "%~dpn1_audio_%track%.mp3"
+"%app%" -hide_banner -i %1 -map 0:a:%track% -c:a libmp3lame -q:a 0 -vn "%~dpn1_audio_%track%.mp3"
 echo. & pause & exit
 
 :Option_3
-"%app%" -i %1 -vf "fps=15,scale=320:-1:flags=lanczos" "%~dpn1.gif"
+"%app%" -hide_banner -i %1 -vf "fps=15,scale=320:-1:flags=lanczos" "%~dpn1.gif"
 echo. & pause & exit
 
 :Option_4
@@ -100,27 +100,27 @@ echo. & "%app%" -i %1 2>&1 | find "Duration" & echo.
 set /p start=Start time (e.g. 00:00:03): 
 if "%start%"=="" set start=00:00:00
 set /p end=End time (e.g. 00:00:30): 
-if "%end%"=="" ("%app%" -i %1 -ss %start% -c copy "%~dpn1_cut%~x1") else ("%app%" -i %1 -ss %start% -to %end% -c copy "%~dpn1_cut%~x1")
+if "%end%"=="" ("%app%" -hide_banner -i %1 -ss %start% -c copy "%~dpn1_cut%~x1") else ("%app%" -hide_banner -i %1 -ss %start% -to %end% -c copy "%~dpn1_cut%~x1")
 echo. & pause & exit
 
 :Option_5
-"%app%" -i %1 -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" "%~dpn1_fast%~x1"
+"%app%" -hide_banner -i %1 -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" "%~dpn1_fast%~x1"
 echo. & pause & exit
 
 :Option_6
-"%app%" -i %1 -filter_complex "[0:v]setpts=2.0*PTS[v];[0:a]atempo=0.5[a]" -map "[v]" -map "[a]" "%~dpn1_slow%~x1"
+"%app%" -hide_banner -i %1 -filter_complex "[0:v]setpts=2.0*PTS[v];[0:a]atempo=0.5[a]" -map "[v]" -map "[a]" "%~dpn1_slow%~x1"
 echo. & pause & exit
 
 :Option_7
-"%app%" -i %1 -c:v libx264 -crf 23 -preset fast -c:a copy "%~dpn1_1080p%~x1"
+"%app%" -hide_banner -i %1 -c:v libx264 -crf 23 -preset fast -c:a copy "%~dpn1_1080p%~x1"
 echo. & pause & exit
 
 :Option_8
-"%app%" -i %1 -vf "transpose=1" -c:v libx264 -crf 18 -preset veryfast -c:a copy "%~dpn1_R%~x1"
+"%app%" -hide_banner -i %1 -vf "transpose=1" -c:v libx264 -crf 18 -preset veryfast -c:a copy "%~dpn1_R%~x1"
 echo. & pause & exit
 
 :Option_9
-"%app%" -i %1 -vf "transpose=2" -c:v libx264 -crf 18 -preset veryfast -c:a copy "%~dpn1_L%~x1"
+"%app%" -hide_banner -i %1 -vf "transpose=2" -c:v libx264 -crf 18 -preset veryfast -c:a copy "%~dpn1_L%~x1"
 echo. & pause & exit
 
 :MultiFile
@@ -138,14 +138,14 @@ if errorlevel 1 goto Moption_1
 exit
 :Moption_1
 (for %%i in (%*) do @echo file '%%~fi') > "listfile.txt"
-"%app%" -f concat -safe 0 -i "listfile.txt" -c copy -movflags +faststart "MergeOutput_%random%.mp4"
+"%app%" -hide_banner -f concat -safe 0 -i "listfile.txt" -c copy -movflags +faststart "MergeOutput_%random%.mp4"
 del listfile.txt & echo. & pause & exit
 :Moption_2
 (for %%i in (%*) do echo file '%%~fi' & echo duration 2) > "listfile.txt"
-"%app%" -f concat -safe 0 -i "listfile.txt" -vf "fps=1,scale=1280:-2,format=yuv420p" -r 30 "Slideshow_%random%.mp4"
+"%app%" -hide_banner -f concat -safe 0 -i "listfile.txt" -vf "fps=1,scale=1280:-2,format=yuv420p" -r 30 "Slideshow_%random%.mp4"
 del listfile.txt & echo. & pause & exit
 :Moption_3
-"%app%" -i "%~2" -i "%~1" -c:v copy -c:a copy -map 0:v:0 -map 1:a:0 "%~n2_with_audio%~x2"
+"%app%" -hide_banner -i "%~2" -i "%~1" -c:v copy -c:a copy -map 0:v:0 -map 1:a:0 "%~n2_with_audio%~x2"
 echo. & pause & exit
 
 :shortcut
