@@ -3,27 +3,22 @@
   Removes zero-length files and empty directories within a given directory tree.
 
 .DESCRIPTION
-  -dir      Directory to scan. Defaults to the current directory.
+  -dir      Directory to scan; default is %temp%
   -test     Test mode. No deletions are performed; only counts are displayed. Logging is ignored.
-  -log      Appends run summary and errors to %TEMP%\<scriptname>.log. Ignored when -test is present.
+  -nolog    Disables logging. By default, script logs to %TEMP%\<scriptname>.log
 
 .EXAMPLE
-  powershell -Ep Bypass empty.ps1 -log -dir $env:TEMP
+  powershell -Ep Bypass empty.ps1 -dir 'C:\temp'
   
 .LINK
   https://github.com/wincmd64
 #>
 
 param (
-    [string]$dir = (Get-Location).Path,
+    [string]$dir = $env:TEMP,
     [switch]$test,
-    [switch]$log
+    [switch]$nolog
 )
-
-# --- Timestamp format (user-editable) ---
-# Change this value if you want a different log timestamp format.
-# Examples: 'yyyy-MM-dd', 'yyyy-MM-dd HH:mm', 'yyyy-MM-dd-HH-mm', etc.
-$DateFormat = 'yyyy-MM-dd-HH-mm'
 
 # --- Path validation ---
 if (-not (Test-Path -LiteralPath $dir)) {
@@ -36,9 +31,9 @@ if (-not $resolvedDir) { $resolvedDir = $dir }
 Write-Host "`n Scanning path: $resolvedDir"
 
 # --- Logging settings ---
-$DoLog = $log.IsPresent -and -not $test      # logging is ignored in test mode
-$scriptBase = ($MyInvocation.MyCommand.Name -split '\.')[0]
-$logFile = Join-Path $env:TEMP "$scriptBase.log"
+$DateFormat = 'yyyy-MM-dd HH:mm'  # Change timestamp format if needed
+$DoLog = -not $nolog.IsPresent -and -not $test      # logging is ignored in test mode
+$logFile = Join-Path $env:TEMP "$(($MyInvocation.MyCommand.Name -split '\.')[0]).log"
 
 # Error log buffer and index (reset on each run)
 $script:logEntries = @()
