@@ -30,9 +30,9 @@ if ($fileExtension -eq '.ps1') {
         $command = "& '$FilePath' $params"
         $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
         $encodedCommand = [Convert]::ToBase64String($bytes)
-        $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoP -EP Bypass -EncodedCommand $encodedCommand"
+        $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoP -WindowStyle Hidden -EP Bypass -EncodedCommand $encodedCommand"
     } else {
-        $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoP -EP Bypass -File `"$FilePath`""
+        $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoP -WindowStyle Hidden -EP Bypass -File `"$FilePath`""
     }
 } else {
     $action = if ($params) {
