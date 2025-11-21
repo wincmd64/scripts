@@ -193,7 +193,7 @@ echo Setting wallpaper: "%~1"
 start "" "%app%" "%~1" /wall=4 /killmesoftly & exit
 
 :shortcut
-powershell -NoP -NoL -Ep Bypass -c ^
+powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\IrfanView converter.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = '%app%'; $s.Save()"
 echo. & echo  Shortcut 'IrfanView converter.lnk' created. & echo. & timeout 2 & exit

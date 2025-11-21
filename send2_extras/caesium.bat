@@ -25,7 +25,7 @@ FOR %%k IN (%*) DO (echo. & "%app%" --lossless --exif --keep-dates --same-folder
 echo. & echo. & echo  DONE. & echo. & pause & exit
 
 :shortcut
-powershell -NoP -NoL -Ep Bypass -c ^
+powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Image compression.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,127'; $s.Save()"
 echo. & echo  Shortcut 'Image compression.lnk' created. & echo. & timeout 2

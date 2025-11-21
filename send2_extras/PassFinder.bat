@@ -60,7 +60,7 @@ for /F "usebackq delims=" %%P in ("!pw_list!") do (
 echo. & echo. & echo  Finished. No matching password found. & echo. & pause & exit
 
 :shortcut
-powershell -NoP -NoL -Ep Bypass -c ^
+powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Password Finder.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,47'; $s.Save()"
 echo. & echo  Shortcut 'Password Finder.lnk' created. & echo. & timeout 2

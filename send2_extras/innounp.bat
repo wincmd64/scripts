@@ -31,7 +31,7 @@ if errorlevel 1 (echo. & pause & exit) else (if exist "%COMMANDER_EXE%" ("%COMMA
 color A & timeout 2 & exit
 
 :shortcut
-powershell -NoP -NoL -Ep Bypass -c ^
+powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\InnoUnpacker.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = '%app%'; $s.Save()"
 echo. & echo  Shortcut 'InnoUnpacker.lnk' created. & echo. & timeout 2

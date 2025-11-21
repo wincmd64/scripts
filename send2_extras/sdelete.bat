@@ -49,7 +49,7 @@ FOR %%k IN (%*) DO (echo. & "%app%" -nobanner -accepteula -s "%%~k")
 echo. & echo. & echo  DONE. & echo. & pause & exit
 
 :shortcut
-powershell -NoP -NoL -Ep Bypass -c ^
+powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Secure Delete.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'imageres.dll,-5320'; $s.Save()"
 echo. & echo  Shortcut 'Secure Delete.lnk' created. & echo. & timeout 2

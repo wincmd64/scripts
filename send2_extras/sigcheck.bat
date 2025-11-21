@@ -43,7 +43,7 @@ for %%k in (%*) do "%app%" -nobanner -accepteula -vt %flag% "%%~k"
 echo. & echo. & echo  DONE. & echo. & pause & exit
 
 :shortcut
-powershell -NoP -NoL -Ep Bypass -c ^
+powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\VirusTotal.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'imageres.dll,101'; $s.Save()"
 echo. & echo  Shortcut 'VirusTotal.lnk' created. & echo. & timeout 2

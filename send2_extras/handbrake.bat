@@ -39,7 +39,7 @@ FOR %%k IN (%*) DO (
 color A & timeout 2 & exit
 
 :shortcut
-powershell -NoP -NoL -Ep Bypass -c ^
+powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\HandBrake.lnk'); ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,129'; $s.Save()"
 echo. & echo  Shortcut 'HandBrake.lnk' created. & echo. & timeout 2
