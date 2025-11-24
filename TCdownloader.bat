@@ -59,7 +59,8 @@ echo. & echo  DONE. & timeout 2 & exit
 if not exist "%file%" (
     curl.exe --ssl-no-revoke "%url%" -OR#
     if errorlevel 1 (color C & echo. & echo  ERROR: download failed. & echo. & pause & exit)
-) else (md "totalcmd")
+)
+md "totalcmd"
 tar -xf "%file%" -C "totalcmd" 2>nul
 curl.exe --ssl-no-revoke "https://raw.githubusercontent.com/wincmd64/blog/refs/heads/main/wincmd.ini" -#O --output-dir "totalcmd"
 if errorlevel 1 (color C & echo. & echo  ERROR: config download failed. & echo. & pause & exit)
