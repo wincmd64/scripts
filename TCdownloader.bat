@@ -13,6 +13,7 @@ if not defined file (color C & echo. & echo  ERROR: No download link found. & ec
 
 :: get downloads folder path
 for /f "delims=" %%a in ('powershell -NoP -C "(New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path"') do set "DOWNLOADS=%%a"
+pushd "%DOWNLOADS%"
 :: get %commander_path%
 if not exist "%commander_path%" set "commander_path=n\a"
 
@@ -47,7 +48,6 @@ if "%commander_path%"=="n\a" (
 exit
 
 :Option_1
-pushd "%DOWNLOADS%"
 if not exist "%file%" (
     curl.exe --ssl-no-revoke "%url%" -OR#
     if errorlevel 1 (color C & echo. & echo  ERROR: download failed. & echo. & pause & exit)
@@ -56,19 +56,21 @@ if not exist "%file%" (
 echo. & echo  DONE. & timeout 2 & exit
 
 :Option_2
-pushd "%DOWNLOADS%"
-if not exist "%file%" (curl.exe --ssl-no-revoke "%url%" -OR#)
-if errorlevel 1 (color C & echo. & echo  ERROR: download failed. & echo. & pause & exit) else (md "totalcmd")
+if not exist "%file%" (
+    curl.exe --ssl-no-revoke "%url%" -OR#
+    if errorlevel 1 (color C & echo. & echo  ERROR: download failed. & echo. & pause & exit)
+) else (md "totalcmd")
 tar -xf "%file%" -C "totalcmd" 2>nul
-curl.exe --ssl-no-revoke "https://raw.githubusercontent.com/wincmd64/blog/refs/heads/main/wincmd_portable.ini" -#o "totalcmd\wincmd.ini"
+curl.exe --ssl-no-revoke "https://raw.githubusercontent.com/wincmd64/blog/refs/heads/main/wincmd.ini" -#O --output-dir "totalcmd"
 if errorlevel 1 (color C & echo. & echo  ERROR: config download failed. & echo. & pause & exit)
 if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /T /A /R="%DOWNLOADS%\totalcmd\TOTALCMD64.EXE") else (explorer /select,"%DOWNLOADS%\totalcmd\TOTALCMD64.EXE")
 echo. & echo  DONE. & timeout 2 & exit
 
 :Option_3
-pushd "%DOWNLOADS%"
-if not exist "%file%" (curl.exe --ssl-no-revoke "%url%" -OR#)
-if errorlevel 1 (color C & echo. & echo  ERROR: download failed. & echo. & pause & exit)
+if not exist "%file%" (
+    curl.exe --ssl-no-revoke "%url%" -OR#
+    if errorlevel 1 (color C & echo. & echo  ERROR: download failed. & echo. & pause & exit)
+)
 "%file%" /I0".\"RSHG0D0 "%COMMANDER_PATH%"
 if errorlevel 1 (color C & echo. & echo  ERROR: update failed. & echo. & pause & exit)
 echo. & echo  DONE. & echo. & timeout 2
