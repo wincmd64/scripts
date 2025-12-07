@@ -26,7 +26,7 @@
   
 * **sigcheck.bat**. Проверка файлов через сервис VirusTotal с помощью Sysinternals [SigCheck](https://learn.microsoft.com/sysinternals/downloads/sigcheck).
 
-* **trid.bat**. Идентифицирует типы файлов по их сигнатурам с помощью [TrID](https://mark0.net/soft-trid-e.html).
+* **trid.bat**. Идентифицирует типы файлов по сигнатурам с помощью [TrID](https://mark0.net/soft-trid-e.html).
 
 * **uploader.bat**. Пакетная загрузка файлов на 0x0.st.
 
