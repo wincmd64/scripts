@@ -18,13 +18,15 @@
 
 * **contconv.bat**. Конвертирует `.vcf` в читабельный формат (HTML или CSV). Кроме [contconv.exe](https://github.com/DarkHobbit/doublecontact/releases) для правильной работы также требуется `libgcc_s_dw2-1.dll`.
   
-* **innounp.bat**. Распаковывает содержимое инсталляторов созданных в [Inno Setup](https://jrsoftware.org).
+* **innounp.bat**. Распаковывает содержимое инсталлятора созданного в [Inno Setup](https://jrsoftware.org).
 
 * **scanner.bat**. Работа с консольным антивирусным сканером от [Emsisoft](https://www.emsisoft.com/en/commandline-scanner/). 
 
 * **sdelete.bat**. Удаления файлов без возможности восстановления с помощью Sysinternals [SDelete](https://learn.microsoft.com/sysinternals/downloads/sdelete).
   
 * **sigcheck.bat**. Проверка файлов через сервис VirusTotal с помощью Sysinternals [SigCheck](https://learn.microsoft.com/sysinternals/downloads/sigcheck).
+
+* **trid.bat**. Идентифицирует типы файлов по их сигнатурам с помощью [TrID](https://mark0.net/soft-trid-e.html).
 
 * **uploader.bat**. Пакетная загрузка файлов на 0x0.st.
 
@@ -39,22 +41,22 @@
 
 ### (root)
 
-**win10_11_tweaks.bat**. Быстрая настройка Windows. Различает 10 \ 11 со своими твиками. Перед выполнением создается точка восстановления.
+* **win10_11_tweaks.bat**. Быстрая настройка Windows. Различает 10 \ 11 со своими твиками. Перед выполнением создается точка восстановления.
 
-**TCdownloader.bat**. Загружает последнюю версию установщика Total Commander x64 с оф.сайта. Может сразу обновить текущую установку. Умеет создавать lite-версию, распаковав установщик с портативным [wincmd.ini](https://github.com/wincmd64/blog/blob/main/wincmd.ini)
+* **TCdownloader.bat**. Загружает последнюю версию установщика Total Commander x64 с оф.сайта. Может сразу обновить текущую установку. Умеет создавать lite-версию, распаковав установщик с портативным [wincmd.ini](https://github.com/wincmd64/blog/blob/main/wincmd.ini)
 
-**ODT.bat**. Авто-установка M$ Office. Загружает [Office Deployment Tool](https://officecdn.microsoft.com/pr/wsus/setup.exe) и применяет Ваш [.xml конфиг](https://config.office.com/deploymentsettings).
+* **ODT.bat**. Авто-установка M$ Office. Загружает [Office Deployment Tool](https://officecdn.microsoft.com/pr/wsus/setup.exe) и применяет Ваш [.xml конфиг](https://config.office.com/deploymentsettings).
 
-**yt-dlp.bat**. Враппер для [yt-dlp](https://github.com/yt-dlp/yt-dlp). Качает по ссылке из буфера обмена.
+* **yt-dlp.bat**. Враппер для [yt-dlp](https://github.com/yt-dlp/yt-dlp). Качает по ссылке из буфера обмена.
 
-**beep.bat**. Добавляет в планировщик ежечасное голосовое или звуковое оповещение.
+* **beep.bat**. Добавляет в планировщик ежечасное голосовое или звуковое оповещение.
 
-**uwp-remover.ps1**. Удаляет встроенные UWP-приложения Windows 11 в один клик.
+* **uwp-remover.ps1**. Удаляет встроенные UWP-приложения Windows 11 в один клик.
 
-**pathman.ps1**. Добавляет каталог в пользовательскую переменную `%PATH%`. Предложит удалить, если уже существует.
+* **pathman.ps1**. Добавляет каталог в пользовательскую переменную `%PATH%`. Предложит удалить, если уже существует.
 
-**schtasks.ps1**. Создает задание в планировщике для запуска приложения\скрипта при входе в систему без запроса UAC.
+* **schtasks.ps1**. Создает задание в планировщике для запуска приложения\скрипта при входе в систему без запроса UAC.
 
-**filter.ps1**. Быстрый фильтр строк текстовых файлов. Удобно для [текстовых таблиц](https://www.tablesgenerator.com/text_tables).
+* **filter.ps1**. Быстрый фильтр строк текстовых файлов. Удобно для [текстовых таблиц](https://www.tablesgenerator.com/text_tables).
 
-**LayoutSwitcher.ahk**. Переключает раскладки клавиатуры по горячим клавишам. По `Ctrl+Alt+Shift+F12` - можно посмотреть все коды установленных раскладок и добавить\изменить нужные под себя.
+* **LayoutSwitcher.ahk**. Переключает раскладки клавиатуры по горячим клавишам. По `Ctrl+Alt+Shift+F12` - можно посмотреть все коды установленных раскладок и добавить\изменить нужные под себя.
