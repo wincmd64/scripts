@@ -19,7 +19,6 @@ if not exist "%app%" (
     if not exist "trid_win64.zip" (curl.exe --ssl-no-revoke -RO# "https://mark0.net/download/trid_win64.zip")
     if errorlevel 1 (color C & echo. & pause & exit)
     if not exist "triddefs.zip" (curl.exe --ssl-no-revoke -RO# "https://mark0.net/download/triddefs.zip")
-    if errorlevel 1 (color C & echo. & pause & exit)
     if exist "trid_win64.zip" (tar -xf "trid_win64.zip" 2>nul) else (echo. & echo  where trid_win64.zip ? & pause)
     if exist "triddefs.zip" (tar -xf "triddefs.zip" 2>nul) else (echo. & echo  where triddefs.zip ? & pause)
     "TrID_setup.exe" /VERYSILENT /DIR="%~dp0"
