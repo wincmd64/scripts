@@ -45,6 +45,8 @@
 
 * **totalcmdDL.bat**. Загружает последнюю версию установщика Total Commander x64 с оф.сайта. Может сразу обновить текущую установку. Умеет создавать lite-версию, распаковав установщик с портативным [wincmd.ini](https://github.com/wincmd64/blog/blob/main/wincmd.ini)
 
+* **viberDL.bat**. Установка/обновление Viber с помощью официального [SFX](http://download.cdn.viber.com/desktop/windows/update/update.zip). Запуск с ключом `/h` добавит в `hosts` блокировку рекламы.
+
 * **ODT.bat**. Авто-установка M$ Office. Загружает [Office Deployment Tool](https://officecdn.microsoft.com/pr/wsus/setup.exe) и применяет Ваш [.xml конфиг](https://config.office.com/deploymentsettings).
 
 * **yt-dlp.bat**. Враппер для [yt-dlp](https://github.com/yt-dlp/yt-dlp). Качает по ссылке из буфера обмена.
