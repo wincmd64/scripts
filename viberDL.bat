@@ -19,7 +19,7 @@ if not exist "Viber\" (
 )
 if not exist "%temp%\7zr.exe" curl.exe "https://www.7-zip.org/a/7zr.exe" -RLO# --output-dir "%temp%"
 curl.exe "http://download.cdn.viber.com/desktop/windows/update/update.zip" -RLO# --output-dir "%temp%"
-if exist "%temp%\update.zip" (tar -xf "update.zip" -C "Viber" 2>nul) else (echo. & echo  update.zip not found. & pause)
+if exist "%temp%\update.zip" (tar -xf "%temp%\update.zip" -C "Viber" 2>nul) else (echo. & echo  update.zip not found. & pause)
 set "VERDIR="
 for /d %%D in ("Viber\*") do (
     if exist "%%D\pack.exe" (
@@ -28,9 +28,8 @@ for /d %%D in ("Viber\*") do (
     )
 )
 :found
-echo  Extracting: %VERDIR%\pack.exe ...
-"7zr.exe" x "%VERDIR%\pack.exe" -o"Viber" -y -bso0
-echo  Cleaning up...
+echo  Extracting: %VERDIR%\pack.exe
+"%temp%\7zr.exe" x "%VERDIR%\pack.exe" -o"Viber" -y -bso0
 rd /s /q "%VERDIR%"
 del "Viber\ViberUpdater.cmd" /q
 
