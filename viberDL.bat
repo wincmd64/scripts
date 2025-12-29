@@ -1,5 +1,5 @@
 :: VIBER DOWNLOADER
-::   Alternative to installer / winget using official SFX.
+::   Alternative to installer/winget using official SFX.
 ::   Use /h to update the hosts file and disable Viber ads.
 :: by github.com/wincmd64
 
