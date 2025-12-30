@@ -21,7 +21,7 @@ if not exist "%app%" (
 ) else (TITLE %app%)
 
 :: arguments
-if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
 if "%~1"=="" (echo. & echo  No objects selected & echo. & pause & exit)
 "%app%" "%~1" >nul 2>&1

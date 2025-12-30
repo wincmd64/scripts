@@ -16,7 +16,7 @@ if not defined app if exist "%~dp0ffmpeg.exe" set "app=%~dp0ffmpeg.exe"
 if not exist "%app%" (echo. & echo  ffmpeg.exe not found. Try: winget install Gyan.FFmpeg & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments
-if "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+if "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
 :::
 :::  _____   _____                                    

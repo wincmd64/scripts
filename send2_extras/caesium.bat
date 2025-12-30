@@ -14,7 +14,7 @@ if not defined app if exist "%~dp0caesiumclt.exe" set "app=%~dp0caesiumclt.exe"
 if not exist "%app%" (echo. & echo  "caesiumclt.exe" not found. & echo  Download it from: https://github.com/Lymphatus/caesium-clt & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments
-if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
 set count=0
 for %%A in (%*) do set /a count+=1

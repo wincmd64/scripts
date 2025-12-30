@@ -12,7 +12,7 @@
 TITLE Temporary file hoster
 
 :: arguments
-if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
 set count=0
 for %%A in (%*) do set /a count+=1
@@ -23,9 +23,7 @@ if %count% equ 1 (
         echo Link: %%i
         echo %%i | clip
     )
-    for /f "tokens=*" %%i in ('certutil -hashfile "%~1" MD5 ^| find /v "MD5" ^| find /v "CertUtil"') do (
-        echo  MD5: %%i
-    )
+    for /f "tokens=*" %%i in ('certutil -hashfile "%~1" MD5 ^| find /v "MD5" ^| find /v "CertUtil"') do (echo  MD5: %%i)
     echo. & echo  Link copied to clipboard. & echo. & pause
 ) else (
     echo. & echo  Upload %count% files? & echo. & pause

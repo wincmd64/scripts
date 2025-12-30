@@ -24,7 +24,7 @@ if not exist "%app%" (
 set "prm=/a /pup /cloud=0"
 
 :: arguments
-if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
 :: UAC
 (Net session >nul 2>&1) && goto :main

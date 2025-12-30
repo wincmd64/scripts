@@ -77,8 +77,8 @@ if not exist "%app%" (
 ) else (TITLE %app%)
 
 :: arguments
-if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
-if /i "%~1"=="/a" (if "%~2"=="" goto :associate)
+if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
+if /i "%~1"=="/a" (if "%~2"=="" goto associate)
 
 echo.
 echo  €€ª€€€€€€ª €€€€€€€ª €€€€€ª €€€ª   €€ª€€ª   €€ª€€ª€€€€€€€ª€€ª    €€ª

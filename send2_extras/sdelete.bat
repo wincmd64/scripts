@@ -19,7 +19,7 @@ if not exist "%app%" (
 ) else (TITLE %app%)
 
 :: arguments
-if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
 :: file counts
 setlocal enabledelayedexpansion

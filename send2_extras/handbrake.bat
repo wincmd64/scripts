@@ -14,7 +14,7 @@ if not defined app if exist "%~dp0HandBrakeCLI.exe" set "app=%~dp0HandBrakeCLI.e
 if not exist "%app%" (echo. & echo  "HandBrakeCLI.exe" not found. & echo  Try: winget install HandBrake.HandBrake.CLI & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments
-if "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+if "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
 set count=0
 for %%A in (%*) do set /a count+=1

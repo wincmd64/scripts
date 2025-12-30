@@ -24,7 +24,7 @@ if defined tesspath set "app=%tesspath%\tesseract.exe"
 if not exist "%app%" (echo. & echo  tesseract.exe not found. Try download from: https://github.com/UB-Mannheim/tesseract/wiki & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments
-if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
 set layout=single
 set lang=ukr+rus

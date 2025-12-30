@@ -19,7 +19,7 @@ if not defined app if exist "C:\Program Files\7-Zip\7z.exe" set "app=C:\Program 
 if not exist "%app%" (echo. & echo  "7z.exe" not found. & echo  Download it from: https://7-zip.org & echo. & pause & exit) else (TITLE %app%)
 
 :: arguments
-if /i "%~1"=="/s" (if "%~2"=="" goto :shortcut)
+if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
 if "%~1"=="" (echo. & echo  No objects selected & echo. & pause & exit)
 :: e.g. "secret.zip" > "secret.txt"
