@@ -5,7 +5,7 @@
 
 @echo off
 :: arguments
-if /i "%~1"=="/h" (if "%~2"=="" goto :remove_ads)
+if /i "%~1"=="/h" goto remove_ads
 
 cd /d "%~dp0"
 if not exist "Viber\" (
