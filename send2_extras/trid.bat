@@ -7,6 +7,7 @@
 
 :: Command line arguments:
 :: /s - create shortcut in Shell:SendTo folder
+:: /u - update TrID
 
 @echo off
 chcp 1251 >nul
@@ -15,19 +16,16 @@ for /f "tokens=* delims=" %%a in ('where trid.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0trid.exe" set "app=%~dp0trid.exe"
 if not exist "%app%" (
     echo. & echo  "trid.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
-    cd /d "%~dp0"
-    if not exist "trid_win64.zip" (curl.exe --ssl-no-revoke -RO# "https://mark0.net/download/trid_win64.zip")
-    if errorlevel 1 (color C & echo. & pause & exit)
-    if not exist "triddefs.zip" (curl.exe --ssl-no-revoke -RO# "https://mark0.net/download/triddefs.zip")
-    if exist "trid_win64.zip" (tar -xf "trid_win64.zip" 2>nul) else (echo. & echo  where trid_win64.zip ? & pause)
-    if exist "triddefs.zip" (tar -xf "triddefs.zip" 2>nul) else (echo. & echo  where triddefs.zip ? & pause)
-    "TrID_setup.exe" /VERYSILENT /DIR="%~dp0"
-    del "TrID_setup.exe" "trid_win64.zip" "triddefs.zip" /q
+    curl.exe "https://mark0.net/download/trid_win64.zip" -RLO# --output-dir "%temp%"
+    if exist "%temp%\trid_win64.zip" (tar -xf "%temp%\trid_win64.zip" -C "%temp%.") else (echo. & echo  where trid_win64.zip ? & pause)
+    "%temp%\TrID_setup.exe" /VERYSILENT /DIR="%~dp0"
+    "%~dp0trid.exe" -u
     color A & echo. & echo  DONE. Please re-run this script. & echo. & pause & exit
 ) else (TITLE %app%)
 
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
+if /i "%~1"=="/u" (if "%~2"=="" goto update)
 
 set count=0
 for %%A in (%*) do set /a count+=1
@@ -52,8 +50,15 @@ pushd "%~dp1"
 :: add -o "trid.csv" to generate the results in CSV format
 "%app%" -d "%appdir%triddefs.trd" -f "%TEMP%\tridlist.txt"
 del "%TEMP%\tridlist.txt"
-
 echo. & echo. & echo  DONE. & echo. & pause & exit
+
+:update
+curl.exe "https://mark0.net/download/trid_win64.zip" -RLO# --output-dir "%temp%" -z "%temp%\trid_win64.zip"
+if exist "%temp%\trid_win64.zip" (tar -xf "%temp%\trid_win64.zip" -C "%temp%.") else (echo. & echo  where trid_win64.zip ? & pause)
+for %%I in ("%app%") do set "app_folder=%%~dpI"
+"%temp%\TrID_setup.exe" /VERYSILENT /DIR="%app_folder%"
+"trid.exe" -u
+if errorlevel 1 (color C & echo. & pause & exit) else (color A & echo. & echo  UPDATED. & echo. & pause & exit)
 
 :shortcut
 powershell -NoP -C ^
