@@ -14,11 +14,6 @@ if "%~1" neq "" (set "url=%~1") else (for /f "delims=" %%i in ('powershell Get-C
 set num=-S "ext"
 :: get ver
 for /f "delims=" %%A in ('"%app%" --version') do set "lastupdate=%%A"
-:: check URL
-if "%url%"=="" (set "uCHK=not valid") else (
-    "%app%" --simulate "%url%" >nul 2>&1
-    if errorlevel 1 (set "uCHK=not valid") else (set "uCHK=tested OK")
-)
 :main
 cls
 ::: 
@@ -33,12 +28,9 @@ for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do @echo(%%A
 
 setlocal enabledelayedexpansion
 set "display_url=!url!"
-if "!display_url!"=="" (
-    set "display_url=n\a"
-) else if not "!display_url:~80!"=="" (
-    set "display_url=!url:~0,80!..."
-)
-echo   [1] Change URL, current - %uCHK%: !display_url!
+:: shorten if a long URL
+if "!display_url!"=="" (set "display_url=n\a") else if not "!display_url:~80!"=="" (set "display_url=!url:~0,80!...")
+echo   [1] Change URL, current: !display_url!
 endlocal
 if "%num%"=="" (echo   [2] Change options, current : yt-dlp default) else (echo   [2] Change options, current: %num%)
 echo   [3] Change download folder, current: %DOWNLOADS%
@@ -61,11 +53,11 @@ exit
 set /p url=Enter new URL: 
 echo  Testing...
 "%app%" --simulate "%url%"
-if ERRORLEVEL 1 (pause & echo. & goto Option_1) else (pause & set uCHK=tested OK & goto main)
+if ERRORLEVEL 1 (pause & echo. & goto Option_1) else (pause & goto main)
 
 :Option_2
-if "%uCHK%"=="not valid" goto Option_1
 "%app%" -F -S vext "%url%"
+if ERRORLEVEL 1 (pause & echo. & goto Option_1)
 echo. & echo  Example: -f 18 --write-auto-subs --embed-chapters & echo.
 set "num="
 set /p num=Enter options: 
@@ -87,9 +79,9 @@ for /f "delims=" %%A in ('"%app%" --version') do set "lastupdate=%%A"
 goto main
 
 :start
-if "%uCHK%"=="not valid" goto Option_1
 echo  Running: "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part "%url%" & echo.
 "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part "%url%"
+if ERRORLEVEL 1 (pause & echo. & goto Option_1)
 echo. & pause
 if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /T /A /R="%DOWNLOADS%") else (explorer "%DOWNLOADS%")
 exit
