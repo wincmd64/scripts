@@ -2,10 +2,11 @@
 :: by github.com/wincmd64
 
 @echo off
-set "startdir=%~dp0"
 chcp 1251 >nul
+
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs & Exit /B)
 for /F "tokens=3 delims=." %%O in ('reg query "HKCR\Word.Application\CurVer" 2^>nul') do set officeVer=%%O
+:: https://en.wikipedia.org/wiki/Microsoft_Office#History_of_releases
 if defined officeVer (TITLE Office v%officeVer% detected) else (TITLE Office Deployment Tool)
 
 :: get downloads folder path
@@ -25,7 +26,8 @@ if errorlevel 1 goto Option_1
 exit
 
 :Option_1
-for /f "delims=" %%A in ('powershell -NoP "Add-Type -AssemblyName System.Windows.Forms; $dlg=New-Object System.Windows.Forms.OpenFileDialog; $dlg.Filter='XML files (*.xml)|*.xml'; $dlg.InitialDirectory = '%STARTDIR%'; if($dlg.ShowDialog() -eq 'OK'){ $dlg.FileName }"') do set "XML_SOURCE=%%A"
+:: looking XML in current dir
+for /f "delims=" %%A in ('powershell -NoP "Add-Type -AssemblyName System.Windows.Forms; $dlg=New-Object System.Windows.Forms.OpenFileDialog; $dlg.Filter='XML files (*.xml)|*.xml'; $dlg.InitialDirectory = '%~dp0'; if($dlg.ShowDialog() -eq 'OK'){ $dlg.FileName }"') do set "XML_SOURCE=%%A"
 if not defined XML_SOURCE echo  Cancelled. & echo. & pause & exit
 echo  Selected: %XML_SOURCE% & echo.
 goto :run
@@ -50,11 +52,10 @@ set "XML_SOURCE=%temp%\office2021.xml"
 :RUN
 pushd "%DOWNLOADS%"
 if not exist "setup.exe" (
-    echo  Download "setup.exe" to "%DOWNLOADS%" ? & echo. & pause
-    curl.exe --ssl-no-revoke https://officecdn.microsoft.com/pr/wsus/setup.exe -OR#
-    if errorlevel 1 (color C & echo. & echo  ERROR: setup.exe download failed. & echo. & pause & exit)
+    echo. & echo  Download "setup.exe" to "%DOWNLOADS%" ? & echo. & pause
+    curl.exe https://officecdn.microsoft.com/pr/wsus/setup.exe -RLO# & echo.
 )
-echo. & echo  run: setup.exe /configure "%XML_SOURCE%" ? & echo. & pause
+if exist "setup.exe" (echo. & echo   RUN: setup.exe /configure "%XML_SOURCE%" ? & echo. & pause) else (echo. & echo  setup.exe not found. & pause & exit)
 start "" "%DOWNLOADS%\setup.exe" /configure "%XML_SOURCE%"
 echo. & echo  Installation started...
 timeout 3
