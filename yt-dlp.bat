@@ -11,7 +11,8 @@ for /f "tokens=2,*" %%A in ('reg query "HKCU\Software\Microsoft\Windows\CurrentV
 :: get URL, priority: parameter > clipboard
 if "%~1" neq "" (set "url=%~1") else (for /f "delims=" %%i in ('powershell Get-Clipboard') do set "url=%%i")
 :: set default options
-set num=-S "ext"
+set "opt_file=%temp%\yt-dlp-options.log"
+if exist "%opt_file%" (set /p num=<"%opt_file%") else (set num=-S "ext")
 :: get ver
 for /f "delims=" %%A in ('"%app%" --version') do set "lastupdate=%%A"
 :main
@@ -50,7 +51,9 @@ if "%userchoice%"==""  echo. & goto start
 exit
 
 :Option_1
+set "url="
 set /p url=Enter new URL: 
+if not defined url goto Option_1
 echo  Testing...
 "%app%" --simulate "%url%"
 if ERRORLEVEL 1 (pause & echo. & goto Option_1) else (pause & goto main)
@@ -58,10 +61,14 @@ if ERRORLEVEL 1 (pause & echo. & goto Option_1) else (pause & goto main)
 :Option_2
 "%app%" -F -S vext "%url%"
 if ERRORLEVEL 1 (pause & echo. & goto Option_1)
-echo. & echo  Example: -f 18 --write-auto-subs --embed-chapters & echo.
-set "num="
-set /p num=Enter options: 
-if not defined num (set "num=")
+echo. & echo  Example: -f 18 --write-auto-subs --embed-chapters --mtime
+echo  Preset aliases: -t mp3, -t aac, -t mp4, -t mkv & echo.
+set "new_num="
+set /p new_num=Enter options (current: %num%) : 
+if defined new_num (
+    set "num=%new_num%"
+    (echo %new_num%)>"%opt_file%"
+)
 goto main
 
 :Option_3
@@ -84,4 +91,4 @@ echo  Running: "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-p
 if ERRORLEVEL 1 (pause & echo. & goto Option_1)
 echo. & pause
 if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /T /A /R="%DOWNLOADS%") else (explorer "%DOWNLOADS%")
-exit
+goto main
