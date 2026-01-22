@@ -3,6 +3,7 @@
 
 @echo off
 for /f "tokens=* delims=" %%a in ('where yt-dlp.exe 2^>nul') do set "app=%%a"
+if not defined app if exist "%~dp0yt-dlp.exe" set "app=%~dp0yt-dlp.exe"
 if not exist "%app%" (color C & echo. & echo  yt-dlp not found. Try: winget install yt-dlp.yt-dlp & echo. & pause & exit) else (TITLE %app%)
 echo. & echo  Loading...
 
@@ -60,11 +61,16 @@ if ERRORLEVEL 1 (pause & echo. & goto Option_1) else (pause & goto main)
 
 :Option_2
 "%app%" -F -S vext "%url%"
-if ERRORLEVEL 1 (pause & echo. & goto Option_1)
+if ERRORLEVEL 1 (echo. & echo  Redirecting to Option #1 ... & echo. & goto Option_1)
 echo. & echo  Example: -f 18 --write-auto-subs --embed-chapters --mtime
 echo  Preset aliases: -t mp3, -t aac, -t mp4, -t mkv & echo.
 set "new_num="
-set /p new_num=Enter options (current: %num%) : 
+set /p new_num=Enter options (type 0 to use default) : 
+if "%new_num%"=="0" (
+    set "num="
+    if exist "%opt_file%" del "%opt_file%"
+    goto main
+)
 if defined new_num (
     set "num=%new_num%"
     (echo %new_num%)>"%opt_file%"
@@ -88,7 +94,7 @@ goto main
 :start
 echo  Running: "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part "%url%" & echo.
 "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part "%url%"
-if ERRORLEVEL 1 (pause & echo. & goto Option_1)
+if ERRORLEVEL 1 (echo. & echo  Redirecting to Option #1 ... & echo. & goto Option_1)
 echo. & pause
 if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /T /A /R="%DOWNLOADS%") else (explorer "%DOWNLOADS%")
 goto main
