@@ -1,10 +1,21 @@
-:: Downloads video from link in clipboard using yt-dlp (+ ffmpeg)
+:: YT-DLP Wrapper
 :: by github.com/wincmd64
+
+:: Downloads video with three input methods:
+::  1. URL FROM CLIPBOARD: Default if no parameters are provided.
+::  2. URL FROM PARAMETER: Pass a single link via command line.
+::  3. BATCH FROM PARAMETER: If the input ends in .txt, pass a file path as an argument.
 
 @echo off
 for /f "tokens=* delims=" %%a in ('where yt-dlp.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0yt-dlp.exe" set "app=%~dp0yt-dlp.exe"
-if not exist "%app%" (color C & echo. & echo  yt-dlp not found. Try: winget install yt-dlp.yt-dlp & echo. & pause & exit) else (TITLE %app%)
+if not exist "%app%" (
+    echo. & echo  yt-dlp not found. Try: winget install yt-dlp.yt-dlp
+    echo  Press Y to install now. & echo.
+    choice /c yn /n >nul
+    if errorlevel 1 if not errorlevel 2 (winget install yt-dlp.yt-dlp & echo. & echo  DONE. Restart the script.)
+    echo. & pause & exit
+) else (TITLE %app%)
 echo. & echo  Loading...
 
 :: get downloads folder path
@@ -28,11 +39,16 @@ cls
 ::: 
 for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do @echo(%%A
 
+:: check if the current URL is a batch file
+set "is_batch="
+if exist "%url%" if /i "%url:~-4%"==".txt" set "is_batch=1"
+:: UI logic
 setlocal enabledelayedexpansion
 set "display_url=!url!"
-:: shorten if a long URL
+set "prefix="
+if defined is_batch set "prefix=[BATCH] "
 if "!display_url!"=="" (set "display_url=n\a") else if not "!display_url:~80!"=="" (set "display_url=!url:~0,80!...")
-echo   [1] Change URL, current: !display_url!
+echo   [1] Change URL, current: %prefix%!display_url!
 endlocal
 if "%num%"=="" (echo   [2] Change options, current : yt-dlp default) else (echo   [2] Change options, current: %num%)
 echo   [3] Change download folder, current: %DOWNLOADS%
@@ -60,8 +76,10 @@ echo  Testing...
 if ERRORLEVEL 1 (pause & echo. & goto Option_1) else (pause & goto main)
 
 :Option_2
+if defined is_batch (echo  [INFO] Format preview is disabled for .txt lists. & goto ManualOptions)
 "%app%" -F -S vext "%url%"
 if ERRORLEVEL 1 (echo. & echo  Redirecting to Option #1 ... & echo. & goto Option_1)
+:ManualOptions
 echo. & echo  Example: -f 18 --write-auto-subs --embed-chapters --mtime
 echo  Preset aliases: -t mp3, -t aac, -t mp4, -t mkv & echo.
 set "new_num="
@@ -92,9 +110,11 @@ for /f "delims=" %%A in ('"%app%" --version') do set "lastupdate=%%A"
 goto main
 
 :start
-echo  Running: "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part "%url%" & echo.
-"%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part "%url%"
+set "batch_arg="
+if defined is_batch set "batch_arg=-a"
+echo  Running: "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part %batch_arg% "%url%" & echo.
+"%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part %batch_arg% "%url%"
 if ERRORLEVEL 1 (echo. & echo  Redirecting to Option #1 ... & echo. & goto Option_1)
 echo. & pause
-if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /T /A /R="%DOWNLOADS%") else (explorer "%DOWNLOADS%")
+if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /R="%DOWNLOADS%") else (explorer "%DOWNLOADS%")
 goto main
