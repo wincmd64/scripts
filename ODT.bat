@@ -47,12 +47,8 @@ set "XML_SOURCE=%temp%\office2021.xml"
 )
 
 :RUN
-pushd "%DOWNLOADS%"
-if not exist "setup.exe" (
-    echo. & echo  Download "setup.exe" to "%DOWNLOADS%" ? & echo. & pause
-    curl.exe https://officecdn.microsoft.com/pr/wsus/setup.exe -RLO# & echo.
-)
-if exist "setup.exe" (echo. & echo   RUN: setup.exe /configure "%XML_SOURCE%" ? & echo. & pause) else (echo. & echo  setup.exe not found. & pause & exit)
-start "" "%DOWNLOADS%\setup.exe" /configure "%XML_SOURCE%"
+curl.exe https://officecdn.microsoft.com/pr/wsus/setup.exe -RLO# --output-dir "%temp%" & echo.
+if exist "%temp%\setup.exe" (echo   RUN: setup.exe /configure "%XML_SOURCE%" ? & echo. & pause) else (color C & echo  setup.exe not found. & pause & exit)
+start "" "%temp%\setup.exe" /configure "%XML_SOURCE%"
 echo. & echo  Installation started...
-timeout 3
+color A & timeout 3
