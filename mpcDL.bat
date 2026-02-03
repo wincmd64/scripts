@@ -77,9 +77,10 @@ for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a
 if not defined fta if exist "%~dp0SetUserFTA.exe" set "fta=%~dp0SetUserFTA.exe"
 if not exist "%fta%" (
     echo. & echo  SetUserFTA.exe required. Try to download it to TEMP ? & echo. & pause
-    curl.exe "https://setuserfta.com/SetUserFTA.zip" -RLO# --output-dir "%temp%" 
+    :: check newer version
+    curl.exe -RL#z "%temp%\SetUserFTA.zip" "https://setuserfta.com/SetUserFTA.zip" -o "%temp%\SetUserFTA.zip" 2>nul
     if exist "%temp%\SetUserFTA.zip" (tar -xf "%temp%\SetUserFTA.zip" -C "%temp%" 2>nul) else (
-        color C & echo  SetUserFTA.zip not found.
+        color C & echo. & echo  SetUserFTA.zip not found.
         echo  Try manual: https://setuserfta.com/SetUserFTA.zip & echo.
         pause & exit
     )
@@ -168,6 +169,10 @@ call :process dav 0
 :: Blu-ray playlist
 call :process mpls 30
 call :process bdmv 30
+:: Custom
+call :process mod 0
+call :process 264 0
+call :process hevc 0
 
 echo. & echo Current associations: & "%fta%" get | findstr /i "mpc" & echo. & pause & exit
 
