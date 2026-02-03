@@ -7,7 +7,7 @@
 
 :: Command line arguments:
 :: /s - create shortcut in Shell:SendTo folder
-:: /a - associate image files with IrfanView (SetUserFTA.exe required)
+:: /a - associate image files with IrfanView
 
 :: Note: this file must use code page OEM 866
 
@@ -94,8 +94,8 @@ set count=0
 for %%A in (%*) do set /a count+=1
 if %count% equ 0 (
     echo  No files selected & echo.
-    echo  1 = create shortcut in Shell:SendTo folder
-    echo  2 = associate image files with IrfanView
+    echo   [1] create shortcut in Shell:SendTo folder
+    echo   [2] associate image files with IrfanView ^(admin rights required^)
     echo.
     CHOICE /C 12 /M "Your choice?:" >nul 2>&1
     if errorlevel 2 goto :associate
@@ -104,15 +104,15 @@ if %count% equ 0 (
 
 if %count% equ 1 (echo  Processing: %* & echo.) else (echo  Processing: %count% files & echo.)
 if "%~x1"=="" echo  NOTICE: first argument is likely a folder or has no extension. & echo.
-echo  1 = resize image by 50%%
-echo  2 = blur effect
-echo  3 = horizontal panorama
-echo  4 = vertical panorama
-echo  5 = convert to .ext
-echo  6 = create multipage PDF or TIF from input files
-echo  7 = extract all pages from a multipage file to .ext
-echo  8 = jpg lossless rotate
-echo  9 = set as wallpaper
+echo   [1] resize image by 50%%
+echo   [2] blur effect
+echo   [3] horizontal panorama
+echo   [4] vertical panorama
+echo   [5] convert to .ext
+echo   [6] create multipage PDF or TIF from input files
+echo   [7] extract all pages from a multipage file to .ext
+echo   [8] jpg lossless rotate
+echo   [9] set as wallpaper
 echo.
 CHOICE /C 123456789 /M "Your choice?:" >nul 2>&1
 if errorlevel 9 goto Option_9
@@ -199,10 +199,21 @@ $s.TargetPath = '%~f0'; $s.IconLocation = '%app%'; $s.Save()"
 echo. & echo  Shortcut 'IrfanView converter.lnk' created. & echo. & timeout 2 & exit
 
 :associate
-for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
-if not exist "%fta%" (color C & echo. & echo  SetUserFTA.exe not found. Try download from: https://setuserfta.com/SetUserFTA.zip & echo. & pause & exit)
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
-echo. & echo  Associate image files with "%app%" ? & echo. & pause
+echo. & echo  Associate image files (jpg png bmp gif tif djvu) with IrfanView ? & echo. & pause
+for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
+if not defined fta if exist "%~dp0SetUserFTA.exe" set "fta=%~dp0SetUserFTA.exe"
+if not exist "%fta%" (
+    echo. & echo  SetUserFTA.exe required. Try to download it to TEMP ? & echo. & pause
+    :: check newer version
+    curl.exe -RL#z "%temp%\SetUserFTA.zip" "https://setuserfta.com/SetUserFTA.zip" -o "%temp%\SetUserFTA.zip" 2>nul
+    if exist "%temp%\SetUserFTA.zip" (tar -xf "%temp%\SetUserFTA.zip" -C "%temp%" 2>nul) else (
+        color C & echo. & echo  SetUserFTA.zip not found.
+        echo  Try manual: https://setuserfta.com/SetUserFTA.zip & echo.
+        pause & exit
+    )
+    set "fta=%temp%\SetUserFTA.exe"
+)
 for %%A in ("%app%") do set "app_dir=%%~dpA"
 set "icons=%app_dir%Plugins\Icons.dll"
 
@@ -213,12 +224,12 @@ call :process gif 10
 call :process tif 31
 call :process djvu 5
 
-echo. & echo Current associations: & SetUserFTA.exe get | findstr /i "irfan" & echo. & pause & exit
+echo. & echo Current associations: & "%fta%" get | findstr /i "irfan" & echo. & pause & exit
 
 :process
 assoc .%1=irfan_%1
 ftype irfan_%1="%app%" "%%1"
 reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f
-SetUserFTA.exe .%1 irfan_%1
+"%fta%" .%1 irfan_%1
 reg add "HKCU\Software\Classes\irfan_%1\DefaultIcon" /ve /d "%icons%,%2" /f
 exit /b
