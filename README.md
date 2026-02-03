@@ -48,7 +48,9 @@
 
 * **viberDL.bat**. Установка/обновление Viber с помощью официального [SFX](http://download.cdn.viber.com/desktop/windows/update/update.zip). Запуск с ключом `/h` добавит в `hosts` блокировку рекламы.
 
-* **ODT.bat**. Авто-установка M$ Office. Загружает [Office Deployment Tool](https://officecdn.microsoft.com/pr/wsus/setup.exe) и применяет Ваш [.xml конфиг](https://config.office.com/deploymentsettings). Если своего конфига нет, можно воспользоваться встроенным.
+* **mpcDL.bat**. Конфигуратор для [MPC-HC](https://github.com/clsid2/mpc-hc). Скачивает (обновляет) и создает портативный `.ini`. Может сразу проассоциировать с видео файлами.
+
+* **officeDL.bat**. Авто-установка M$ Office. Загружает [Office Deployment Tool](https://officecdn.microsoft.com/pr/wsus/setup.exe) и применяет Ваш [.xml конфиг](https://config.office.com/deploymentsettings). Если своего конфига нет, можно воспользоваться встроенным.
 
 * **yt-dlp.bat**. Враппер для [yt-dlp](https://github.com/yt-dlp/yt-dlp). Качает по ссылке из буфера обмена, параметра ком.строки или пакетно.
 
