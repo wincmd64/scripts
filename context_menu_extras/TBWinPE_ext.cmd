@@ -11,7 +11,11 @@ if not defined app if exist "%~dp0TBWinPE.exe" set "app=%~dp0TBWinPE.exe"
 if not exist "%app%" (
     echo. & echo  "TBWinPE.exe" not found. & echo  Try to download it to TEMP ? & echo. & pause
     curl.exe "https://www.terabyteunlimited.com/downloads/wp/tbwinpe.zip" -RLO# -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" --output-dir "%temp%" 
-    if exist "%temp%\tbwinpe.zip" (tar -xf "%temp%\tbwinpe.zip" -C "%temp%" 2>nul) else (echo. & echo  tbwinpe.zip not found. & pause)
+    if exist "%temp%\tbwinpe.zip" (tar -xf "%temp%\tbwinpe.zip" -C "%temp%" 2>nul) else (
+        color C & echo  tbwinpe.zip not found.
+        echo  Try manual: https://www.terabyteunlimited.com/downloads/wp/tbwinpe.zip & echo.
+        pause & exit
+    )
     set "app=%temp%\TBWinPE.exe"
 ) 
 TITLE %app%
