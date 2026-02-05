@@ -30,11 +30,8 @@ if not exist "%temp%\%filename%" (
 echo. & echo  Extracting ...
 md "%temp%\caesium"
 if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" -C "%temp%\caesium" 2>nul) else (echo. & echo  %filename% not found. & echo. & pause)
-:: finds .exe
-set "found_exe="
-for /r "%temp%\caesium" %%F in (*caesium*clt.exe) do (set "found_exe=%%~fF")
-:: move it
-if defined found_exe (move /y "%found_exe%" "%~dp0" >nul) else (echo. & echo  Error: caesiumclt.exe not found inside the archive.)
+:: finds .exe and move it
+for /r "%temp%\caesium" %%F in (*caesium*clt.exe) do (if exist "%%~fF" move /y "%%~fF" "%~dp0" >nul)
 rd /s /q "%temp%\caesium"
 echo. & echo. & echo  DONE. & echo. & pause & goto start
 
