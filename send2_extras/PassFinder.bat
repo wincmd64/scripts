@@ -14,10 +14,34 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:start
 for /f "tokens=* delims=" %%a in ('where 7z.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "C:\Program Files\7-Zip\7z.exe" set "app=C:\Program Files\7-Zip\7z.exe"
-if not exist "%app%" (echo. & echo  "7z.exe" not found. & echo  Download it from: https://7-zip.org & echo. & pause & exit) else (TITLE %app%)
+if not defined app if exist "%~dp07z.exe" set "app=%~dp07z.exe"
+if not defined app if exist "%temp%\7z\Files\7-Zip\7z.exe" set "app=%temp%\7z\Files\7-Zip\7z.exe"
+if exist "%app%" goto skip_download
+echo. & echo  "7z.exe" not found. & echo  Try to download it to TEMP ? & echo. & pause
+:: getting the latest version via the GitHub API
+echo. & echo  Getting the latest version...
+set "ps_get_url=$r = Invoke-RestMethod -Uri 'https://api.github.com/repos/ip7z/7zip/releases/latest'; $a = $r.assets | Where-Object { $_.name -like '*x64.msi' } | Select-Object -First 1; echo $a.browser_download_url"
+set "ps_get_name=$r = Invoke-RestMethod -Uri 'https://api.github.com/repos/ip7z/7zip/releases/latest'; $a = $r.assets | Where-Object { $_.name -like '*x64.msi' } | Select-Object -First 1; echo $a.name"
+for /f "tokens=*" %%a in ('powershell -command "%ps_get_url%"') do set "url=%%a"
+for /f "tokens=*" %%a in ('powershell -command "%ps_get_name%"') do set "filename=%%a"
+if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try: winget install 7zip.7zip & pause & exit /b)
+if not exist "%temp%\%filename%" (
+    echo. & echo  Downloading: %filename%
+    powershell -command "Invoke-WebRequest -Uri '%url%' -OutFile '%temp%\%filename%'"
+) else (
+    echo. & echo  Downloading: %filename% ^(already in TEMP^)
+)
+echo. & echo  Extracting ...
+md "%temp%\7z"
+if exist "%temp%\%filename%" (msiexec /a "%temp%\%filename%" /qn TARGETDIR="%temp%\7z") else (echo. & echo  %filename% not found. & echo. & pause)
+echo. & echo. & echo  DONE. & echo. & pause & goto start
 
+:skip_download
+cls
+TITLE %app%
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
@@ -27,7 +51,7 @@ set "pw_list=%~dpn1.txt"
 if "%~x1"=="" echo. & echo     NOTICE: first argument is likely a folder or has no extension.
 if not exist "!pw_list!" (
     echo. & echo  Use default-passwords.txt ^(will be downloaded^) to search password for "%~nx1" ? & echo. & pause
-    set "pw_list=%~dpn1_%random%.txt"
+    set "pw_list=%temp%\default-passwords.txt"
     powershell -C "iwr 'https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Default-Credentials/default-passwords.txt' -OutFile '!pw_list!'"
     if not exist "!pw_list!" (echo. & echo  Failed to get password list. & pause & exit)
 ) else (
