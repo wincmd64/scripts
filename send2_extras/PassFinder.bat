@@ -2,13 +2,14 @@
 ::   If no local password list <archive_name>.txt is found, downloads a default list from SecLists on GitHub.
 :: by github.com/wincmd64
 
-:: Usage:
+:: [USAGE]
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%N parameter
 
-:: NOTICE: filenames containing the character "!" are not supported.
+:: [NOTICE]
+:: Filenames containing the character "!" are not supported.
 
-:: Command line arguments:
+:: [COMMAND LINE ARGUMENTS]
 :: /s - create shortcut in Shell:SendTo folder
 
 @echo off
@@ -18,9 +19,8 @@ setlocal enabledelayedexpansion
 for /f "tokens=* delims=" %%a in ('where 7z.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "C:\Program Files\7-Zip\7z.exe" set "app=C:\Program Files\7-Zip\7z.exe"
 if not defined app if exist "%~dp07z.exe" set "app=%~dp07z.exe"
-if not defined app if exist "%temp%\7z\Files\7-Zip\7z.exe" set "app=%temp%\7z\Files\7-Zip\7z.exe"
 if exist "%app%" goto skip_download
-echo. & echo  "7z.exe" not found. & echo  Try to download it to TEMP ? & echo. & pause
+echo. & echo  "7z.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
 :: getting the latest version via the GitHub API
 echo. & echo  Getting the latest version...
 set "ps_get_url=$r = Invoke-RestMethod -Uri 'https://api.github.com/repos/ip7z/7zip/releases/latest'; $a = $r.assets | Where-Object { $_.name -like '*x64.msi' } | Select-Object -First 1; echo $a.browser_download_url"
@@ -37,6 +37,9 @@ if not exist "%temp%\%filename%" (
 echo. & echo  Extracting ...
 md "%temp%\7z"
 if exist "%temp%\%filename%" (msiexec /a "%temp%\%filename%" /qn TARGETDIR="%temp%\7z") else (echo. & echo  %filename% not found. & echo. & pause)
+:: finds 7z.exe+7z.dll and move it
+for /r "%temp%\7z" %%F in (7z.exe 7z.dll) do (if exist "%%~fF" move /y "%%~fF" "%~dp0" >nul)
+rd /s /q "%temp%\7z"
 echo. & echo. & echo  DONE. & echo. & pause & goto start
 
 :skip_download
