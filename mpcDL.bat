@@ -10,7 +10,6 @@ if /i "%~1"=="/a" goto associate
 cd /d "%~dp0"
 if not exist "MPC-HC\" (
     echo. & echo  Download MPC-HC to "%~dp0MPC-HC" ? & echo. & pause
-    md "MPC-HC"
 ) else (
     echo. & echo  Download and update existing installation in "%~dp0MPC-HC" ? & echo. & pause
     :check_task
@@ -19,6 +18,7 @@ if not exist "MPC-HC\" (
 )
 
 :: getting the latest version tag via the GitHub API
+echo. & echo  Loading ...
 for /f "tokens=*" %%a in ('powershell -command "$v = (Invoke-RestMethod -Uri 'https://api.github.com/repos/clsid2/mpc-hc/releases/latest').tag_name; echo $v"') do set "version=%%a"
 if "%version%"=="" (echo  Error: Could not retrieve version. & pause & exit /b)
 set "filename=MPC-HC.%version%.x64.zip"
@@ -26,6 +26,7 @@ set "url=https://github.com/clsid2/mpc-hc/releases/download/%version%/%filename%
 :: downloading
 if not exist "%temp%\%filename%" (powershell -command "Invoke-WebRequest -Uri '%url%' -OutFile '%temp%\%filename%'") else (echo. & echo  %filename% is already in TEMP.)
 echo. & echo  Extracting ...
+md "MPC-HC"
 if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" -C "MPC-HC" 2>nul) else (echo. & echo  %filename% not found. & echo. & pause)
 echo. & echo  Creating ini ...
 set "temp_ini=%TEMP%\mpc_hc_tmp.ini"
@@ -33,9 +34,9 @@ set "final_ini=MPC-HC\mpc-hc64.ini"
 setlocal DisableDelayedExpansion
 (
   echo [Commands2]
-  echo ;- Esc ^(גלוסעמ Alt+X^)
-  echo ;- Enter ^(גלוסעמ Alt+Enter^)
-  echo ;- Alt 1..3 ט 1..3 םאמבמנמע
+  echo ;- Esc instead of Alt+X
+  echo ;- Enter instead of Alt+Enter
+  echo ;- Alt 1..3 ט 1..3 vice versa
   echo CommandMod0=816 1 1b "" 5 0 0 0 0 0
   echo CommandMod1=827 11 31 "" 5 0 0 0 0 0
   echo CommandMod2=828 11 32 "" 5 0 0 0 0 0
