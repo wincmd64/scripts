@@ -20,7 +20,7 @@ if exist "core\betterbird.exe" (
 cls
 echo. & echo  Latest version found: %version%
 echo  Current version: %current_version%
-echo. & echo  Download and update ? & echo. & pause
+echo. & echo  Download and update in "%~dp0" ? & echo. & pause
 :: is running?
 :check_task
 tasklist /fi "imagename eq betterbird.exe" | find /i "betterbird.exe" >nul
