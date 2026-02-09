@@ -46,7 +46,9 @@
 
 * **totalcmdDL.bat**. Загружает последнюю версию установщика Total Commander x64 с оф.сайта. Может сразу обновить текущую установку. Умеет создавать lite-версию, распаковав установщик с портативным [wincmd.ini](https://github.com/wincmd64/blog/blob/main/wincmd.ini)
 
-* **viberDL.bat**. Установка/обновление Viber с помощью официального [SFX](http://download.cdn.viber.com/desktop/windows/update/update.zip). Запуск с ключом `/h` добавит в `hosts` блокировку рекламы.
+* **betterbirdDL.bat**. Установка/обновление портативного почтового клиента [Betterbird](https://www.betterbird.eu).
+
+* **viberDL.bat**. Установка/обновление мессенджера Viber с помощью официального [SFX](http://download.cdn.viber.com/desktop/windows/update/update.zip). Запуск с ключом `/h` добавит в `hosts` блокировку рекламы.
 
 * **mpcDL.bat**. Конфигуратор для [MPC-HC](https://github.com/clsid2/mpc-hc). Скачивает (обновляет) и создает портативный `.ini`. Может сразу проассоциировать с видео файлами.
 
