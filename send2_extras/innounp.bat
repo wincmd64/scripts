@@ -1,22 +1,23 @@
 :: Wrapper for InnoUnp CLI — Inno Setup unpacker
 :: by github.com/wincmd64
 
-:: Usage:
+:: [USAGE]
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%N parameter
 
-:: Command line arguments:
+:: [COMMAND LINE ARGUMENTS]
 :: /s - create shortcut in Shell:SendTo folder
 :: /u - update innounp.exe
 
 @echo off
+:start
 for /f "tokens=* delims=" %%a in ('where innounp.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0innounp.exe" set "app=%~dp0innounp.exe"
 if not exist "%app%" (
     echo. & echo  "innounp.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
     curl.exe "https://www.rathlev-home.de/tools/download/innounp-2.zip" -RLO# --output-dir "%temp%"
     tar -xf "%temp%\innounp-2.zip" -C "%~dp0." innounp.exe
-    if errorlevel 1 (color C & echo. & pause & exit) else (color A & echo. & echo  DONE. Please re-run this script. & echo. & pause & exit)
+    if errorlevel 1 (color C & echo. & pause & exit) else (echo. & echo  DONE. & echo. & pause & cls & goto start)
 ) else (TITLE %app%)
 
 :: arguments

@@ -1,21 +1,22 @@
 :: Wrapper for SigCheck CLI — check a files status on VirusTotal
 :: by github.com/wincmd64
 
-:: Usage:
+:: [USAGE]
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%S parameter
 
-:: Command line arguments:
+:: [COMMAND LINE ARGUMENTS]
 :: /s - create shortcut in Shell:SendTo folder
 
 @echo off
+:start
 for /f "tokens=* delims=" %%a in ('where sigcheck64.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0sigcheck64.exe" set "app=%~dp0sigcheck64.exe"
 if not exist "%app%" (
     echo. & echo  "sigcheck64.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
     cd /d "%~dp0"
-    curl.exe --ssl-no-revoke -RO# "https://live.sysinternals.com/sigcheck64.exe"
-    if errorlevel 1 (color C & echo. & pause & exit) else (color A & echo. & echo  DONE. Please re-run this script. & echo. & pause & exit)
+    curl.exe "https://live.sysinternals.com/sigcheck64.exe" -RLO#
+    if errorlevel 1 (color C & echo. & pause & exit) else (echo. & echo  DONE. & echo. & pause & cls & goto start)
 ) else (TITLE %app%)
 
 :: arguments

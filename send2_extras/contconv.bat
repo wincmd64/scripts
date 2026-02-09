@@ -1,11 +1,11 @@
 :: Wrapper for ContConv CLI — contact (.vcf) convertor
 :: by github.com/wincmd64
 
-:: Usage:
+:: [USAGE]
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%S parameter
 
-:: Command line arguments:
+:: [COMMAND LINE ARGUMENTS]
 :: /s - create shortcut in Shell:SendTo folder
 
 @echo off
@@ -16,10 +16,8 @@ if exist "%app%" goto skip_download
 echo. & echo  "contconv.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
 :: getting the latest version via the GitHub API
 echo. & echo  Getting the latest version...
-set "ps_get_url=$r = Invoke-RestMethod -Uri 'https://api.github.com/repos/DarkHobbit/doublecontact/releases'; $a = $r[0].assets | Where-Object { $_.name -like '*portable*' } | Select-Object -First 1; echo $a.browser_download_url"
-set "ps_get_name=$r = Invoke-RestMethod -Uri 'https://api.github.com/repos/DarkHobbit/doublecontact/releases'; $a = $r[0].assets | Where-Object { $_.name -like '*portable*' } | Select-Object -First 1; echo $a.name"
-for /f "tokens=*" %%a in ('powershell -command "%ps_get_url%"') do set "url=%%a"
-for /f "tokens=*" %%a in ('powershell -command "%ps_get_name%"') do set "filename=%%a"
+set "ps_cmd=$r=Invoke-RestMethod 'https://api.github.com/repos/DarkHobbit/doublecontact/releases'; $a=$r.assets|?{$_.name -like '*portable*'}|select -f 1; echo $a.browser_download_url; echo $a.name"
+for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do (if not defined url (set "url=%%a") else (set "filename=%%a"))
 if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try manual: https://github.com/DarkHobbit/doublecontact/releases & pause & exit /b)
 if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename%

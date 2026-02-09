@@ -1,17 +1,18 @@
 :: Wrapper for TrID — file identifier utility
 :: by github.com/wincmd64
 
-:: Usage:
+:: [USAGE]
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%S parameter
 
-:: Command line arguments:
+:: [COMMAND LINE ARGUMENTS]
 :: /s - create shortcut in Shell:SendTo folder
 :: /u - update TrID
 
 @echo off
 chcp 1251 >nul
 
+:start
 for /f "tokens=* delims=" %%a in ('where trid.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0trid.exe" set "app=%~dp0trid.exe"
 if not exist "%app%" (
@@ -20,7 +21,7 @@ if not exist "%app%" (
     if exist "%temp%\trid_win64.zip" (tar -xf "%temp%\trid_win64.zip" -C "%temp%.") else (echo. & echo  where trid_win64.zip ? & pause)
     "%temp%\TrID_setup.exe" /VERYSILENT /DIR="%~dp0"
     "%~dp0trid.exe" -u
-    color A & echo. & echo  DONE. Please re-run this script. & echo. & pause & exit
+    echo. & echo  DONE. & echo. & pause & cls & goto start
 ) else (TITLE %app%)
 
 :: arguments

@@ -1,4 +1,4 @@
-:: Tries to open a archive using a list of passwords.
+:: Tries to open an archive using a list of passwords.
 ::   If no local password list <archive_name>.txt is found, downloads a default list from SecLists on GitHub.
 :: by github.com/wincmd64
 
@@ -23,10 +23,8 @@ if exist "%app%" goto skip_download
 echo. & echo  "7z.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
 :: getting the latest version via the GitHub API
 echo. & echo  Getting the latest version...
-set "ps_get_url=$r = Invoke-RestMethod -Uri 'https://api.github.com/repos/ip7z/7zip/releases/latest'; $a = $r.assets | Where-Object { $_.name -like '*x64.msi' } | Select-Object -First 1; echo $a.browser_download_url"
-set "ps_get_name=$r = Invoke-RestMethod -Uri 'https://api.github.com/repos/ip7z/7zip/releases/latest'; $a = $r.assets | Where-Object { $_.name -like '*x64.msi' } | Select-Object -First 1; echo $a.name"
-for /f "tokens=*" %%a in ('powershell -command "%ps_get_url%"') do set "url=%%a"
-for /f "tokens=*" %%a in ('powershell -command "%ps_get_name%"') do set "filename=%%a"
+set "ps_cmd=$r=Invoke-RestMethod 'https://api.github.com/repos/ip7z/7zip/releases/latest'; $a=$r.assets|?{$_.name -like '*x64.msi'}|select -f 1; echo $a.browser_download_url; echo $a.name"
+for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do (if not defined url (set "url=%%a") else (set "filename=%%a"))
 if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try: winget install 7zip.7zip & pause & exit /b)
 if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename%

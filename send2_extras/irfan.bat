@@ -1,15 +1,13 @@
 :: IrfanView converter
 :: by github.com/wincmd64
 
-:: Usage:
+:: [USAGE]
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%S parameter
 
-:: Command line arguments:
+:: [COMMAND LINE ARGUMENTS]
 :: /s - create shortcut in Shell:SendTo folder
 :: /a - associate image files with IrfanView
-
-:: Note: this file must use code page OEM 866
 
 @echo off
 setlocal
@@ -80,15 +78,14 @@ if not exist "%app%" (
 if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 if /i "%~1"=="/a" (if "%~2"=="" goto associate)
 
-echo.
-echo  ÛÛ»ÛÛÛÛÛÛ» ÛÛÛÛÛÛÛ» ÛÛÛÛÛ» ÛÛÛ»   ÛÛ»ÛÛ»   ÛÛ»ÛÛ»ÛÛÛÛÛÛÛ»ÛÛ»    ÛÛ»
-echo  ÛÛºÛÛÉÍÍÛÛ»ÛÛÉÍÍÍÍ¼ÛÛÉÍÍÛÛ»ÛÛÛÛ»  ÛÛºÛÛº   ÛÛºÛÛºÛÛÉÍÍÍÍ¼ÛÛº    ÛÛº
-echo  ÛÛºÛÛÛÛÛÛÉ¼ÛÛÛÛÛ»  ÛÛÛÛÛÛÛºÛÛÉÛÛ» ÛÛºÛÛº   ÛÛºÛÛºÛÛÛÛÛ»  ÛÛº Û» ÛÛº
-echo  ÛÛºÛÛÉÍÍÛÛ»ÛÛÉÍÍ¼  ÛÛÉÍÍÛÛºÛÛºÈÛÛ»ÛÛºÈÛÛ» ÛÛÉ¼ÛÛºÛÛÉÍÍ¼  ÛÛºÛÛÛ»ÛÛº
-echo  ÛÛºÛÛº  ÛÛºÛÛº     ÛÛº  ÛÛºÛÛº ÈÛÛÛÛº ÈÛÛÛÛÉ¼ ÛÛºÛÛÛÛÛÛÛ»ÈÛÛÛÉÛÛÛÉ¼
-echo  ÈÍ¼ÈÍ¼  ÈÍ¼ÈÍ¼     ÈÍ¼  ÈÍ¼ÈÍ¼  ÈÍÍÍ¼  ÈÍÍÍ¼  ÈÍ¼ÈÍÍÍÍÍÍ¼ ÈÍÍ¼ÈÍÍ¼ 
-echo.
-chcp 1251 >nul
+:::
+:::  ___       __          __     ___               
+::: |_ _|_ __ / _| __ _ _ _\ \   / (_) _____      __
+:::  | || '__| |_ / _` | '_ \ \ / /| |/ _ \ \ /\ / /
+:::  | || |  |  _| (_| | | | \ V / | |  __/\ V  V / 
+::: |___|_|  |_|  \__,_|_| |_|\_/  |_|\___| \_/\_/  
+:::
+for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do @echo(%%A
 
 set count=0
 for %%A in (%*) do set /a count+=1

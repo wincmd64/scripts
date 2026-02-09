@@ -1,11 +1,11 @@
 :: Wrapper for Emsisoft CLI Scanner — anti-malware scanning tool
 :: by github.com/wincmd64
 
-:: Usage:
+:: [USAGE]
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%S parameter
 
-:: Command line arguments:
+:: [COMMAND LINE ARGUMENTS]
 :: /s - create shortcut in Shell:SendTo folder
 
 @echo off
@@ -14,13 +14,14 @@ if not defined app if exist "%~dp0a2cmd.exe" set "app=%~dp0a2cmd.exe"
 if not exist "%app%" (
     echo. & echo  "a2cmd.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
     cd /d "%~dp0"
-    curl.exe --ssl-no-revoke -RO# "https://dl.emsisoft.com/EmsisoftCommandlineScanner64.exe"
+    curl.exe "https://dl.emsisoft.com/EmsisoftCommandlineScanner64.exe" -RLO#
     echo  Extracting...
     EmsisoftCommandlineScanner64.exe -s -o+ -d"EmsisoftCommandlineScanner64\"
     del EmsisoftCommandlineScanner64.exe
     if errorlevel 1 (color C & echo. & pause & exit) else (color A & echo. & echo  DONE. & echo  Add the folder "%~dp0EmsisoftCommandlineScanner64\" to PATH ^(or move this file into that folder^) and run this file. & echo. & pause & exit)
 ) else (TITLE %app%)
-:: default parameters
+
+:: DEFAULT PARAMETERS
 set "prm=/a /pup /cloud=0"
 
 :: arguments
