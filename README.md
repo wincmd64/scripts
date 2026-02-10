@@ -32,6 +32,17 @@
 
 * **PassFinder.bat**. Демонстрирует метод подбора по словарю. Пароль от архива (требуется `7z.exe` и `7z.dll`) подбирается по списку из одноимённого TXT. Если файла-словаря нет, используется [default-passwords.txt](https://github.com/danielmiessler/SecLists/blob/master/Passwords/Default-Credentials/default-passwords.txt).
 
+### updaters/
+Основная идея скриптов в этой папке – быстро обновить программу прямо в её рабочей директории.
+
+* **betterbirdUPD.bat**. Портативный почтовый клиент.
+
+* **mpcUPD.bat**. Умеет также создавать портативный `.ini` и ассоциировать с видео файлами.
+
+* **ventoyUPD.bat**. Популярная для создания загрузочных USB-накопителей.
+
+* **viberUPD.bat**. Умеет также блокировать рекламу патчем файла `hosts`.
+
 ### context_menu_extras/
 Скрипты в этой папке добавляют соотв. пункт(ы) в контекстное меню. С ключом `/u` можно откатить изменения.
 
@@ -45,12 +56,6 @@
 * **win10_11_tweaks.bat**. Быстрая настройка Windows. Различает 10 \ 11 со своими твиками. Перед выполнением создается точка восстановления.
 
 * **totalcmdDL.bat**. Загружает последнюю версию установщика Total Commander x64 с оф.сайта. Может сразу обновить текущую установку. Умеет создавать lite-версию, распаковав установщик с портативным [wincmd.ini](https://github.com/wincmd64/blog/blob/main/wincmd.ini)
-
-* **betterbirdDL.bat**. Установка/обновление портативного почтового клиента [Betterbird](https://www.betterbird.eu).
-
-* **viberDL.bat**. Установка/обновление мессенджера Viber с помощью официального [SFX](http://download.cdn.viber.com/desktop/windows/update/update.zip). Запуск с ключом `/h` добавит в `hosts` блокировку рекламы.
-
-* **mpcDL.bat**. Конфигуратор для [MPC-HC](https://github.com/clsid2/mpc-hc). Скачивает (обновляет) и создает портативный `.ini`. Может сразу проассоциировать с видео файлами.
 
 * **officeDL.bat**. Авто-установка M$ Office. Загружает [Office Deployment Tool](https://officecdn.microsoft.com/pr/wsus/setup.exe) и применяет Ваш [.xml конфиг](https://config.office.com/deploymentsettings). Если своего конфига нет, можно воспользоваться встроенным.
 
