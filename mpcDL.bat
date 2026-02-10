@@ -1,33 +1,51 @@
-:: MPC-HC Configurator
+:: MPC-HC x64 configurator
 ::   Alternative to installer/winget.
 ::   Downloads/updates MPC-HC and makes portable config.
 :: by github.com/wincmd64
 
 @echo off
+cd /d "%~dp0"
+
 :: arguments
 if /i "%~1"=="/a" goto associate
 
-cd /d "%~dp0"
-if not exist "MPC-HC\" (
-    echo. & echo  Download MPC-HC to "%~dp0MPC-HC" ? & echo. & pause
-) else (
-    echo. & echo  Download and update existing installation in "%~dp0MPC-HC" ? & echo. & pause
-    :check_task
-    tasklist /fi "imagename eq mpc-hc64.exe" | find /i "mpc-hc64.exe" >nul
-    if not errorlevel 1 (echo. & echo  MPC-HC is currently running. & echo  Please close MPC-HC before updating. & echo. & pause & goto check_task)
+if exist "MPC-HC\mpc-hc64.exe" (
+    echo. & echo  Getting current version...
+    for /f "tokens=*" %%v in ('powershell -command "$v = (Get-Item 'MPC-HC\mpc-hc64.exe').VersionInfo.ProductVersion; if ($v -match '^\d+\.\d+\.\d+') { $matches[0] } else { $v.Trim() }"') do set "current_version=%%v"
+    cls
 )
 
-:: getting the latest version tag via the GitHub API
-echo. & echo  Loading ...
-for /f "tokens=*" %%a in ('powershell -command "$v = (Invoke-RestMethod -Uri 'https://api.github.com/repos/clsid2/mpc-hc/releases/latest').tag_name; echo $v"') do set "version=%%a"
-if "%version%"=="" (echo  Error: Could not retrieve version. & pause & exit /b)
-set "filename=MPC-HC.%version%.x64.zip"
-set "url=https://github.com/clsid2/mpc-hc/releases/download/%version%/%filename%"
+if not defined current_version (echo. & echo  Download MPC-HC to "%~dp0MPC-HC" ? & echo. & pause
+) else (echo. & echo  Current version: %current_version% & echo  Checking for updates...)
+
+:: getting URL, filename and latest_ver
+set "ps_cmd=$r=Invoke-RestMethod 'https://api.github.com/repos/clsid2/mpc-hc/releases/latest'; $a=$r.assets|?{$_.name -like '*x64.zip'}|select -f 1; echo $r.tag_name; echo $a.browser_download_url; echo $a.name"
+for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do (
+    if not defined latest_version (set "latest_version=%%a") else if not defined url (set "url=%%a") else (set "filename=%%a")
+)
+if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try manual: https://github.com/clsid2/mpc-hc/releases & pause & exit /b)
+
+:: update logic
+if defined current_version (
+    echo  Latest version:  %latest_version%
+    echo. & echo  Update? & echo. 
+    pause
+    :check_task
+    tasklist /fi "imagename eq mpc-hc64.exe" | find /i "mpc-hc64.exe" >nul
+    if not errorlevel 1 (echo. & echo  [!] MPC-HC is running. Please close it to continue. & echo. & pause & goto check_task)
+)
+
 :: downloading
-if not exist "%temp%\%filename%" (powershell -command "Invoke-WebRequest -Uri '%url%' -OutFile '%temp%\%filename%'") else (echo. & echo  %filename% is already in TEMP.)
+if not exist "%temp%\%filename%" (
+    echo. & echo  Downloading: %filename%
+    powershell -command "Invoke-WebRequest -Uri '%url%' -OutFile '%temp%\%filename%'"
+) else (
+    echo. & echo  Downloading: %filename% ^(already in TEMP^)
+)
 echo. & echo  Extracting ...
-md "MPC-HC"
+if not exist "MPC-HC" md "MPC-HC"
 if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" -C "MPC-HC" 2>nul) else (echo. & echo  %filename% not found. & echo. & pause)
+if exist "MPC-HC\mpc-hc64.ini" goto done
 echo. & echo  Creating ini ...
 set "temp_ini=%TEMP%\mpc_hc_tmp.ini"
 set "final_ini=MPC-HC\mpc-hc64.ini"
@@ -67,13 +85,14 @@ setlocal DisableDelayedExpansion
 endlocal
 powershell -command "Get-Content '%temp_ini%' | Out-File -FilePath '%final_ini%' -Encoding utf8; Remove-Item '%temp_ini%'"
 
-echo. & echo  DONE. & echo.
-choice /c YN /m "Associate video files with MPC-HC ?"
-if errorlevel 2 goto :eof
+:done
+echo. & echo. & echo  DONE. & echo.
+choice /c YN /m "Associate video files with MPC-HC"
+if errorlevel 2 goto eof
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
-if not exist "%~dp0MPC-HC\mpc-hc64.exe" (echo. & echo  MPC-HC\mpc-hc64.exe not found. & echo. & pause & exit)
+if not exist "MPC-HC\mpc-hc64.exe" (echo. & echo  MPC-HC\mpc-hc64.exe not found. & echo. & pause & exit)
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
 if not defined fta if exist "%~dp0SetUserFTA.exe" set "fta=%~dp0SetUserFTA.exe"
 if not exist "%fta%" (
@@ -87,7 +106,7 @@ if not exist "%fta%" (
     )
     set "fta=%temp%\SetUserFTA.exe"
 )
-set "icons=%~dp0MPC-HC\mpciconlib.dll"
+set "icons=MPC-HC\mpciconlib.dll"
 
 :: AVI
 call :process avi 8
@@ -175,12 +194,12 @@ call :process mod 0
 call :process 264 0
 call :process hevc 0
 
-echo. & echo Current associations: & "%fta%" get | findstr /i "mpc" & echo. & pause & exit
+echo. & echo Current MPC-HC associations: & "%fta%" get | findstr /i "mpc" & echo. & pause & exit
 
 :process
 assoc .%1=mpc_%1
-ftype mpc_%1="%~dp0MPC-HC\mpc-hc64.exe" "%%1"
-reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f
+ftype mpc_%1="MPC-HC\mpc-hc64.exe" "%%1"
+reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f >nul
 "%fta%" .%1 mpc_%1
-reg add "HKCU\Software\Classes\mpc_%1\DefaultIcon" /ve /d "%icons%,%2" /f
+reg add "HKCU\Software\Classes\mpc_%1\DefaultIcon" /ve /d "%icons%,%2" /f >nul
 exit /b
