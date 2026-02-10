@@ -112,7 +112,7 @@ goto main
 :start
 set "batch_arg="
 if defined is_batch set "batch_arg=-a"
-echo  Running: "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part %batch_arg% "%url%" & echo.
+echo  Running: yt-dlp.exe %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part %batch_arg% "%url%" & echo.
 "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part %batch_arg% "%url%"
 if ERRORLEVEL 1 (echo. & echo  Redirecting to Option #1 ... & echo. & goto Option_1)
 echo. & pause
