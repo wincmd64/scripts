@@ -39,7 +39,7 @@
 
 * **viberUPD.bat**. Умеет также блокировать рекламу патчем файла `hosts`.
 
-* а также **betterbirdUPD.bat**, **DiskMarkUPD.bat** и **ventoyUPD.bat**.
+* а также **betterbirdUPD.bat**, **DiskMarkUPD.bat**, **ventoyUPD.bat** и **HTTP_DownloaderUPD.bat**.
 
 ### context_menu_extras/
 Скрипты в этой папке добавляют соотв. пункт(ы) в контекстное меню. С ключом `/u` можно откатить изменения.
