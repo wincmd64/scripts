@@ -10,70 +10,67 @@
 :: /a - associate image files with IrfanView
 
 @echo off
-setlocal
+:start
 
 :: path to i_view64.exe - custom if nedded
 set "myapp="
 if defined myapp if exist "%myapp%" (set "app=%myapp%") 
-:: path to i_view64.exe - from PATH or same folder
+:: searching i_view64.exe
 if not defined app (for /f "tokens=* delims=" %%a in ('where i_view64.exe 2^>nul') do set "app=%%a")
 if not defined app if exist "%~dp0i_view64.exe" set "app=%~dp0i_view64.exe"
-:: trying to download IrfanView + all plugins + skin + lang + configure .ini
-if not exist "%app%" (
-    echo. & echo  i_view64.exe not found. Try to download it to "%~dp0IrfanView\" ? & echo. & pause
-    cd /d "%~dp0"
-    :: checking connection
-    ping -n 1 www.irfanview.info >nul 2>&1
-    if errorlevel 1 (color C & echo. & echo  Unable to reach www.irfanview.info. Check your internet connection. & echo. & pause & exit)
-    :: get latest version
-    for /f tokens^=1-3^ delims^=^" %%i in ('curl.exe --ssl-no-revoke -s "https://www.irfanview.com/64bit.htm" ^| FINDSTR /IRC:"href=.*iview[0-9]*_x64\.zip"') do (
-        set "mainZip=%%~nxj"
-        goto :afterMainZip
-    )
-    :afterMainZip
-    set "pluginsZip=%mainZip:_x64.zip=_plugins_x64.zip%"
-     echo. & echo  Trying to download ... & echo.
-    if not exist "%mainZip%" curl.exe --ssl-no-revoke -LR#H "Referer: https://www.irfanview.info/" -o "%mainZip%" "https://www.irfanview.info/files/%mainZip%"
-    if not exist "%pluginsZip%" curl.exe --ssl-no-revoke -LR#H "Referer: https://www.irfanview.info/" -o "%pluginsZip%" "https://www.irfanview.info/files/%pluginsZip%"
-    if not exist "irfanview_skin_iconshock.zip" curl.exe --ssl-no-revoke -LOR# "https://www.irfanview.com/skins/irfanview_skin_iconshock.zip"
-    if not exist "irfanview_lang_ukrainian.zip" curl.exe --ssl-no-revoke -LOR# "https://www.irfanview.net/lang/irfanview_lang_ukrainian.zip"
-    md "IrfanView"
-     echo. & echo  Trying to unpack ...
-    if exist "%mainZip%" (tar -xf "%mainZip%" -C "IrfanView" 2>nul) else (echo. & echo  where %mainZip% ? & pause)
-    if exist "IrfanView\i_view64.exe" (del "%mainZip%") else (echo. & echo  error unpacking %mainZip% & pause)
-    if exist "%pluginsZip%" (tar -xf "%pluginsZip%" -C "IrfanView\Plugins" 2>nul) else (echo. & echo  where %pluginsZip% ? & pause)
-    if exist "irfanview_skin_iconshock.zip" (tar -xf "irfanview_skin_iconshock.zip" -C "IrfanView\Toolbars" 2>nul) else (echo. & echo  where irfanview_skin_iconshock.zip ? & pause)
-    if exist "irfanview_lang_ukrainian.zip" (tar -xf "irfanview_lang_ukrainian.zip" -C "IrfanView\Languages" 2>nul) else (echo. & echo  where irfanview_lang_ukrainian.zip ? & pause)
-    del "%pluginsZip%" "irfanview_skin_iconshock.zip" "irfanview_lang_ukrainian.zip"
-     echo. & echo  Creating i_view64.ini ...
-    (
-    echo [Viewing]
-    echo BackColor=8421504
-    echo FitWindowOption=3
-    echo ShowMultipageDlg=1
-    echo [Others]
-    echo LoopCurDir=1
-    echo BeepOnLoop=0
-    echo JumpAfterDelete=1
-    echo [WinPosition]
-    echo Maximized=1
-    echo MultiThumb=2,88,161,910,0;
-    echo [Extensions]
-    echo CustomExtensions=JPG^|JPEG^|JPE^|PNG^|GIF^|BMP^|TIF^|TIFF^|ICO^|PSD^|TGA^|WMF^|EMF^|WEBP^|HEIC^|AVIF^|PDF^|DJVU^|
-    echo [Toolbar]
-    echo Skin=IconShock Android_24.png
-    echo Size=24
-    echo Flag=2097151
-    echo [Disabled_PlugIns]
-    echo DICOM.DLL=0
-    echo DJVU.DLL=0
-    echo JPEG2000.DLL=0
-    )>temp.txt
-    :: to UTF-16
-    powershell -command "Get-Content 'temp.txt' | Out-File 'IrfanView\i_view64.ini' -Encoding Unicode; Remove-Item 'temp.txt'"
-    echo. & echo. & echo  DONE. & echo  Add the folder "%~dp0IrfanView\" to PATH ^(or move this file into that folder^) and run this file. & echo. & pause & exit
-) else (TITLE %app%)
+if exist "%app%" goto skip_download
 
+:: trying to download IrfanView + all plugins + skin + lang + configure .ini
+echo. & echo  i_view64.exe not found. Try to download it to "%~dp0IrfanView\" ? & echo. & pause
+cd /d "%~dp0"
+:: checking connection
+ping -n 1 www.irfanview.info >nul 2>&1
+if errorlevel 1 (color C & echo. & echo  Unable to reach www.irfanview.info. Check your internet connection. & echo. & pause & goto start)
+:: get latest version
+for /f tokens^=1-3^ delims^=^" %%i in ('curl.exe -s "https://www.irfanview.com/64bit.htm" ^| FINDSTR /IRC:"href=.*iview[0-9]*_x64\.zip"') do (set "mainZip=%%~nxj")
+set "pluginsZip=%mainZip:_x64.zip=_plugins_x64.zip%"
+echo. & echo  Downloading... & echo.
+echo  %mainZip% & curl.exe -LRz "%temp%\%mainZip%" -H "Referer: https://www.irfanview.info/" "https://www.irfanview.info/files/%mainZip%" -o "%temp%\%mainZip%" 2>nul
+echo  %pluginsZip% & curl.exe -LRz "%temp%\%pluginsZip%" -H "Referer: https://www.irfanview.info/" "https://www.irfanview.info/files/%pluginsZip%" -o "%temp%\%pluginsZip%" 2>nul
+echo  irfanview_skin_iconshock.zip & curl.exe -LRz "%temp%\irfanview_skin_iconshock.zip" "https://www.irfanview.com/skins/irfanview_skin_iconshock.zip" -o "%temp%\irfanview_skin_iconshock.zip" 2>nul
+echo  irfanview_lang_ukrainian.zip & curl.exe -LRz "%temp%\irfanview_lang_ukrainian.zip" "https://www.irfanview.net/lang/irfanview_lang_ukrainian.zip" -o "%temp%\irfanview_lang_ukrainian.zip" 2>nul
+echo. & echo  Extracting ...
+md "IrfanView"
+if exist "%temp%\%mainZip%" (tar -xf "%temp%\%mainZip%" -C "IrfanView" 2>nul) else (echo. & echo  where %mainZip% ? & pause)
+if exist "%temp%\%pluginsZip%" (tar -xf "%temp%\%pluginsZip%" -C "IrfanView\Plugins" 2>nul) else (echo. & echo  where %pluginsZip% ? & pause)
+if exist "%temp%\irfanview_skin_iconshock.zip" (tar -xf "%temp%\irfanview_skin_iconshock.zip" -C "IrfanView\Toolbars" 2>nul) else (echo. & echo  where irfanview_skin_iconshock.zip ? & pause)
+if exist "%temp%\irfanview_lang_ukrainian.zip" (tar -xf "%temp%\irfanview_lang_ukrainian.zip" -C "IrfanView\Languages" 2>nul) else (echo. & echo  where irfanview_lang_ukrainian.zip ? & pause)
+echo. & echo  Creating i_view64.ini ...
+(
+echo [Viewing]
+echo BackColor=8421504
+echo FitWindowOption=3
+echo ShowMultipageDlg=1
+echo [Others]
+echo LoopCurDir=1
+echo BeepOnLoop=0
+echo JumpAfterDelete=1
+echo [WinPosition]
+echo Maximized=1
+echo MultiThumb=2,88,161,910,0;
+echo [Extensions]
+echo CustomExtensions=JPG^|JPEG^|JPE^|PNG^|GIF^|BMP^|TIF^|TIFF^|ICO^|PSD^|TGA^|WMF^|EMF^|WEBP^|HEIC^|AVIF^|PDF^|DJVU^|
+echo [Toolbar]
+echo Skin=IconShock Android_24.png
+echo Size=24
+echo Flag=2097151
+echo [Disabled_PlugIns]
+echo DICOM.DLL=0
+echo DJVU.DLL=0
+echo JPEG2000.DLL=0
+)>temp.txt
+:: to UTF-16
+powershell -command "Get-Content 'temp.txt' | Out-File 'IrfanView\i_view64.ini' -Encoding Unicode; Remove-Item 'temp.txt'"
+echo. & echo. & echo  DONE. & echo  Add the folder "%~dp0IrfanView\" to PATH ^(or move this file into that folder^) and run this file. & echo. & pause & exit
+
+:skip_download
+cls
+TITLE %app%
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 if /i "%~1"=="/a" (if "%~2"=="" goto associate)
