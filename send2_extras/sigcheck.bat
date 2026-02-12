@@ -14,8 +14,7 @@ for /f "tokens=* delims=" %%a in ('where sigcheck64.exe 2^>nul') do set "app=%%a
 if not defined app if exist "%~dp0sigcheck64.exe" set "app=%~dp0sigcheck64.exe"
 if not exist "%app%" (
     echo. & echo  "sigcheck64.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
-    cd /d "%~dp0"
-    curl.exe "https://live.sysinternals.com/sigcheck64.exe" -RLO#
+    curl.exe "https://live.sysinternals.com/sigcheck64.exe" -RLO# --output-dir "%~dp0."
     if errorlevel 1 (color C & echo. & pause & exit) else (echo. & echo  DONE. & echo. & pause & cls & goto start)
 ) else (TITLE %app%)
 

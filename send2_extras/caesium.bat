@@ -26,11 +26,7 @@ if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )
 echo. & echo  Extracting ...
-md "%temp%\caesium"
-if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" -C "%temp%\caesium" 2>nul) else (echo. & echo  %filename% not found. & echo. & pause)
-:: finds .exe and move it
-for /r "%temp%\caesium" %%F in (*caesium*clt.exe) do (if exist "%%~fF" move /y "%%~fF" "%~dp0" >nul)
-rd /s /q "%temp%\caesium"
+if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" --strip-components=1 *.exe) else (echo. & echo  %filename% not found. & echo. & pause)
 echo. & echo. & echo  DONE. & echo. & pause & goto start
 
 :skip_download
