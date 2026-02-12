@@ -15,6 +15,7 @@ if ($List) { [System.Environment]::GetEnvironmentVariable('PATH', 'User') -split
 if (-not $Path) { $Path = $PWD.Path }
 # Validate path
 if (-not (Test-Path -LiteralPath $Path)) { Write-Warning "The directory '$Path' does not exist."; exit 1 }
+if (-not (Test-Path -LiteralPath $Path -PathType Container)) {Write-Warning "The path '$Path' is a file. You can only add directories to PATH."; exit 1}
 if (-not ([IO.Path]::IsPathRooted($Path))) { Write-Warning "Only absolute paths or UNC are allowed."; exit 1 }
 
 # Get paths with recursion consideration
