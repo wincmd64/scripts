@@ -7,7 +7,7 @@
 
 :: [COMMAND LINE ARGUMENTS]
 :: /s - create shortcut in Shell:SendTo folder
-:: /a - associate image files with IrfanView
+:: /a - associate image files
 
 @echo off
 :start
@@ -194,7 +194,7 @@ echo. & echo  Shortcut 'IrfanView converter.lnk' created. & echo. & timeout 2 & 
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
-echo. & echo  Associate image files (jpg png bmp gif tif djvu) with IrfanView ? & echo. & pause
+echo. & echo  Associate IrfanView with image files ? & echo. & pause
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
 if not defined fta if exist "%~dp0SetUserFTA.exe" set "fta=%~dp0SetUserFTA.exe"
 if not exist "%fta%" (
@@ -215,6 +215,7 @@ call :process jpg 14
 call :process png 21
 call :process bmp 0
 call :process gif 10
+call :process jp2 13
 call :process tif 31
 call :process djvu 5
 
@@ -223,7 +224,7 @@ echo. & echo Current associations: & "%fta%" get | findstr /i "irfan" & echo. & 
 :process
 assoc .%1=irfan_%1
 ftype irfan_%1="%app%" "%%1"
-reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f
+reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f >nul
 "%fta%" .%1 irfan_%1
-reg add "HKCU\Software\Classes\irfan_%1\DefaultIcon" /ve /d "%icons%,%2" /f
+reg add "HKCU\Software\Classes\irfan_%1\DefaultIcon" /ve /d "%icons%,%2" /f >nul
 exit /b
