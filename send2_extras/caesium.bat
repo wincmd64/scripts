@@ -13,9 +13,17 @@
 for /f "tokens=* delims=" %%a in ('where caesiumclt.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0caesiumclt.exe" set "app=%~dp0caesiumclt.exe"
 if exist "%app%" goto skip_download
-echo. & echo  "caesiumclt.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
+echo. & echo  "caesiumclt.exe" not found. & echo.
+echo   [1] download it to "%~dp0"
+echo   [2] winget install SaeraSoft.CaesiumCLT
+echo.
+CHOICE /C 12 /M "Your choice?:" >nul 2>&1
+if errorlevel 2 goto download_winget
+if errorlevel 1 goto download_manual
+exit
+:download_manual
 :: getting the latest version via the GitHub API
-echo. & echo  Getting the latest version...
+echo  Getting the latest version...
 set "ps_cmd=$r=Invoke-RestMethod 'https://api.github.com/repos/Lymphatus/caesium-clt/releases/latest'; $a=$r.assets|?{$_.name -like '*windows*.zip'}|select -f 1; echo $a.browser_download_url; echo $a.name"
 for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do (if not defined url (set "url=%%a") else (set "filename=%%a"))
 if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try manual: https://github.com/Lymphatus/caesium-clt/releases & pause & exit /b)
@@ -28,6 +36,10 @@ if not exist "%temp%\%filename%" (
 echo. & echo  Extracting ...
 if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" --strip-components=1 *.exe) else (echo. & echo  %filename% not found. & echo. & pause)
 echo. & echo. & echo  DONE. & echo. & pause & goto start
+:download_winget
+winget install SaeraSoft.CaesiumCLT
+if %errorlevel% neq 0 (echo. & echo  Installation failed with error code: %errorlevel% & echo. & pause & exit)
+echo. & echo  DONE. Restart the script. & echo. & pause & exit
 
 :skip_download
 cls
