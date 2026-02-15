@@ -9,13 +9,17 @@
 @echo off
 for /f "tokens=* delims=" %%a in ('where yt-dlp.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "%~dp0yt-dlp.exe" set "app=%~dp0yt-dlp.exe"
-if not exist "%app%" (
-    echo. & echo  yt-dlp not found. Try: winget install yt-dlp.yt-dlp
-    echo  Press Y to install now. & echo.
-    choice /c yn /n >nul
-    if errorlevel 1 if not errorlevel 2 (winget install yt-dlp.yt-dlp & echo. & echo  DONE. Restart the script.)
-    echo. & pause & exit
-) else (TITLE %app%)
+if exist "%app%" goto skip_download
+echo. & echo  yt-dlp not found. Try: winget install yt-dlp.yt-dlp
+echo  Press Y to install now. & echo.
+choice /c yn /n >nul
+if errorlevel 2 exit /b
+winget install yt-dlp.yt-dlp
+if %errorlevel% neq 0 (echo. & echo  Installation failed with error code: %errorlevel% & echo. & pause & exit)
+echo. & echo  DONE. Restart the script. & echo. & pause & exit
+
+:skip_download
+TITLE %app%
 echo. & echo  Loading...
 
 :: get downloads folder path
