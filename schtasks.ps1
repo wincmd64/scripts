@@ -2,10 +2,35 @@
 # by github.com/wincmd64
 
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$FilePath
+    [string]$FilePath,
+    [Switch]$Install
 )
 
+# --- INSTALL LOGIC ---
+if ($Install) {
+    $sendToPath = [Environment]::GetFolderPath('SendTo')
+    $shortcutPath = Join-Path $sendToPath "Add to schtasks.lnk"
+    $wsShell = New-Object -ComObject WScript.Shell
+    $shortcut = $wsShell.CreateShortcut($shortcutPath)
+    $shortcut.TargetPath = "powershell.exe"
+    $shortcut.Arguments = "-NoP -EP Bypass -File `"$PSCommandPath`""
+    $shortcut.IconLocation = "powershell.exe,1"
+    $shortcut.Description = "Create a scheduled task to skip UAC"
+    $shortcut.Save()
+
+    # Set 'Run as Administrator' property for the shortcut
+    $bytes = [System.IO.File]::ReadAllBytes($shortcutPath)
+    $bytes[0x15] = $bytes[0x15] -bor 0x20
+    [System.IO.File]::WriteAllBytes($shortcutPath, $bytes)
+
+    Write-Host "SUCCESS: Shortcut created in SendTo menu." -ForegroundColor Green
+    Write-Host "Now you can right-click any file -> SendTo -> Add to schtasks."
+    pause
+    exit
+}
+
+# Existing
+if (-not $FilePath) { Write-Warning "No file specified! Use -Install to setup."; exit 1}
 # Check if running as administrator
 $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 if (-not $isAdmin) {Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -FilePath `"$FilePath`"" -Verb RunAs; exit}
