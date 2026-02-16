@@ -26,15 +26,13 @@ exit
 echo  Getting the latest version...
 set "ps_cmd=$r=Invoke-RestMethod 'https://api.github.com/repos/Lymphatus/caesium-clt/releases/latest'; $a=$r.assets|?{$_.name -like '*windows*.zip'}|select -f 1; echo $a.browser_download_url; echo $a.name"
 for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do (if not defined url (set "url=%%a") else (set "filename=%%a"))
-if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try manual: https://github.com/Lymphatus/caesium-clt/releases & pause & exit /b)
+if "%filename%"=="" (echo  Error: Could not find download URL. & echo  Try manual: https://github.com/Lymphatus/caesium-clt/releases & echo. & pause & exit /b)
 if not exist "%temp%\%filename%" (
-    echo. & echo  Downloading: %filename%
+    echo. & echo  Downloading: "%filename%"
     powershell -command "Invoke-WebRequest -Uri '%url%' -OutFile '%temp%\%filename%'"
-) else (
-    echo. & echo  Downloading: %filename% ^(already in TEMP^)
-)
+) else (echo. & echo  Downloading: "%filename%" already in TEMP)
 echo. & echo  Extracting ...
-if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" --strip-components=1 *.exe) else (echo. & echo  %filename% not found. & echo. & pause)
+if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" -C "%~dp0." --strip-components=1 *.exe) else (echo. & echo  %filename% not found. & echo. & pause)
 echo. & echo. & echo  DONE. & echo. & pause & goto start
 :download_winget
 winget install SaeraSoft.CaesiumCLT

@@ -26,7 +26,7 @@ if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )
 echo. & echo  Extracting ...
-if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" --strip-components=1 *contconv.exe *.dll) else (echo. & echo  %filename% not found. & echo. & pause)
+if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" -C "%~dp0." --strip-components=1 *contconv.exe *.dll) else (echo. & echo  %filename% not found. & echo. & pause)
 echo. & echo. & echo  DONE. & echo. & pause & goto start
 
 :skip_download
