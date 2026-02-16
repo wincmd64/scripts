@@ -8,8 +8,6 @@ chcp 1251 >nul
 :: ver finder https://en.wikipedia.org/wiki/Microsoft_Office#History_of_releases
 for /F "tokens=3 delims=." %%O in ('reg query "HKCR\Word.Application\CurVer" 2^>nul') do set officeVer=%%O
 if defined officeVer (TITLE Office v%officeVer% detected) else (TITLE Office Deployment Tool)
-:: get downloads folder path
-for /f "delims=" %%a in ('powershell -NoP -C "(New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path"') do set "DOWNLOADS=%%a"
 
 echo. & echo   This script runs MS Office setup using an XML configuration file. & echo.
 echo   [1] select XML file
