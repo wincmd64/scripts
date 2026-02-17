@@ -21,7 +21,7 @@ for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do (if not defined u
 if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try manual: https://github.com/DarkHobbit/doublecontact/releases & pause & exit /b)
 if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename%
-    powershell -C "Start-BitsTransfer -Source '%url%' -Destination '%temp%\%filename%'"
+    curl.exe -RL# "%url%" -o "%temp%\%filename%"
 ) else (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )

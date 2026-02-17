@@ -28,7 +28,7 @@ for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do (if not defined u
 if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try: winget install 7zip.7zip & pause & exit /b)
 if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename%
-    powershell -command "Invoke-WebRequest -Uri '%url%' -OutFile '%temp%\%filename%'"
+    curl.exe -RL# "%url%" -o "%temp%\%filename%"
 ) else (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )
