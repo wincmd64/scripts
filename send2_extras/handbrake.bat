@@ -29,10 +29,10 @@ for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do (if not defined u
 if "%filename%"=="" (echo  Error: Could not find download URL. & echo  Try manual: https://github.com/HandBrake/HandBrake/releases & echo. & pause & exit /b)
 if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: "%filename%"
-    powershell -command "Invoke-WebRequest -Uri '%url%' -OutFile '%temp%\%filename%'"
+    powershell -C "Start-BitsTransfer -Source '%url%' -Destination '%temp%\%filename%'"
 ) else (echo. & echo  Downloading: "%filename%" already in TEMP)
 echo. & echo  Extracting ...
-if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" -C "%~dp0." *.exe) else (echo. & echo  %filename% not found. & echo. & pause)
+if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" -C "%~dp0." *.exe 2>nul) else (echo. & echo  %filename% not found. & echo. & pause)
 echo. & echo. & echo  DONE. & echo. & pause & goto start
 :download_winget
 winget install HandBrake.HandBrake.CLI
