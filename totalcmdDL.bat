@@ -5,7 +5,7 @@
 echo. & echo  Loading...
 
 :: get url
-for /f tokens^=1-3^ delims^=^" %%i in ('curl.exe --ssl-no-revoke -s "https://www.ghisler.com/download.htm" ^| FINDSTR /IRC:"href=.*tcmd[0-9]*x64\.exe"') do (
+for /f tokens^=1-3^ delims^=^" %%i in ('curl.exe -s "https://www.ghisler.com/download.htm" ^| FINDSTR /IRC:"href=.*tcmd[0-9]*x64\.exe"') do (
     set "file=%%~nxj"
     set "url=%%j"
 )
@@ -47,31 +47,32 @@ if "%commander_path%"=="n\a" (
 )
 exit
 
-:Option_1
+:Download
 if not exist "%file%" (
-    curl.exe --ssl-no-revoke "%url%" -OR#
+    echo  Downloading %file%...
+    curl.exe "%url%" -RLO#
     if errorlevel 1 (color C & echo. & echo  ERROR: download failed. & echo. & pause & exit)
-    if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /T /A /R="%DOWNLOADS%\%file%") else (explorer /select,"%DOWNLOADS%\%file%")
-) else (echo  "%DOWNLOADS%\%file%" already exists.)
-echo. & echo  DONE. & timeout 2 & exit
+) else (echo  "%file%" already exists, skipping download.)
+goto :eof
+
+:Option_1
+call :Download
+echo. & echo  DONE. & timeout 2
+if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /A /R="%DOWNLOADS%\%file%") else (explorer /select,"%DOWNLOADS%\%file%")
+exit
 
 :Option_2
-if not exist "%file%" (
-    curl.exe --ssl-no-revoke "%url%" -OR#
-    if errorlevel 1 (color C & echo. & echo  ERROR: download failed. & echo. & pause & exit)
-)
+call :Download
 md "totalcmd"
 tar -xf "%file%" -C "totalcmd" 2>nul
-curl.exe --ssl-no-revoke "https://raw.githubusercontent.com/wincmd64/blog/refs/heads/main/wincmd.ini" -#O --output-dir "totalcmd"
+curl.exe "https://raw.githubusercontent.com/wincmd64/blog/refs/heads/main/wincmd.ini" -#O --output-dir "totalcmd"
 if errorlevel 1 (color C & echo. & echo  ERROR: config download failed. & echo. & pause & exit)
-if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /T /A /R="%DOWNLOADS%\totalcmd\TOTALCMD64.EXE") else (explorer /select,"%DOWNLOADS%\totalcmd\TOTALCMD64.EXE")
-echo. & echo  DONE. & timeout 2 & exit
+echo. & echo  DONE. & timeout 2
+if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /A /R="%DOWNLOADS%\totalcmd\TOTALCMD64.EXE") else (explorer /select,"%DOWNLOADS%\totalcmd\TOTALCMD64.EXE")
+exit
 
 :Option_3
-if not exist "%file%" (
-    curl.exe --ssl-no-revoke "%url%" -OR#
-    if errorlevel 1 (color C & echo. & echo  ERROR: download failed. & echo. & pause & exit)
-)
+call :Download
 "%file%" /I0".\"RSHG0D0 "%COMMANDER_PATH%"
 if errorlevel 1 (color C & echo. & echo  ERROR: update failed. & echo. & pause & exit)
 echo. & echo  DONE. & echo. & timeout 2
