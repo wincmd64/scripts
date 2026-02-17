@@ -18,11 +18,15 @@ reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\
 
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\02a" /v "MUIVerb" /d "Admin" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\02a" /v "Icon" /d "powershell.exe,1" /f
-reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\02a\command" /ve /d "powershell.exe -Command \"Start-Process powershell.exe -ArgumentList '-Ep Bypass -File \\\"%%1\\\"' -Verb RunAs\"" /f
+reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\02a\command" /ve /d "powershell.exe -C \"Start-Process powershell.exe -ArgumentList '-Ep Bypass -File \\\"%%1\\\"' -Verb RunAs\"" /f
 
-reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\03a" /v "MUIVerb" /d "Admin NoExit" /f
+reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\03a" /v "MUIVerb" /d "Admin -NoExit" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\03a" /v "Icon" /d "powershell.exe,1" /f
-reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\03a\command" /ve /d "powershell.exe -Command \"Start-Process powershell.exe -ArgumentList '-NoExit -Ep Bypass -File \\\"%%1\\\"' -Verb RunAs\"" /f
+reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\03a\command" /ve /d "powershell.exe -C \"Start-Process powershell.exe -ArgumentList '-NoE -Ep Bypass -File \\\"%%1\\\"' -Verb RunAs\"" /f
+
+reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\04p" /v "MUIVerb" /d "With Params -NoExit" /f
+reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\04p" /v "Icon" /d "powershell.exe" /f
+reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\04p\command" /ve /d "powershell.exe -NoP -C \"Add-Type -AssemblyName Microsoft.VisualBasic; $a = [Microsoft.VisualBasic.Interaction]::InputBox('Enter arguments for ' + [System.IO.Path]::GetFileName('%%1'), 'PowerShell Launcher'); if($a -ne $null) { Start-Process powershell.exe -ArgumentList '-NoExit -Ep Bypass -File \\\"%%1\\\"', $a }\"" /f
 
 :: ExecutionPolicy
 
