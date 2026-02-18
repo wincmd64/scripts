@@ -53,30 +53,23 @@ color 07 & cls
 set count=0
 for %%A in (%*) do set /a count+=1
 echo.
-if %count% equ 0 (echo  [1] Scan: ^(nothing selected^)) else if %count% equ 1 (echo  [1] Scan: %*) else (echo  [1] Scan: %count% objects)
+if %count% equ 0 (echo  [1] Scan files) else if %count% equ 1 (echo  [1] Scan: %*) else (echo  [1] Scan: %count% objects)
 if "%prm%"=="" (echo  [2] Change parameters, current: n\a) else (echo  [2] Change parameters, current: %prm%)
 echo  [3] Quick Scan: memory, traces
 for /f "delims=" %%A in ('a2cmd.exe /status %1 2^>^&1 ^| findstr /C:"Last Update:"') do set "lastupdate=%%A"
 echo  [4] Update signature  --  %lastupdate%
 echo  [0] Exit
 echo. 
-if %count% equ 0 (
-    CHOICE /C 2340 /M "Your choice?:" >nul 2>&1
-    if errorlevel 4 goto exit
-    if errorlevel 3 goto Option_4
-    if errorlevel 2 goto Option_3
-    if errorlevel 1 goto Option_2
-) else (
-    CHOICE /C 12340 /M "Your choice?:" >nul 2>&1
-    if errorlevel 5 goto exit
-    if errorlevel 4 goto Option_4
-    if errorlevel 3 goto Option_3
-    if errorlevel 2 goto Option_2
-    if errorlevel 1 goto Option_1
-)
+CHOICE /C 12340 /M "Your choice?:" >nul 2>&1
+if errorlevel 5 goto exit
+if errorlevel 4 goto Option_4
+if errorlevel 3 goto Option_3
+if errorlevel 2 goto Option_2
+if errorlevel 1 goto Option_1
 exit
 
 :Option_1
+if %count% equ 0 goto SelectFiles
 set i=0
 set found=0
 FOR %%k IN (%*) DO (
@@ -85,11 +78,25 @@ FOR %%k IN (%*) DO (
     if errorlevel 1 set found=1
 )
 if %found%==1 (color C) else (color A)
-echo. & echo  [DONE] & echo. & pause & goto main
+echo. & echo  [DONE] & echo. & pause & "%~f0"
 :processFile
 echo. & echo  [%1/%2] a2cmd.exe "%~3" %prm%
 "%app%" "%~3" %prm%
 exit /b
+
+:SelectFiles
+set found=0
+set "selected_any="
+echo  Opening file selection...
+for /f "delims=" %%A in ('powershell -NoP "Add-Type -AssemblyName System.Windows.Forms; $dlg=New-Object System.Windows.Forms.OpenFileDialog; $dlg.Multiselect=$true; $dlg.Title='Select files for Emsisoft Scan'; if($dlg.ShowDialog() -eq 'OK'){ $dlg.FileNames }"') do (
+    set "selected_any=1"
+    echo. & echo  Scanning: "%%A"
+    "%app%" "%%A" %prm%
+    if errorlevel 1 set "found=1"
+)
+if not defined selected_any (goto main)
+if %found%==1 (color C) else (color A)
+echo. & echo  [DONE] & echo. & pause & goto main
 
 :Option_2
 echo  "%app%" %prm%
