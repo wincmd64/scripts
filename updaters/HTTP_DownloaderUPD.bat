@@ -35,11 +35,11 @@ if defined current_version (
 :: download and unpack
 if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename%
-    powershell -command "Invoke-WebRequest -Uri '%url%' -OutFile '%temp%\%filename%'"
+    curl.exe -RL# "%url%" -o "%temp%\%filename%"
 ) else (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )
 echo. & echo  Extracting ...
-if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%") else (echo. & echo  %filename% not found. & echo. & pause)
+if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" 2>nul) else (echo. & echo  %filename% not found. & echo. & pause)
 
 color A & echo. & echo. & echo  DONE. & timeout 5
