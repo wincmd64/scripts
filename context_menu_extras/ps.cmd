@@ -18,11 +18,11 @@ reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\
 
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\02a" /v "MUIVerb" /d "Admin" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\02a" /v "Icon" /d "powershell.exe,1" /f
-reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\02a\command" /ve /d "powershell.exe -C \"Start-Process powershell.exe -ArgumentList '-Ep Bypass -File \\\"%%1\\\"' -Verb RunAs\"" /f
+reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\02a\command" /ve /d "powershell.exe -NoP -C \"Start-Process powershell.exe -ArgumentList '-NoP -Ep Bypass -C Set-Location -LiteralPath ''%%1\..'' ; ^& ''%%1''' -Verb RunAs \"" /f
 
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\03a" /v "MUIVerb" /d "Admin -NoExit" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\03a" /v "Icon" /d "powershell.exe,1" /f
-reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\03a\command" /ve /d "powershell.exe -C \"Start-Process powershell.exe -ArgumentList '-NoE -Ep Bypass -File \\\"%%1\\\"' -Verb RunAs\"" /f
+reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\03a\command" /ve /d "powershell.exe -NoP -C \"Start-Process powershell.exe -ArgumentList '-NoE -NoP -Ep Bypass -C Set-Location -LiteralPath ''%%1\..'' ; ^& ''%%1''' -Verb RunAs \"" /f
 
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\04p" /v "MUIVerb" /d "With Params -NoExit" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\04p" /v "Icon" /d "powershell.exe" /f
