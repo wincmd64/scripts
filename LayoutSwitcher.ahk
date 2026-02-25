@@ -1,9 +1,9 @@
 ﻿; Keyboard Layout Switcher
 ; by github.com/wincmd64
 ;
-; Left Ctrl - English
-; Right Ctrl - Russian  
-; AppsKey - Ukrainian
+; Left Ctrl+Shift - English
+; Right Ctrl+Shift - Russian
+; AltGr - Ukrainian
 ;
 ; Ctrl+Alt+Shift+F12 - Show installed layouts (for testing/customization)
 
@@ -13,10 +13,33 @@
 ; Get installed keyboard layouts once at startup
 installedLayouts := GetInstalledLayoutsWithNames()
 
-~LControl::SwitchLayout(0x4090409) ; EN
-~RControl::SwitchLayout(0x4190419) ; RU
-AppsKey::SwitchLayout(0x04220422)  ; UA
-!^+F12:: ; List of installed layouts
+
+; Left Ctrl+Shift - English
+~LShift Up::
+~LControl Up:: {
+    if (A_PriorKey = "LControl" && A_ThisHotkey = "~LShift Up")
+    || (A_PriorKey = "LShift"   && A_ThisHotkey = "~LControl Up") {
+        SwitchLayout(0x04090409)
+    }
+}
+
+; Right Ctrl+Shift - Russian
+~RShift Up::
+~RControl Up:: {
+    if (A_PriorKey = "RControl" && A_ThisHotkey = "~RShift Up")
+    || (A_PriorKey = "RShift"   && A_ThisHotkey = "~RControl Up") {
+        SwitchLayout(0x04190419)
+    }
+}
+
+; AltGr - Ukrainian   TIP: use RWin or AppsKey instead
+~RAlt::
+RAlt & RCtrl::{ ; AltGr
+    SwitchLayout(0x04220422)
+}
+
+; Ctrl+Alt+Shift+F12 - List of installed layouts
+!^+F12::
 {
     allLayoutsStr := ""
     for layoutID, langName in installedLayouts {
@@ -24,6 +47,7 @@ AppsKey::SwitchLayout(0x04220422)  ; UA
     }
     MsgBox(Trim(allLayoutsStr, "`n"), "Installed layouts")
 }
+
 
 ; Get all installed layouts with their names
 GetInstalledLayoutsWithNames() {
