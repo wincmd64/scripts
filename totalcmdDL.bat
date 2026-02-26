@@ -4,19 +4,36 @@
 @echo off
 echo. & echo  Loading...
 
-:: get url
-for /f tokens^=1-3^ delims^=^" %%i in ('curl.exe -s "https://www.ghisler.com/download.htm" ^| FINDSTR /IRC:"href=.*tcmd[0-9]*x64\.exe"') do (
-    set "file=%%~nxj"
-    set "url=%%j"
-)
-if not defined file (color C & echo. & echo  ERROR: No download link found. & echo. & pause & exit)
-
 :: get downloads folder path
 for /f "delims=" %%a in ('powershell -NoP -C "(New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path"') do set "DOWNLOADS=%%a"
 pushd "%DOWNLOADS%"
 :: get %commander_path%
 if not exist "%commander_path%" set "commander_path=n\a"
 
+:: get stable link
+for /f tokens^=1-3^ delims^=^" %%i in ('curl.exe -s "https://www.ghisler.com/download.htm" ^| FINDSTR /IRC:"href=.*tcmd[0-9]*x64\.exe"') do (
+    set "file=%%~nxj"
+    set "url=%%j"
+)
+if not defined file (color C & echo. & echo  ERROR: No download link found. & echo. & pause & exit)
+
+:: get beta link
+set "TARGET_PAGE="
+for /f "usebackq tokens=*" %%a in (`powershell -NoP -C "$html = Invoke-WebRequest -Uri 'https://www.ghisler.com/whatsnew.htm' -UseBasicParsing; $link = $html.Links | Where-Object { $_.href -like '*_beta.htm' } | Select-Object -First 1 -ExpandProperty href; if ($link) { if ($link -notlike 'http*') { 'https://www.ghisler.com/' + $link } else { 'https://www.ghisler.com/' + $link.Split('/')[-1] } }"`) do set "TARGET_PAGE=%%a"
+if not defined TARGET_PAGE goto :MenuStart
+set "beta_url="
+for /f "usebackq tokens=*" %%a in (`powershell -NoP -C "$html = Invoke-WebRequest -Uri '%TARGET_PAGE%' -UseBasicParsing; $link = $html.Links | Where-Object { $_.href -like '*x64*.exe' -and $_.href -notlike '*direct*' } | Select-Object -First 1 -ExpandProperty href; if ($link) { if ($link -notlike 'http*') { 'https://www.ghisler.com/' + $link } else { $link } }"`) do set "beta_url=%%a"
+if not defined beta_url goto :MenuStart
+for %%F in ("%beta_url%") do set "beta_file=%%~nxF"
+echo.
+echo  [!] New BETA found: %beta_file%
+echo.
+choice /C YN /M "  --> Use BETA instead of Stable"
+if errorlevel 2 goto :MenuStart
+set "file=%beta_file%"
+set "url=%beta_url%"
+
+:MenuStart
 cls
 ::: 
 :::   _____     _        _    ____                                          _           
