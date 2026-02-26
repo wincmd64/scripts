@@ -39,6 +39,8 @@
 
 * **viberUPD.bat**. Умеет также блокировать рекламу патчем файла `hosts`.
 
+* **qBittorrentUPD.bat**. Делает программу портативной.
+
 * а также **betterbirdUPD.bat**, **DiskMarkUPD.bat**, **ventoyUPD.bat** и **HTTP_DownloaderUPD.bat**.
 
 ### context_menu_extras/
