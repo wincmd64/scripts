@@ -25,7 +25,7 @@ set "beta_url="
 for /f "usebackq tokens=*" %%a in (`powershell -NoP -C "$html = Invoke-WebRequest -Uri '%TARGET_PAGE%' -UseBasicParsing; $link = $html.Links | Where-Object { $_.href -like '*x64*.exe' -and $_.href -notlike '*direct*' } | Select-Object -First 1 -ExpandProperty href; if ($link) { if ($link -notlike 'http*') { 'https://www.ghisler.com/' + $link } else { $link } }"`) do set "beta_url=%%a"
 if not defined beta_url goto :MenuStart
 for %%F in ("%beta_url%") do set "beta_file=%%~nxF"
-echo.
+cls & echo.
 echo  [!] New BETA found: %beta_file%
 echo.
 choice /C YN /M "  --> Use BETA instead of Stable"
