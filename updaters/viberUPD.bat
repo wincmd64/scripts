@@ -43,7 +43,7 @@ if errorlevel 2 goto :eof
 powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop') + '\Viber.lnk'); ^
 $s.TargetPath = '%~dp0Viber.exe'; $s.WorkingDirectory='%~dp0'; $s.IconLocation = '%~dp0Viber.exe'; $s.Save()"
-echo. & echo  Shortcut 'Viber.lnk' created. & echo. & timeout 2 & exit
+echo. & echo  Shortcut 'Viber.lnk' created. & echo. & timeout 3 & exit
 
 :remove_ads
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/h' & Exit /B)

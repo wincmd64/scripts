@@ -30,4 +30,14 @@ echo. & echo  Downloading...
 curl.exe -RLz "%temp%\cdm.zip" "https://sourceforge.net/projects/crystaldiskmark/files/latest/download" -o "%temp%\cdm.zip" 2>nul
 echo. & echo  Extracting ...
 if exist "%temp%\cdm.zip" (tar -xf "%temp%\cdm.zip" DiskMark64.exe CdmResource) else (echo. & echo  cdm.zip not found. & pause)
-color A & echo. & echo. & echo  DONE. & timeout 5
+color A & echo. & echo. & echo  DONE. & echo.
+
+choice /c YN /m "Create desktop shortcut"
+if errorlevel 2 goto :eof
+powershell -NoP -C ^
+"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop') + '\CrystalDiskMark.lnk'); ^
+$s.TargetPath = '%~dp0DiskMark64.exe'; ^
+$s.WorkingDirectory = '%~dp0'; ^
+$s.IconLocation = '%~dp0DiskMark64.exe'; ^
+$s.Save()"
+echo. & echo Shortcut 'CrystalDiskMark.lnk' created. & echo. & timeout 3

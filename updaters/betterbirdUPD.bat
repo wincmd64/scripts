@@ -39,4 +39,14 @@ if not exist "%temp%\%filename%" (
 echo. & echo  Extracting ...
 if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" 2>nul) else (echo. & echo  %filename% not found. & echo. & pause)
 
-color A & echo. & echo. & echo  DONE. & timeout 5
+color A & echo. & echo. & echo  DONE. & echo.
+
+choice /c YN /m "Create desktop shortcut"
+if errorlevel 2 goto :eof
+powershell -NoP -C ^
+"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop') + '\Betterbird.lnk'); ^
+$s.TargetPath = '%~dp0betterbird.exe'; ^
+$s.WorkingDirectory = '%~dp0'; ^
+$s.IconLocation = '%~dp0betterbird.exe'; ^
+$s.Save()"
+echo. & echo Shortcut 'Betterbird.lnk' created. & echo. & timeout 3

@@ -1,5 +1,6 @@
 :: qBittorrent (PORTABLE) UPDATER
 ::   Alternative to winget
+::   Use /a to associate with .torrent files
 :: by github.com/wincmd64
 
 @echo off
