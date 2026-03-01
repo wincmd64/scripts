@@ -5,6 +5,9 @@
 @echo off
 cd /d "%~dp0"
 
+:: arguments
+if /i "%~1"=="/a" goto associate
+
 :: get local ver
 if exist "qbittorrent.exe" (
     echo. & echo  Getting local version...
@@ -47,7 +50,6 @@ if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )
 echo. & echo  Extracting ...
-md "%temp%\7z"
 if exist "%temp%\%filename%" (msiexec /a "%temp%\%filename%" /qn TARGETDIR="%temp%\7z") else (echo. & echo  %filename% not found. & echo. & pause)
 :: finds 7z.exe+7z.dll and move it
 for /r "%temp%\7z" %%F in (7z.exe 7z.dll) do (if exist "%%~fF" move /y "%%~fF" "%~dp0" >nul)
@@ -60,4 +62,27 @@ if not exist "profile" (
     echo. & echo  Creating "profile" folder for Portable mode...
     md "profile"
 )
-color A & echo. & echo. & echo  DONE. & echo. & pause
+color A & echo. & echo. & echo  DONE. & echo. & pause & exit
+
+:associate
+(Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
+if not exist "qbittorrent.exe" (echo. & echo  qbittorrent.exe not found. & echo. & pause & exit)
+for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
+if not defined fta if exist "%~dp0SetUserFTA.exe" set "fta=%~dp0SetUserFTA.exe"
+if not exist "%fta%" (
+    echo. & echo  SetUserFTA.exe required. Try to download it to TEMP ? & echo. & pause
+    :: check newer version
+    curl.exe -RL#z "%temp%\SetUserFTA.zip" "https://setuserfta.com/SetUserFTA.zip" -o "%temp%\SetUserFTA.zip" 2>nul
+    if exist "%temp%\SetUserFTA.zip" (tar -xf "%temp%\SetUserFTA.zip" -C "%temp%" 2>nul) else (
+        color C & echo. & echo  SetUserFTA.zip not found.
+        echo  Try manual: https://setuserfta.com/SetUserFTA.zip & echo.
+        pause & exit
+    )
+    set "fta=%temp%\SetUserFTA.exe"
+)
+assoc .torrent=qbit
+ftype qbit="%~dp0qbittorrent.exe" "%%1"
+reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f >nul
+"%fta%" .torrent qbit
+reg add "HKCU\Software\Classes\qbit\DefaultIcon" /ve /d "%~dp0qbittorrent.exe,1" /f >nul
+echo. & echo Current qBittorrent associations: & "%fta%" get | findstr /i "qbit" & echo. & pause & exit
