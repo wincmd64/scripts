@@ -31,8 +31,8 @@ if not errorlevel 1 (echo. & echo  [!] Viber is running. Please close it to cont
 
 :: download and unpack
 echo. & echo  Downloading...
-curl.exe -RL#z "%temp%\update.zip" "http://download.cdn.viber.com/desktop/windows/update/update.zip" -o "%temp%\update.zip" 2>nul
-curl.exe -RL#z "%temp%\7zr.exe" "https://www.7-zip.org/a/7zr.exe" -o "%temp%\7zr.exe" 2>nul
+curl.exe -RL# "%temp%\update.zip" "http://download.cdn.viber.com/desktop/windows/update/update.zip" -o "%temp%\update.zip"
+curl.exe -RL# "%temp%\7zr.exe" "https://www.7-zip.org/a/7zr.exe" -o "%temp%\7zr.exe"
 if exist "%temp%\update.zip" (tar -xf "%temp%\update.zip" -C "%temp%" --strip-components=1) else (echo. & echo  update.zip not found. & pause)
 echo. & echo  Extracting ...
 "%temp%\7zr.exe" x "%temp%\pack.exe" -o".\" -y -bso0
