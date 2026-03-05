@@ -7,6 +7,9 @@
 @echo off
 cd /d "%~dp0"
 
+:: arguments
+if /i "%~1"=="/a" goto associate
+
 :: get local ver
 if exist "KeePass.exe" (
     echo. & echo  Getting local version...
@@ -38,14 +41,30 @@ curl.exe -RLO# "https://downloads.sourceforge.net/keepass/KeePass-%latest_versio
 echo. & echo  Extracting ...
 if exist "%temp%\kpass.zip" (tar -xf "%temp%\kpass.zip" 2>nul) else (echo. & echo  kpass.zip not found. & pause)
 if exist "%temp%\KeePass-%latest_version%-Russian.zip" tar -xf "%temp%\KeePass-%latest_version%-Russian.zip" -C "Languages" 2>nul
-color A & echo. & echo. & echo  DONE. & echo.
 
-choice /c YN /m "Create desktop shortcut"
-if errorlevel 2 goto :eof
-powershell -NoP -C ^
-"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop') + '\KeePass.lnk'); ^
-$s.TargetPath = '%~dp0KeePass.exe'; ^
-$s.WorkingDirectory = '%~dp0'; ^
-$s.IconLocation = '%~dp0KeePass.exe'; ^
-$s.Save()"
-echo. & echo Shortcut 'KeePass.lnk' created. & echo. & timeout 3
+echo. & echo. & echo  DONE. & echo.
+choice /c YN /m "Associate with .kdbx files"
+if errorlevel 2 goto eof
+
+:associate
+(Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
+if not exist "KeePass.exe" (echo. & echo  KeePass.exe not found. & echo. & pause & exit)
+for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
+if not defined fta if exist "%~dp0SetUserFTA.exe" set "fta=%~dp0SetUserFTA.exe"
+if not exist "%fta%" (
+    echo. & echo  SetUserFTA.exe required. Try to download it to TEMP ? & echo. & pause
+    :: check newer version
+    curl.exe -RL#z "%temp%\SetUserFTA.zip" "https://setuserfta.com/SetUserFTA.zip" -o "%temp%\SetUserFTA.zip" 2>nul
+    if exist "%temp%\SetUserFTA.zip" (tar -xf "%temp%\SetUserFTA.zip" -C "%temp%" 2>nul) else (
+        color C & echo. & echo  SetUserFTA.zip not found.
+        echo  Try manual: https://setuserfta.com/SetUserFTA.zip & echo.
+        pause & exit
+    )
+    set "fta=%temp%\SetUserFTA.exe"
+)
+assoc .kdbx=kpass2
+ftype kpass2="%~dp0KeePass.exe" "%%1"
+reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f >nul
+"%fta%" .kdbx kpass2
+reg add "HKCU\Software\Classes\kpass2\DefaultIcon" /ve /d "%~dp0KeePass.exe" /f >nul
+echo. & echo Current KeePass associations: & "%fta%" get | findstr /i "kpass2" & echo. & pause & exit
