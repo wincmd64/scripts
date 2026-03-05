@@ -1,6 +1,8 @@
-:: CrystalDiskMark (X64) UPDATER
-::   Alternative to winget
+:: CrystalDiskMark x64 UPDATER
 :: by github.com/wincmd64
+
+:: Look for DiskMark64.exe in the script directory.
+:: If present, check for updates; otherwise offer to download the latest version.
 
 @echo off
 cd /d "%~dp0"

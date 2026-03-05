@@ -1,7 +1,9 @@
-:: qBittorrent (PORTABLE) UPDATER
-::   Alternative to winget
-::   Use /a to associate with .torrent files
+:: qBittorrent (portable) UPDATER
 :: by github.com/wincmd64
+
+:: Look for qbittorrent.exe in the script directory.
+:: If present, check for updates; otherwise offer to download the latest version.
+:: Use /a to associate with .torrent files
 
 @echo off
 cd /d "%~dp0"

@@ -1,6 +1,8 @@
-:: HTTP Downloader UPDATER
-::   Alternative to winget
+:: HTTP Downloader x64 UPDATER
 :: by github.com/wincmd64
+
+:: Look for HTTP_Downloader.exe in the script directory.
+:: If present, check for updates; otherwise offer to download the latest version.
 
 @echo off
 cd /d "%~dp0"

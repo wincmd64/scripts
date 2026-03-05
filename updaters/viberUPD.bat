@@ -1,7 +1,9 @@
-:: VIBER UPDATER
-::   Alternative to installer/winget using official SFX.
-::   Use /h to update the hosts file and disable Viber ads.
+:: Viber UPDATER
 :: by github.com/wincmd64
+
+:: Look for Viber.exe in the script directory.
+:: If present, check for updates; otherwise offer to download the latest version.
+:: Use /h to update the hosts file and disable Viber ads.
 
 @echo off
 cd /d "%~dp0"

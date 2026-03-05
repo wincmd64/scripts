@@ -1,5 +1,8 @@
-:: BETTERBIRD (PORTABLE) UPDATER
+:: Betterbird (portable) UPDATER
 :: by github.com/wincmd64
+
+:: Look for core\betterbird.exe in the script directory.
+:: If present, check for updates; otherwise offer to download the latest version.
 
 @echo off
 cd /d "%~dp0"

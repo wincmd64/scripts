@@ -1,6 +1,8 @@
-:: FIREFOX ESR x64 UPDATER
-::   Alternative to winget
+:: Firefox ESR x64 UPDATER
 :: by github.com/wincmd64
+
+:: Look for firefox.exe in the script directory.
+:: If present, check for updates; otherwise offer to download the latest version.
 
 @echo off
 cd /d "%~dp0"
