@@ -8,9 +8,14 @@
 cd /d "%~dp0"
 
 :: get local ver
-if exist "firefox.exe" (
-    echo. & echo  Getting local version...
-    for /f "tokens=*" %%v in ('powershell -command "(Get-Item 'firefox.exe').VersionInfo.ProductVersion.Trim()"') do set "current_version=v%%v"
+set "app_ini=application.ini"
+if exist "%app_ini%" (
+    for /f "tokens=1,2 delims==" %%a in ('findstr /i "Version= RemotingName=" "%app_ini%"') do (
+        if /i "%%a"=="Version" set "current_version=v%%b"
+        if /i "%%a"=="RemotingName" (
+            echo %%b | findstr /i "esr" >nul && (set "ff_type=ESR") || (set "ff_type=Standard")
+        )
+    )
 )
 
 echo. & echo  Getting latest version...
@@ -19,10 +24,10 @@ for /f "tokens=*" %%a in ('powershell -command "$req = [System.Net.WebRequest]::
 for /f "tokens=*" %%v in ('powershell -command "if ('%final_url%' -match 'releases/([^/]+)/') { $matches[1] }"') do set "latest_version=%%v"
 cls
 
-if not defined current_version (echo. & echo  Download Firefox ESR to "%~dp0" ?
+if not defined current_version (echo. & echo  Download Firefox v%latest_version% to "%~dp0" ?
 ) else (
-    echo. & echo  Current version: %current_version%
-    echo  Latest version: v%latest_version%
+    echo. & echo  Current version: %current_version% %ff_type%
+    echo   Latest version: v%latest_version%
     echo. & echo  Update?
 )
 
