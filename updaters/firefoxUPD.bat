@@ -1,7 +1,7 @@
 :: Firefox ESR x64 UPDATER
 :: by github.com/wincmd64
 
-:: Look for firefox.exe in the script directory.
+:: Look for application.ini in the script directory.
 :: If present, check for updates; otherwise offer to download the latest version.
 
 @echo off

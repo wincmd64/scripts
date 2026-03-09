@@ -29,6 +29,10 @@ if defined current_version (
     pause
 )
 
+:check_task
+tasklist /fi "imagename eq opera-proxy.exe" | find /i "opera-proxy.exe" >nul
+if not errorlevel 1 (echo. & echo  [!] opera-proxy is running. Please close it to continue. & echo. & pause & goto check_task)
+
 :: download
 curl.exe -RL# "https://github.com/Snawoot/opera-proxy/releases/latest/download/opera-proxy.windows-amd64.exe" -o "opera-proxy.exe"
 echo. & echo. & echo  DONE. & echo.
