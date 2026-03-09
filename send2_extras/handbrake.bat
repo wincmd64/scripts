@@ -7,6 +7,7 @@
 
 :: [COMMAND LINE ARGUMENTS]
 :: /s - create shortcut in Shell:SendTo folder
+:: /u - download HandBrakeCLI.exe to the script directory
 
 @echo off
 :start
@@ -40,10 +41,12 @@ if %errorlevel% neq 0 (echo. & echo  Installation failed with error code: %error
 echo. & echo  DONE. Restart the script. & echo. & pause & exit
 
 :skip_download
+for /f "tokens=2" %%a in ('call "%app%" --version ^| findstr /b "HandBrake "') do set "hb_ver=%%a"
 cls
-TITLE %app%
+TITLE %app% v%hb_ver%
 :: arguments
 if "%~1"=="/s" (if "%~2"=="" goto shortcut)
+if "%~1"=="/u" (if "%~2"=="" goto download_manual)
 
 set count=0
 for %%A in (%*) do set /a count+=1
