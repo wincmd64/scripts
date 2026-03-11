@@ -47,13 +47,28 @@
 
 * **win10_11_tweaks.bat**. Быстрая настройка Windows. Различает 10 \ 11 со своими твиками. Перед выполнением создается точка восстановления.
 
-* **totalcmdDL.bat**. Загружает последнюю версию установщика Total Commander x64 с оф.сайта. Может сразу обновить текущую установку. Умеет создавать lite-версию, распаковав установщик с портативным [wincmd.ini](https://github.com/wincmd64/blog/blob/main/wincmd.ini)
-
 * **officeDL.bat**. Авто-установка M$ Office. Загружает [Office Deployment Tool](https://officecdn.microsoft.com/pr/wsus/setup.exe) и применяет Ваш [.xml конфиг](https://config.office.com/deploymentsettings). Если своего конфига нет, можно воспользоваться встроенным.
 
 * **yt-dlp.bat**. Враппер для [yt-dlp](https://github.com/yt-dlp/yt-dlp). Качает по ссылке из буфера обмена, параметра ком.строки или пакетно.
 
-* **beep.bat**. Добавляет в планировщик ежечасное голосовое или звуковое оповещение.
+* **beep [deprecated]**. Добавляет в планировщик ежечасное голосовое или звуковое оповещение. Оставлен в образовательных целях, лучше использовать AutoHotkey.
+
+<details>
+  <summary>Пример</summary>
+
+```autohotkey
+SetTimer(CheckTime, 1000)
+CheckTime() {
+    if (A_Min = "00" && A_Sec = "00") {
+        ComObject("SAPI.SpVoice").Speak("в киеве: " FormatTime(, "HH:mm"))
+        ; or SoundPlay("C:\Windows\Media\Windows Ding.wav", "Wait")
+        ; or SoundBeep(750, 500)
+        Sleep(1100)
+    }
+}
+```
+
+</details>
 
 * **uwp-remover.ps1**. Удаляет встроенные UWP-приложения Windows 11 в один клик.
 
