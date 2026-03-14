@@ -12,7 +12,7 @@ if defined officeVer (TITLE Office v%officeVer% detected) else (TITLE Office Dep
 echo. & echo   This script runs MS Office setup using an XML configuration file. & echo.
 echo   [1] select XML file
 echo       ^(can be generated with 'https://config.office.com/deploymentsettings'^)
-echo   [2] use built-in preset: Office 2021 VL x64
+echo   [2] use built-in preset: Office 2024 VL x64
 echo       ^(Word, Excel, PowerPoint only^)
 echo.
 CHOICE /C 12 /M "Your choice?:" >nul 2>&1
@@ -28,11 +28,11 @@ echo  Selected: %XML_SOURCE% & echo.
 goto :run
 
 :Option_2
-set "XML_SOURCE=%temp%\office2021.xml"
+set "XML_SOURCE=%temp%\office2024.xml"
 > "%XML_SOURCE%" (
   echo ^<Configuration^>
-  echo   ^<Add OfficeClientEdition="64" Channel="PerpetualVL2021"^>
-  echo     ^<Product ID="Standard2021Volume"^>
+  echo   ^<Add OfficeClientEdition="64" Channel="PerpetualVL2024"^>
+  echo     ^<Product ID="Standard2024Volume"^>
   echo       ^<Language ID="MatchOS" /^>
   echo       ^<ExcludeApp ID="OneDrive" /^>
   echo       ^<ExcludeApp ID="OneNote" /^>
