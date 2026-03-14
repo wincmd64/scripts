@@ -28,5 +28,4 @@ reg add "HKCU\Software\Classes\SystemFileAssociations\.wim\shell\wincmd64_WIM\co
 color A & timeout 2 & exit
 
 :undo
-reg delete "HKCU\Software\Classes\SystemFileAssociations\.wim\shell\wincmd64_WIM" /f
-color A & timeout 2
+reg delete "HKCU\Software\Classes\SystemFileAssociations\.wim\shell\wincmd64_WIM" /f && (color A & timeout 2) || (echo. & pause)

@@ -52,4 +52,4 @@ color A & timeout 1 & exit
 :undo
 reg delete "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun" /f
 reg delete "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol" /f
-color A & timeout 1
+timeout 2

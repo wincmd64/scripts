@@ -39,5 +39,4 @@ reg add "HKCU\Software\Classes\*\shell\wincmd64_Hash\shell\06_All\command" /ve /
 color A & timeout 1 & exit
 
 :undo
-reg delete "HKCU\Software\Classes\*\shell\wincmd64_Hash" /f
-color A & timeout 1
+reg delete "HKCU\Software\Classes\*\shell\wincmd64_Hash" /f && (color A & timeout 2) || (echo. & pause)

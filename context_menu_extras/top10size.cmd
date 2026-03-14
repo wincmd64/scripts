@@ -23,4 +23,4 @@ color A & timeout 1 & exit
 :undo
 reg delete "HKCU\Software\Classes\Directory\shell\wincmd64_Top10size" /f
 reg delete "HKCU\Software\Classes\Drive\shell\wincmd64_Top10size" /f
-color A & timeout 1
+timeout 2
