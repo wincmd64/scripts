@@ -27,7 +27,7 @@ curl.exe "%BASS_URL%" -RLO# --output-dir "%temp%" && (echo  %bassfile%) || (echo
 curl.exe "%FLAC_URL%" -RLO# --output-dir "%temp%" && (echo  %flacfile%) || (echo. & echo %flacfile% -- DOWNLOAD FAILED.)
 curl.exe "%APE_URL%" -RLO# --output-dir "%temp%" && (echo  %apefile%) || (echo. & echo %apefile% -- DOWNLOAD FAILED.)
 echo. & echo  Extracting ...
-if exist "%temp%\%mainfile%" (tar -xf "%temp%\%mainfile%" -C "%~dp0." 1by1.exe) else (echo. & echo  %mainfile% not found.)
+if exist "%temp%\%mainfile%" (tar -xf "%temp%\%mainfile%" -C "%~dp0." 1by1.exe lanRU.ini lanUA.ini) else (echo. & echo  %mainfile% not found.)
 if exist "%temp%\%bassfile%" (tar -xf "%temp%\%bassfile%" -C "%~dp0." bass.dll) else (echo. & echo  %bassfile% not found.)
 if exist "%temp%\%flacfile%" (tar -xf "%temp%\%flacfile%" -C "%~dp0." bassflac.dll) else (echo. & echo  %flacfile% not found.)
 if exist "%temp%\%apefile%" (tar -xf "%temp%\%apefile%" -C "%~dp0." bassape.dll) else (echo. & echo  %apefile% not found.)
