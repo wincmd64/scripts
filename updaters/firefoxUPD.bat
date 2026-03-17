@@ -8,9 +8,8 @@
 cd /d "%~dp0"
 
 :: get local ver
-set "app_ini=application.ini"
-if exist "%app_ini%" (
-    for /f "tokens=1,2 delims==" %%a in ('findstr /i "Version= RemotingName=" "%app_ini%"') do (
+if exist "application.ini" (
+    for /f "tokens=1,2 delims==" %%a in ('findstr /i "Version= RemotingName=" "application.ini"') do (
         if /i "%%a"=="Version" set "current_version=v%%b"
         if /i "%%a"=="RemotingName" (
             echo %%b | findstr /i "esr" >nul && (set "ff_type=ESR") || (set "ff_type=Standard")

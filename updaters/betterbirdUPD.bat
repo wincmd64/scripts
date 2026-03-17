@@ -1,17 +1,14 @@
 :: Betterbird (portable) UPDATER
 :: by github.com/wincmd64
 
-:: Look for core\betterbird.exe in the script directory.
+:: Look for core\application.ini in the script directory.
 :: If present, check for updates; otherwise offer to download the latest version.
 
 @echo off
 cd /d "%~dp0"
 
-if exist "core\betterbird.exe" (
-    echo. & echo  Getting current version...
-    for /f "tokens=*" %%v in ('powershell -command "(Get-Item 'core\betterbird.exe').VersionInfo.ProductVersion.Trim()"') do set "current_version=v%%v"
-    cls
-)
+:: get local ver
+if exist "core\application.ini" (for /f "tokens=2 delims==" %%v in ('findstr /i "^Version=" "core\application.ini"') do (set "current_version=%%v"))
 
 if not defined current_version (echo. & echo  Download Betterbird to "%~dp0" ? & echo. & pause
 ) else (echo. & echo  Current version: %current_version% & echo  Checking for updates...)
