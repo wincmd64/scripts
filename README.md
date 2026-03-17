@@ -54,7 +54,7 @@
 SetTimer(CheckTime, 1000)
 CheckTime() {
     if (A_Min = "00" && A_Sec = "00") {
-        ComObject("SAPI.SpVoice").Speak("время: " FormatTime(, "HH:mm"))
+        try ComObject("SAPI.SpVoice").Speak("в киеве: " FormatTime(, "HH:mm"))
         ; or SoundPlay("C:\Windows\Media\Windows Ding.wav", "Wait")
         ; or SoundBeep(750, 500)
         Sleep(1100)
