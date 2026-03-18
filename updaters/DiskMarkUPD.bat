@@ -19,7 +19,7 @@ if exist "DiskMark64.exe" (
 if not defined current_version (echo. & echo  Download CrystalDiskMark to "%~dp0" ? & echo. & pause
 ) else (
     echo. & echo  Current version: %current_version%
-    echo  Latest version: %latest_version%
+    echo   Latest version: %latest_version%
     echo. & echo  Update? & echo. & pause
 )
 
@@ -29,10 +29,11 @@ if not errorlevel 1 (echo. & echo  [!] CrystalDiskMark is running. Please close 
 
 :: download and unpack
 echo. & echo  Downloading...
-curl.exe -RLz "%temp%\cdm.zip" "https://sourceforge.net/projects/crystaldiskmark/files/latest/download" -o "%temp%\cdm.zip" 2>nul
+curl.exe -fRL# "https://sourceforge.net/projects/crystaldiskmark/files/latest/download" -o "%temp%\cdm.zip" 2>nul
+if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 echo. & echo  Extracting ...
-if exist "%temp%\cdm.zip" (tar -xf "%temp%\cdm.zip" DiskMark64.exe CdmResource) else (echo. & echo  cdm.zip not found. & pause)
-color A & echo. & echo. & echo  DONE. & echo.
+tar -xf "%temp%\cdm.zip" DiskMark64.exe CdmResource
+if errorlevel 1 (color C & echo. & echo  Error: extraction failed. & echo. & pause & exit /b) else (color A & echo. & echo. & echo  DONE. & echo.)
 
 choice /c YN /m "Create desktop shortcut"
 if errorlevel 2 goto :eof
