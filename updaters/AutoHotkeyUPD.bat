@@ -25,9 +25,10 @@ if not errorlevel 1 (echo. & echo  [!] AutoHotkey is running. Please close it to
 
 :: download and unpack
 echo. & echo  Downloading: https://www.autohotkey.com/download/ahk-v2.zip
-curl.exe -RLO# "https://www.autohotkey.com/download/ahk-v2.zip" --output-dir "%temp%"
+curl.exe -fRLO# "https://www.autohotkey.com/download/ahk-v2.zip" --output-dir "%temp%"
+if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 echo. & echo  Extracting ...
-if exist "%temp%\ahk-v2.zip" (tar -xf "%temp%\ahk-v2.zip" AutoHotkey64.exe AutoHotkey.chm UX/WindowSpy.ahk) else (echo. & echo  ahk-v2.zip not found. & pause)
+tar -xf "%temp%\ahk-v2.zip" AutoHotkey64.exe AutoHotkey.chm UX/WindowSpy.ahk
 move /y "UX\WindowSpy.ahk" "WindowSpy.ahk" >nul
 rd "UX"
 color A & echo. & echo. & echo  DONE. & timeout 3
