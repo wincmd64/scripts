@@ -34,14 +34,14 @@ if defined current_version (
 :: download and unpack
 if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename%
-    curl.exe -RL# "%url%" -o "%temp%\%filename%"
+    curl.exe -fRL# "%url%" -o "%temp%\%filename%"
+    if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 ) else (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )
 echo. & echo  Extracting ...
-if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" fastfetch.exe) else (echo. & echo  %filename% not found. & echo. & pause)
-
-echo. & echo. & echo  DONE. & echo.
+tar -xf "%temp%\%filename%" fastfetch.exe
+if errorlevel 1 (color C & echo. & echo  Error: extraction failed. & echo. & pause & exit /b) else (color A & echo. & echo. & echo  DONE. & echo.)
 
 choice /c YN /m "Create config file fastfetch.jsonc"
 if errorlevel 2 goto :eof
