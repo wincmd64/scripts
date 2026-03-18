@@ -10,7 +10,7 @@ cd /d "%~dp0"
 :: get local ver
 if exist "HTTP_Downloader.exe" (
     echo. & echo  Getting current version...
-    for /f "tokens=*" %%v in ('powershell -command "$v = (Get-Item 'HTTP_Downloader.exe').VersionInfo.ProductVersion; if ($v -match '^\d+\.\d+\.\d+') { $matches[0] } else { $v.Trim() }"') do set "current_version=%%v"
+    for /f "tokens=*" %%v in ('powershell -command "$v = (Get-Item 'HTTP_Downloader.exe').VersionInfo.ProductVersion; if ($v -match '^\d+\.\d+\.\d+') { $matches[0] } else { $v.Trim() }"') do set "current_version=v%%v"
     cls
 )
 
@@ -37,14 +37,14 @@ if defined current_version (
 :: download and unpack
 if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename%
-    curl.exe -RL# "%url%" -o "%temp%\%filename%"
+    curl.exe -fRL# "%url%" -o "%temp%\%filename%"
+    if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 ) else (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )
 echo. & echo  Extracting ...
-if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" 2>nul) else (echo. & echo  %filename% not found. & echo. & pause)
-
-color A & echo. & echo. & echo  DONE. & echo.
+tar -xf "%temp%\%filename%"
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & echo.)
 
 choice /c YN /m "Create desktop shortcut"
 if errorlevel 2 goto :eof
