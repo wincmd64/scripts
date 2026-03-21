@@ -16,14 +16,14 @@ if exist "qbittorrent.exe" (
     echo. & echo  Getting local version...
     for /f "tokens=*" %%v in ('powershell -command "(Get-Item 'qbittorrent.exe').VersionInfo.ProductVersion.Trim()"') do set "current_version=%%v"
     echo  Getting latest version...
-    for /f %%a in ('powershell -command "$req = [System.Net.WebRequest]::Create('https://sourceforge.net/projects/qbittorrent/files/latest/download'); $req.Method = 'HEAD'; $res = $req.GetResponse(); $res.ResponseUri.Segments[4].Trim('/')"') do set "latest_version=%%a"
+    for /f %%a in ('powershell -command "$req = [System.Net.WebRequest]::Create('https://sourceforge.net/projects/qbittorrent/files/latest/download'); $req.Method = 'HEAD'; $res = $req.GetResponse(); 'v' + $res.ResponseUri.Segments[4].Trim('/').Replace('qbittorrent-', '')"') do set "latest_version=%%a"
     cls
 )
 
 if not defined current_version (echo. & echo  Download qBittorrent to "%~dp0" ? & echo. & pause
 ) else (
     echo. & echo  Current version: %current_version%
-    echo  Latest version: %latest_version%
+    echo   Latest version: %latest_version%
     echo. & echo  Update? & echo. & pause
 )
 
@@ -33,13 +33,14 @@ if not errorlevel 1 (echo. & echo  [!] qBittorrent is running. Please close it t
 
 :: download
 echo. & echo  Downloading...
-curl.exe -RL# "https://sourceforge.net/projects/qbittorrent/files/latest/download" -o "%temp%\qbt_setup.exe"
+curl.exe -fRL# "https://sourceforge.net/projects/qbittorrent/files/latest/download" -o "%temp%\qbt_setup.exe"
+if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 echo. & echo  Extracting ...
 :7z
 for /f "tokens=* delims=" %%a in ('where 7z.exe 2^>nul') do set "app=%%a"
 if not defined app if exist "C:\Program Files\7-Zip\7z.exe" set "app=C:\Program Files\7-Zip\7z.exe"
 if not defined app if exist "%~dp07z.exe" set "app=%~dp07z.exe"
-if exist "%app%" goto skip_download
+if exist "%app%" goto skip_7z
 echo. & echo  "7z.exe" not found. & echo  Try to download it to "%~dp0" ? & echo. & pause
 :: getting the latest version via the GitHub API
 echo. & echo  Getting the latest version...
@@ -53,34 +54,33 @@ if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )
 echo. & echo  Extracting ...
-if exist "%temp%\%filename%" (msiexec /a "%temp%\%filename%" /qn TARGETDIR="%temp%\7z") else (echo. & echo  %filename% not found. & echo. & pause)
+msiexec /a "%temp%\%filename%" /qn TARGETDIR="%temp%\7z"
 :: finds 7z.exe+7z.dll and move it
 for /r "%temp%\7z" %%F in (7z.exe 7z.dll) do (if exist "%%~fF" move /y "%%~fF" "%~dp0" >nul)
 rd /s /q "%temp%\7z"
 goto 7z
 
-:skip_download
-if exist "%temp%\qbt_setup.exe" (7z e "%temp%\qbt_setup.exe" "qbittorrent.exe" -y) else (echo. & echo  qbt_setup.exe not found. & pause)
+:skip_7z
+7z e "%temp%\qbt_setup.exe" "qbittorrent.exe" -y
 if not exist "profile" (
     echo. & echo  Creating "profile" folder for Portable mode...
     md "profile"
 )
-color A & echo. & echo. & echo  DONE. & echo. & pause & exit
+start "" qbittorrent.exe
+timeout 3 & exit
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
 if not exist "qbittorrent.exe" (echo. & echo  qbittorrent.exe not found. & echo. & pause & exit)
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
 if not defined fta if exist "%~dp0SetUserFTA.exe" set "fta=%~dp0SetUserFTA.exe"
+:: get SetUserFTA.exe
 if not exist "%fta%" (
     echo. & echo  SetUserFTA.exe required. Try to download it to TEMP ? & echo. & pause
-    :: check newer version
-    curl.exe -RL#z "%temp%\SetUserFTA.zip" "https://setuserfta.com/SetUserFTA.zip" -o "%temp%\SetUserFTA.zip" 2>nul
-    if exist "%temp%\SetUserFTA.zip" (tar -xf "%temp%\SetUserFTA.zip" -C "%temp%" 2>nul) else (
-        color C & echo. & echo  SetUserFTA.zip not found.
-        echo  Try manual: https://setuserfta.com/SetUserFTA.zip & echo.
-        pause & exit
-    )
+    curl.exe -fRLO# "https://setuserfta.com/SetUserFTA.zip" --output-dir "%temp%"
+    if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo  Try manual: https://setuserfta.com/SetUserFTA.zip & echo. & pause & exit /b)
+    tar -xf "%temp%\SetUserFTA.zip" -C "%temp%"
+    if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
     set "fta=%temp%\SetUserFTA.exe"
 )
 assoc .torrent=qbit
