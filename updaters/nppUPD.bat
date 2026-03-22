@@ -8,7 +8,7 @@
 cd /d "%~dp0"
 
 :: arguments
-if /i "%~1"=="/a" goto associate
+if "%~1" NEQ "" (if exist "notepad++.exe" (start "" "notepad++.exe" %* & exit))
 
 if exist "notepad++.exe" (
     echo. & echo  Getting current version...
@@ -56,4 +56,5 @@ if exist "notepad++.exe" (
 ) else (
     robocopy "%temp%\npp_update" "%~dp0." /e /move /xd localization updater /r:0 /w:0 >nul
 )
-color A & echo. & echo. & echo  DONE. & echo. & pause
+start "" notepad++.exe
+timeout 3 & exit

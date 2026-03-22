@@ -45,14 +45,7 @@ if not exist "%temp%\%filename%" (
 echo. & echo  Extracting ...
 tar -xf "%temp%\%filename%"
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & echo.)
+type nul > "portable"
 
-choice /c YN /m "Create desktop shortcut"
-if errorlevel 2 goto :eof
-powershell -NoP -C ^
-"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop') + '\HTTP Downloader.lnk'); ^
-$s.TargetPath = '%~dp0HTTP_Downloader.exe'; ^
-$s.Arguments = '--clipboard'; ^
-$s.WorkingDirectory = '%~dp0'; ^
-$s.IconLocation = '%~dp0HTTP_Downloader.exe'; ^
-$s.Save()"
-echo. & echo Shortcut 'HTTP Downloader.lnk' created. & echo. & timeout 3
+start "" HTTP_Downloader.exe --clipboard
+timeout 3 & exit

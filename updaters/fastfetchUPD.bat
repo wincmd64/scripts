@@ -41,85 +41,86 @@ if not exist "%temp%\%filename%" (
 )
 echo. & echo  Extracting ...
 tar -xf "%temp%\%filename%" fastfetch.exe
-if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & echo.)
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & timeout 2)
 
-choice /c YN /m "Create config file fastfetch.jsonc"
-if errorlevel 2 goto :eof
-echo. & echo  Creating fastfetch.jsonc ...
-(
-  echo {
-  echo   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  echo   "logo": {
-  echo         "source": "windows"
-  echo   },
-  echo   "modules": [
-  echo   {
-  echo   "type": "version",
-  echo   "key": "fastfetch",
-  echo   "keyColor": "red",
-  echo   "format": "{version}"
-  echo   },
-  echo   {
-  echo   "type": "title",
-  echo   "key": "Host",
-  echo   "format": "{2}, {1}",
-  echo   "keyColor": "green"
-  echo   },
-  echo   {
-  echo     "type": "os",
-  echo     "keyColor": "green"
-  echo   },
-  echo   {
-  echo     "type": "uptime",
-  echo     "keyColor": "green"
-  echo   },
-  echo   {
-  echo     "type": "disk",
-  echo     "folders": "/",
-  echo     "keyColor": "green"
-  echo   },
-  echo   {
-  echo     "type": "bios",
-  echo     "key": "BIOS",
-  echo     "format": "{type}, {vendor}"
-  echo   },
-  echo   "TPM",
-  echo   "CPU",
-  echo   "GPU",
-  echo   "PhysicalMemory",
-  echo   {
-  echo     "type": "PhysicalDisk",
-  echo     "temp": true
-  echo   },
-  echo   {
-  echo     "type": "BluetoothRadio",
-  echo     "keyColor": "cyan"
-  echo   },
-  echo   {
-  echo     "type": "Bluetooth",
-  echo     "keyColor": "cyan"
-  echo   },
-  echo   {
-  echo     "type": "Display",
-  echo     "keyColor": "cyan"
-  echo   },
-  echo   {
-  echo     "type": "Wifi",
-  echo     "keyColor": "yellow"
-  echo   },
-  echo   {
-  echo     "type": "LocalIp",
-  echo     "keyColor": "yellow"
-  echo   },
-  echo   {
-  echo     "type": "dns",
-  echo     "keyColor": "yellow"
-  echo   },
-  echo   {
-  echo     "type": "PublicIp",
-  echo     "keyColor": "yellow"
-  echo   }
-  echo   ]
-  echo }
-) > fastfetch.jsonc
-echo. & echo. & echo  DONE. You can use now: fastfetch.exe -c fastfetch.jsonc & echo. & pause
+if not exist "fastfetch.jsonc" (
+    echo. & echo  Creating fastfetch.jsonc ...
+    (
+      echo {
+      echo   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+      echo   "logo": {
+      echo         "source": "windows"
+      echo   },
+      echo   "modules": [
+      echo   {
+      echo   "type": "version",
+      echo   "key": "fastfetch",
+      echo   "keyColor": "red",
+      echo   "format": "{version}"
+      echo   },
+      echo   {
+      echo   "type": "title",
+      echo   "key": "Host",
+      echo   "format": "{2}, {1}",
+      echo   "keyColor": "green"
+      echo   },
+      echo   {
+      echo     "type": "os",
+      echo     "keyColor": "green"
+      echo   },
+      echo   {
+      echo     "type": "uptime",
+      echo     "keyColor": "green"
+      echo   },
+      echo   {
+      echo     "type": "disk",
+      echo     "folders": "/",
+      echo     "keyColor": "green"
+      echo   },
+      echo   {
+      echo     "type": "bios",
+      echo     "key": "BIOS",
+      echo     "format": "{type}, {vendor}"
+      echo   },
+      echo   "TPM",
+      echo   "CPU",
+      echo   "GPU",
+      echo   "PhysicalMemory",
+      echo   {
+      echo     "type": "PhysicalDisk",
+      echo     "temp": true
+      echo   },
+      echo   {
+      echo     "type": "BluetoothRadio",
+      echo     "keyColor": "cyan"
+      echo   },
+      echo   {
+      echo     "type": "Bluetooth",
+      echo     "keyColor": "cyan"
+      echo   },
+      echo   {
+      echo     "type": "Display",
+      echo     "keyColor": "cyan"
+      echo   },
+      echo   {
+      echo     "type": "Wifi",
+      echo     "keyColor": "yellow"
+      echo   },
+      echo   {
+      echo     "type": "LocalIp",
+      echo     "keyColor": "yellow"
+      echo   },
+      echo   {
+      echo     "type": "dns",
+      echo     "keyColor": "yellow"
+      echo   },
+      echo   {
+      echo     "type": "PublicIp",
+      echo     "keyColor": "yellow"
+      echo   }
+      echo   ]
+      echo }
+    ) > fastfetch.jsonc
+)
+cls
+%comspec% /k fastfetch.exe -c fastfetch.jsonc

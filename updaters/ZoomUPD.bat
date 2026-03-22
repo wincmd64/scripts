@@ -30,8 +30,9 @@ if not errorlevel 1 (echo. & echo  [!] Zoom is running. Please close it to conti
 
 echo. & echo  Downloading...
 curl.exe "https://zoom.us/client/latest/ZoomInstallerFull.msi?archType=x64" -RLO# --output-dir "%temp%"
+if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 echo. & echo  Extracting ...
-if exist "%temp%\ZoomInstallerFull.msi" (msiexec /a "%temp%\ZoomInstallerFull.msi" /qn TARGETDIR="%temp%\zoom") else (echo. & echo  ZoomInstallerFull.msi not found. & echo. & pause)
+msiexec /a "%temp%\ZoomInstallerFull.msi" /qn TARGETDIR="%temp%\zoom"
 xcopy "%temp%\zoom\Program Files (64-bit) Folder\Zoom\bin\*" "%~dp0" /y /e /i /q >nul
 echo. & echo  Registering Zoom URL Protocol...
 reg add "HKCU\SOFTWARE\Classes\zoommtg" /ve /d "URL:Zoom Launcher" /f >nul
@@ -39,15 +40,7 @@ reg add "HKCU\SOFTWARE\Classes\zoommtg" /v "URL Protocol" /d "" /f >nul
 reg add "HKCU\SOFTWARE\Classes\zoommtg" /v "UseOriginalUrlEncoding" /t REG_DWORD /d 1 /f >nul
 reg add "HKCU\SOFTWARE\Classes\zoommtg\DefaultIcon" /ve /d "\"%~dp0Zoom.exe\",1" /f >nul
 reg add "HKCU\SOFTWARE\Classes\zoommtg\shell\open\command" /ve /d "\"%~dp0Zoom.exe\" \"--url=%%1\"" /f >nul
-color A & echo. & echo. & echo  DONE. & echo.
+color A & echo. & echo. & echo  DONE. Running Zoom... & echo.
 
-choice /c YN /m "Create desktop shortcut"
-if errorlevel 2 goto :eof
-powershell -NoP -C ^
-"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop') + '\Zoom.lnk'); ^
-$s.TargetPath = '%~dp0Zoom.exe'; ^
-$s.WorkingDirectory = '%~dp0'; ^
-$s.IconLocation = '%~dp0Zoom.exe'; ^
-$s.Save()"
-echo. & echo Shortcut 'Zoom.lnk' created. & echo. & timeout 3
-
+start "" Zoom.exe
+timeout 3 & exit

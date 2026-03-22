@@ -65,4 +65,5 @@ if not exist "distribution\policies.json" (
     )>"distribution\policies.json"
 )
 
-echo. & echo  DONE. & echo. & timeout 3
+start "" firefox.exe
+timeout 3 & exit

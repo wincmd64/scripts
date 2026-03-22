@@ -34,18 +34,16 @@ if not errorlevel 1 (echo. & echo  [!] Viber is running. Please close it to cont
 :: download and unpack
 echo. & echo  Downloading...
 curl.exe "http://download.cdn.viber.com/desktop/windows/update/update.zip" -RLO# --output-dir "%temp%"
+if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 curl.exe "https://www.7-zip.org/a/7zr.exe" -RLO# --output-dir "%temp%"
-if exist "%temp%\update.zip" (tar -xf "%temp%\update.zip" -C "%temp%" --strip-components=1) else (echo. & echo  update.zip not found. & pause)
 echo. & echo  Extracting ...
+tar -xf "%temp%\update.zip" -C "%temp%" --strip-components=1
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
 "%temp%\7zr.exe" x "%temp%\pack.exe" -o".\" -y -bso0
-echo. & echo  DONE. & echo.
+color A & echo. & echo  DONE. Running Viber...  & echo.
 
-choice /c YN /m "Create desktop shortcut"
-if errorlevel 2 goto :eof
-powershell -NoP -C ^
-"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop') + '\Viber.lnk'); ^
-$s.TargetPath = '%~dp0Viber.exe'; $s.WorkingDirectory='%~dp0'; $s.IconLocation = '%~dp0Viber.exe'; $s.Save()"
-echo. & echo  Shortcut 'Viber.lnk' created. & echo. & timeout 3 & exit
+start "" Viber.exe
+timeout 3 & exit
 
 :remove_ads
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/h' & Exit /B)

@@ -41,12 +41,5 @@ echo. & echo  Extracting ...
 tar -xf "%temp%\%filename%" 2>nul
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & echo.)
 
-choice /c YN /m "Create desktop shortcut"
-if errorlevel 2 goto :eof
-powershell -NoP -C ^
-"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop') + '\Betterbird.lnk'); ^
-$s.TargetPath = '%~dp0betterbird.exe'; ^
-$s.WorkingDirectory = '%~dp0'; ^
-$s.IconLocation = '%~dp0betterbird.exe'; ^
-$s.Save()"
-echo. & echo Shortcut 'Betterbird.lnk' created. & echo. & timeout 3
+start "" BetterbirdLauncher.exe
+timeout 3 & exit

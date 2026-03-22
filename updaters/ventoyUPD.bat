@@ -32,21 +32,12 @@ if defined current_version (
 :: download and unpack
 if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename%
-    curl.exe -RL# "%url%" -o "%temp%\%filename%"
+    curl.exe -fRL# "%url%" -o "%temp%\%filename%"
+    if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 ) else (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )
 echo. & echo  Extracting ...
-if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" --strip-components=1 2>nul) else (echo. & echo  %filename% not found. & echo. & pause)
-
-color A & echo. & echo. & echo  DONE. & echo.
-
-choice /c YN /m "Create desktop shortcut"
-if errorlevel 2 goto :eof
-powershell -NoP -C ^
-"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop') + '\Ventoy.lnk'); ^
-$s.TargetPath = '%~dp0Ventoy2Disk.exe'; ^
-$s.WorkingDirectory = '%~dp0'; ^
-$s.IconLocation = '%~dp0Ventoy2Disk.exe'; ^
-$s.Save()"
-echo. & echo Shortcut 'Ventoy.lnk' created. & echo. & timeout 3
+tar -xf "%temp%\%filename%" --strip-components=1 2>nul
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & echo.)
+start "" /b powershell -windowstyle hidden -C "Start-Process 'Ventoy2Disk.exe' -Verb RunAs"

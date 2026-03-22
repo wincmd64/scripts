@@ -26,7 +26,7 @@ cls
 if not defined current_version (echo. & echo  Download KeePass to "%~dp0" ? & echo. & pause
 ) else (
     echo. & echo  Current version: v%current_version%
-    echo  Latest version: v%latest_version%
+    echo   Latest version: v%latest_version%
     echo. & echo  Update? & echo. & pause
 )
 
@@ -36,30 +36,29 @@ if not errorlevel 1 (echo. & echo  [!] KeePass is running. Please close it to co
 
 :: download and unpack
 echo. & echo  Downloading: %download_url%
-curl.exe -RL# "%download_url%" -o "%temp%\kpass.zip"
+curl.exe -fRL# "%download_url%" -o "%temp%\kpass.zip"
+if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 curl.exe -RLO# "https://downloads.sourceforge.net/keepass/KeePass-%latest_version%-Russian.zip" --output-dir "%temp%"
 echo. & echo  Extracting ...
-if exist "%temp%\kpass.zip" (tar -xf "%temp%\kpass.zip" 2>nul) else (echo. & echo  kpass.zip not found. & pause)
+tar -xf "%temp%\kpass.zip" 2>nul
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
 if exist "%temp%\KeePass-%latest_version%-Russian.zip" tar -xf "%temp%\KeePass-%latest_version%-Russian.zip" -C "Languages" 2>nul
 
-echo. & echo. & echo  DONE. & echo.
-choice /c YN /m "Associate with .kdbx files"
-if errorlevel 2 goto eof
+start "" KeePass.exe
+timeout 3 & exit
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
 if not exist "KeePass.exe" (echo. & echo  KeePass.exe not found. & echo. & pause & exit)
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
 if not defined fta if exist "%~dp0SetUserFTA.exe" set "fta=%~dp0SetUserFTA.exe"
+:: get SetUserFTA.exe
 if not exist "%fta%" (
     echo. & echo  SetUserFTA.exe required. Try to download it to TEMP ? & echo. & pause
-    :: check newer version
-    curl.exe -RL#z "%temp%\SetUserFTA.zip" "https://setuserfta.com/SetUserFTA.zip" -o "%temp%\SetUserFTA.zip" 2>nul
-    if exist "%temp%\SetUserFTA.zip" (tar -xf "%temp%\SetUserFTA.zip" -C "%temp%" 2>nul) else (
-        color C & echo. & echo  SetUserFTA.zip not found.
-        echo  Try manual: https://setuserfta.com/SetUserFTA.zip & echo.
-        pause & exit
-    )
+    curl.exe -fRLO# "https://setuserfta.com/SetUserFTA.zip" --output-dir "%temp%"
+    if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo  Try manual: https://setuserfta.com/SetUserFTA.zip & echo. & pause & exit /b)
+    tar -xf "%temp%\SetUserFTA.zip" -C "%temp%"
+    if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
     set "fta=%temp%\SetUserFTA.exe"
 )
 assoc .kdbx=kpass2

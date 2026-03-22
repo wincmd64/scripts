@@ -28,7 +28,7 @@ if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try manual: ht
 
 :: update logic
 if defined current_version (
-    echo  Latest version:  %latest_version%
+    echo   Latest version: %latest_version%
     echo. & echo  Update? & echo. 
     pause
     :check_task
@@ -39,17 +39,18 @@ if defined current_version (
 :: download and unpack
 if not exist "%temp%\%filename%" (
     echo. & echo  Downloading: %filename%
-    curl.exe -RL# "%url%" -o "%temp%\%filename%"
+    curl.exe -fRL# "%url%" -o "%temp%\%filename%"
+    if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 ) else (
     echo. & echo  Downloading: %filename% ^(already in TEMP^)
 )
 echo. & echo  Extracting ...
-if exist "%temp%\%filename%" (tar -xf "%temp%\%filename%" 2>nul) else (echo. & echo  %filename% not found. & echo. & pause)
+tar -xf "%temp%\%filename%" 2>nul
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
 if exist "mpc-hc64.ini" goto done
 echo. & echo  Creating ini ...
 set "temp_ini=%TEMP%\mpc_hc_tmp.ini"
 set "final_ini=mpc-hc64.ini"
-setlocal DisableDelayedExpansion
 (
   echo [Commands2]
   echo ;- Esc instead of Alt+X
@@ -82,28 +83,24 @@ setlocal DisableDelayedExpansion
   echo ButtonSequence=HHDAAAAAIHDAAAAAKHDAAAAAJJDAAAAAOHDAAAAAPHDAAAAAKJDAAAAALHDAAAAACNDAAAAADNDAAAAABLDAAAAANIDAAAAA
   echo ButtonSequenceSize=48
 ) > "%temp_ini%"
-endlocal
 powershell -command "Get-Content '%temp_ini%' | Out-File -FilePath '%final_ini%' -Encoding utf8; Remove-Item '%temp_ini%'"
 
 :done
-echo. & echo. & echo  DONE. & echo.
-choice /c YN /m "Associate video files with MPC-HC"
-if errorlevel 2 goto eof
+start "" mpc-hc64.exe
+timeout 3 & exit
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
 if not exist "mpc-hc64.exe" (echo. & echo  mpc-hc64.exe not found. & echo. & pause & exit)
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
 if not defined fta if exist "%~dp0SetUserFTA.exe" set "fta=%~dp0SetUserFTA.exe"
+:: get SetUserFTA.exe
 if not exist "%fta%" (
     echo. & echo  SetUserFTA.exe required. Try to download it to TEMP ? & echo. & pause
-    :: check newer version
-    curl.exe -RL#z "%temp%\SetUserFTA.zip" "https://setuserfta.com/SetUserFTA.zip" -o "%temp%\SetUserFTA.zip" 2>nul
-    if exist "%temp%\SetUserFTA.zip" (tar -xf "%temp%\SetUserFTA.zip" -C "%temp%" 2>nul) else (
-        color C & echo. & echo  SetUserFTA.zip not found.
-        echo  Try manual: https://setuserfta.com/SetUserFTA.zip & echo.
-        pause & exit
-    )
+    curl.exe -fRLO# "https://setuserfta.com/SetUserFTA.zip" --output-dir "%temp%"
+    if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo  Try manual: https://setuserfta.com/SetUserFTA.zip & echo. & pause & exit /b)
+    tar -xf "%temp%\SetUserFTA.zip" -C "%temp%"
+    if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
     set "fta=%temp%\SetUserFTA.exe"
 )
 set "icons=%~dp0mpciconlib.dll"

@@ -35,12 +35,5 @@ echo. & echo  Extracting ...
 tar -xf "%temp%\cdm.zip" DiskMark64.exe CdmResource
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & echo.)
 
-choice /c YN /m "Create desktop shortcut"
-if errorlevel 2 goto :eof
-powershell -NoP -C ^
-"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop') + '\CrystalDiskMark.lnk'); ^
-$s.TargetPath = '%~dp0DiskMark64.exe'; ^
-$s.WorkingDirectory = '%~dp0'; ^
-$s.IconLocation = '%~dp0DiskMark64.exe'; ^
-$s.Save()"
-echo. & echo Shortcut 'CrystalDiskMark.lnk' created. & echo. & timeout 3
+start "" DiskMark64.exe
+timeout 3 & exit
