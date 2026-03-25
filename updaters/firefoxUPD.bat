@@ -64,6 +64,6 @@ if not exist "distribution\policies.json" (
         echo }
     )>"distribution\policies.json"
 )
-
-start "" firefox.exe
+:: use Profile Manager (-p) for fresh installs
+if not defined current_version (start "" firefox.exe -p) else (start "" firefox.exe)
 timeout 3 & exit
