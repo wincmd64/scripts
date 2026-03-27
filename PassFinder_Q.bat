@@ -45,14 +45,19 @@ goto 7z
 :skip_7z
 cls
 TITLE %app%
+:: escape colors
+for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1) do rem"') do set "ESC=%%b"
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
-if "%~1"=="" (echo. & echo  No objects selected & echo. & pause & exit)
 set count=0
 for %%A in (%*) do set /a count+=1
 if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
-if %count% equ 1 (echo. & echo  Processing: %* ? & echo. & pause) else (echo. & echo  Processing %count% objects? & echo. & pause)
+echo. & echo  Try to open archive using a password list?
+if %count% equ 1 (echo  Target: %* & echo.) else (echo  Target: %count% files & echo.)
+if "%~x1"=="" echo  %ESC%[31m NOTICE: first argument is likely a folder or has no extension.%ESC%[0m & echo.
+pause
+
 set "total_files=0"
 for %%A in (%*) do set /a total_files+=1
 echo. & echo  Files in queue: %total_files% & echo. & echo.
@@ -63,7 +68,7 @@ for %%F in (%*) do (
     call :process_file "%%~F"
     echo.
 )
-echo. & echo  All tasks finished. & echo. & pause & exit
+echo. & echo  %ESC%[7mAll tasks finished%ESC%[0m & echo. & pause & exit
 
 :process_file
 set "target=%~1"
@@ -89,18 +94,14 @@ for /F "usebackq delims=" %%P in ("!pw_list!") do (
         "%app%" t -p"%%P" "!target!" >nul 2>&1
         if !errorlevel! EQU 0 (
             echo. & echo.
-            echo  ==============================
-            echo   PASSWORD FOUND: %%P
-            echo  ==============================
+            echo   %ESC%[42mPASSWORD FOUND: %%P%ESC%[0m
             echo.
             goto :file_done
         )
     )
 )
 echo. & echo.
-echo  ==============================
-echo   PASSWORD NOT FOUND.
-echo  ==============================
+echo   %ESC%[41mPASSWORD NOT FOUND%ESC%[0m
 echo.
 
 :file_done
