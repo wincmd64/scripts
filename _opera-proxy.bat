@@ -21,7 +21,7 @@ if not defined current_version (echo. & echo  Download opera-proxy to "%~dp0" ? 
 :: getting URL, filename and latest_ver
 set "ps_cmd=(Invoke-RestMethod 'https://api.github.com/repos/Alexey71/opera-proxy/releases/latest').tag_name"
 for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do set "latest_version=%%a"
-if "%latest_version%"=="" (echo  Error: Could not find download URL. & echo  Try manual: https://github.com/Alexey71/opera-proxy/releases & pause & exit /b)
+if "%latest_version%"=="" (echo. & echo  Error: Could not find download URL. & echo  Try manual: https://github.com/Alexey71/opera-proxy/releases & echo. & pause & exit /b)
 
 :: update logic
 if defined current_version (
