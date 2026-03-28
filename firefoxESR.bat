@@ -46,10 +46,16 @@ if not errorlevel 1 (echo. & echo  [!] Firefox is running. Please close it to co
 
 :: download and unpack
 echo. & echo  Downloading...
-curl.exe -RL# "%url%" -e"https://download.mozilla.org" -o "%temp%/ffwin.exe.7z"
-curl.exe -RLO# "https://www.7-zip.org/a/7zr.exe" --output-dir "%temp%"
+curl.exe -fRL# "%url%" -e"https://download.mozilla.org" -o "%temp%/ffwin.exe.7z"
+if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
+echo  Getting 7-zip.org/a/7zr.exe
+curl.exe "https://www.7-zip.org/a/7zr.exe" -fRLO# --output-dir "%temp%"
+if errorlevel 1 (echo. & echo  Download failed. Trying github.com/ip7z/7zip/releases/latest/download/7zr.exe)
+curl.exe "https://github.com/ip7z/7zip/releases/latest/download/7zr.exe" -fRLO# --output-dir "%temp%"
+if errorlevel 1 (echo. & echo  Error: download failed. & echo. & pause)
 echo. & echo  Extracting ...
 "%temp%\7zr.exe" x -t7z -bso0 "%temp%/ffwin.exe.7z" -o"%dir%" -xr!setup.exe
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
 xcopy "%dir%core\*" "%dir%" /s /e /y /q
 rd /s /q "core"
 if not exist "distribution" md "distribution"
@@ -69,5 +75,6 @@ if not exist "distribution\policies.json" (
     )>"distribution\policies.json"
 )
 :: use Profile Manager (-p) for fresh installs
+color A & echo. & echo. & echo  DOWNLOADED. Now launching Firefox ESR... & echo.
 if not defined current_version (start "" firefox.exe -p) else (start "" firefox.exe)
-timeout 3 & exit
+timeout 2 & exit

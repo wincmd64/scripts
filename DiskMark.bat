@@ -37,7 +37,7 @@ curl.exe -fRL# "https://sourceforge.net/projects/crystaldiskmark/files/latest/do
 if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 echo. & echo  Extracting ...
 tar -xf "%temp%\cdm.zip" DiskMark64.exe CdmResource
-if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & echo.)
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching CrystalDiskMark... & echo.)
 
 start "" DiskMark64.exe
-timeout 3 & exit
+timeout 2 & exit

@@ -48,6 +48,6 @@ if not exist "%temp%\%filename%" (
 )
 echo. & echo  Extracting ...
 tar -xf "%temp%\%filename%"
-if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & echo.)
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching WinMTR... & echo.)
 start "" WinMTR.exe
-timeout 3 & exit
+timeout 2 & exit

@@ -68,12 +68,13 @@ goto 7z
 
 :skip_7z
 7z e "%temp%\qbt_setup.exe" "qbittorrent.exe" -y
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching qBittorrent... & echo.)
 if not exist "profile" (
     echo. & echo  Creating "profile" folder for Portable mode...
     md "profile"
 )
 start "" qbittorrent.exe
-timeout 3 & exit
+timeout 2 & exit
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)

@@ -60,5 +60,6 @@ if exist "notepad++.exe" (
 ) else (
     robocopy "%temp%\npp_update" "%dir%." /e /move /xd localization updater /r:0 /w:0 >nul
 )
+color A & echo. & echo. & echo  DOWNLOADED. Now launching Notepad++... & echo.
 start "" notepad++.exe
-timeout 3 & exit
+timeout 2 & exit

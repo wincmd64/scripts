@@ -90,8 +90,9 @@ set "final_ini=mpc-hc64.ini"
 powershell -command "Get-Content '%temp_ini%' | Out-File -FilePath '%final_ini%' -Encoding utf8; Remove-Item '%temp_ini%'"
 
 :done
+color A & echo. & echo. & echo  DOWNLOADED. Now launching MPC-HC... & echo.
 start "" mpc-hc64.exe
-timeout 3 & exit
+timeout 2 & exit
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)

@@ -38,17 +38,21 @@ if not errorlevel 1 (echo. & echo  [!] Viber is running. Please close it to cont
 
 :: download and unpack
 echo. & echo  Downloading...
-curl.exe "http://download.cdn.viber.com/desktop/windows/update/update.zip" -RLO# --output-dir "%temp%"
+curl.exe "http://download.cdn.viber.com/desktop/windows/update/update.zip" -fRLO# --output-dir "%temp%"
 if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
-curl.exe "https://www.7-zip.org/a/7zr.exe" -RLO# --output-dir "%temp%"
 echo. & echo  Extracting ...
+echo  Getting 7-zip.org/a/7zr.exe
+curl.exe "https://www.7-zip.org/a/7zr.exe" -fRLO# --output-dir "%temp%"
+if errorlevel 1 (echo. & echo  Download failed. Trying github.com/ip7z/7zip/releases/latest/download/7zr.exe)
+curl.exe "https://github.com/ip7z/7zip/releases/latest/download/7zr.exe" -fRLO# --output-dir "%temp%"
+if errorlevel 1 (echo. & echo  Error: download failed. & echo. & pause)
 tar -xf "%temp%\update.zip" -C "%temp%" --strip-components=1
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
 "%temp%\7zr.exe" x "%temp%\pack.exe" -o".\" -y -bso0
-color A & echo. & echo  DONE. Running Viber...  & echo.
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching Viber... & echo.)
 
 start "" Viber.exe
-timeout 3 & exit
+timeout 2 & exit
 
 :remove_ads
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/h' & Exit /B)

@@ -43,5 +43,5 @@ if not exist "%temp%\%filename%" (
 )
 echo. & echo  Extracting ...
 tar -xf "%temp%\%filename%" --strip-components=1 2>nul
-if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & echo.)
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching Ventoy... & echo.)
 start "" /b powershell -windowstyle hidden -C "Start-Process 'Ventoy2Disk.exe' -Verb RunAs"

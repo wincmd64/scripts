@@ -20,18 +20,18 @@ if /i "%~1"=="/a" goto associate
 if exist "KeePass.exe" (
     echo. & echo  Getting local version...
     for /f "tokens=*" %%v in ('powershell -command "(Get-Item 'KeePass.exe').VersionInfo.ProductVersion.Trim()"') do set "current_version=%%v"
+    cls
 )
 
-echo. & echo  Getting latest version...
+if not defined current_version (echo. & echo  Download KeePass to "%dir%" ? & echo. & pause
+) else (echo. & echo  Current version: v%current_version% & echo  Checking for updates...)
+
 for /f %%a in ('powershell -command "$req = [System.Net.HttpWebRequest]::Create('https://sourceforge.net/projects/keepass/files/latest/download'); $req.AllowAutoRedirect = $true; $res = $req.GetResponse(); $finalUrl = $res.ResponseUri.ToString(); if ($finalUrl -match 'KeePass-([\d\.]+)\.zip') { $matches[1] }"') do (
     set "latest_version=%%a"
     set "download_url=https://sourceforge.net/projects/keepass/files/KeePass%%202.x/%%a/KeePass-%%a.zip/download"
 )
-cls
 
-if not defined current_version (echo. & echo  Download KeePass to "%dir%" ? & echo. & pause
-) else (
-    echo. & echo  Current version: v%current_version%
+if defined current_version (
     echo   Latest version: v%latest_version%
     echo. & echo  Update? & echo. & pause
 )
@@ -49,9 +49,10 @@ echo. & echo  Extracting ...
 tar -xf "%temp%\kpass.zip" 2>nul
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
 if exist "%temp%\KeePass-%latest_version%-Russian.zip" tar -xf "%temp%\KeePass-%latest_version%-Russian.zip" -C "Languages" 2>nul
+color A & echo. & echo. & echo  DOWNLOADED. Now launching KeePass... & echo.
 
 start "" KeePass.exe
-timeout 3 & exit
+timeout 2 & exit
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)

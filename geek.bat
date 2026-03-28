@@ -37,5 +37,5 @@ curl.exe "https://geekuninstaller.com/geek.zip" -fRLO# --output-dir "%temp%"
 if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 echo. & echo  Extracting ...
 tar -xf "%temp%\geek.zip"
-if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo  DONE. & echo.)
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo  DOWNLOADED. Now launching Geek Uninstaller... & echo.)
 start "" /b powershell -windowstyle hidden -C "Start-Process 'geek.exe' -Verb RunAs"

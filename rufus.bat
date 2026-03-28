@@ -19,7 +19,7 @@ if exist "rufus-p.exe" (
 )
 
 if not defined current_version (echo. & echo  Download Rufus to "%dir%" ? & echo. & pause
-) else (echo. & echo  Current version: %current_version% & echo  Checking for updates...)
+) else (echo. & echo  Current version: v%current_version% & echo  Checking for updates...)
 
 :: getting URL, filename and latest_ver
 set "ps_cmd=$r=Invoke-RestMethod 'https://api.github.com/repos/pbatard/rufus/releases/latest'; $a=$r.assets|?{$_.name -like '*p.exe'}|select -f 1; echo $r.tag_name; echo $a.browser_download_url; echo $a.name"
@@ -39,5 +39,5 @@ tasklist /nh | findstr /i "rufus.*\.exe" >nul && (echo. & echo  [!] Rufus is run
 
 :: download and unpack
 curl.exe -fRL# "%url%" -o "rufus-p.exe" 2>nul
-if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b) else (color A & echo. & echo. & echo  DONE. & echo.)
+if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching Rufus... & echo.)
 start "" /b powershell -windowstyle hidden -C "Start-Process 'rufus-p.exe' -Verb RunAs"

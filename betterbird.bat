@@ -43,7 +43,7 @@ if not exist "%temp%\%filename%" (
 )
 echo. & echo  Extracting ...
 tar -xf "%temp%\%filename%" 2>nul
-if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & echo.)
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching Betterbird... & echo.)
 
 start "" BetterbirdLauncher.exe
-timeout 3 & exit
+timeout 2 & exit

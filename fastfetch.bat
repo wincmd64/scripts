@@ -36,13 +36,9 @@ if defined current_version (
 )
 
 :: download and unpack
-if not exist "%temp%\%filename%" (
-    echo. & echo  Downloading: %filename%
-    curl.exe -fRL# "%url%" -o "%temp%\%filename%"
-    if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
-) else (
-    echo. & echo  Downloading: %filename% ^(already in TEMP^)
-)
+echo. & echo  Downloading: %filename%
+curl.exe -fRL# "%url%" -o "%temp%\%filename%"
+if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
 echo. & echo  Extracting ...
 tar -xf "%temp%\%filename%" fastfetch.exe
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DONE. & timeout 2)
