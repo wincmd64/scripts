@@ -20,7 +20,7 @@ set "prm=/a /pup /cloud=0"
 
 :start
 if exist "%app%" goto skip_download
-echo. & echo  "a2cmd.exe" not found. & echo  Try to download it to "%dir%" ? & echo. & pause
+echo. & echo  Download Emsisoft CLI Scanner ^(~300mb^) to "%dir%" ? & echo. & pause
 curl.exe -fRLO# "https://dl.emsisoft.com/EmsisoftCommandlineScanner64.exe"
 if errorlevel 1 (echo. & echo  Error: download failed. & echo. & pause & goto start)
 echo  Extracting...
