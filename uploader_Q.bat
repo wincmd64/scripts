@@ -34,6 +34,7 @@ if %count% equ 1 (
     ) else (
         for /f "delims=" %%i in ('curl -# -F "file=@%~1" https://0x0.st') do (set "LNK=%%i")
     )
+    if not defined LNK (echo  Error: Failed to get link. & exit /b)
     call echo  Link: %ESC%[36m%%LNK%%%ESC%[0m
     call echo | set /p="%%LNK%%" | clip
     for /f "tokens=*" %%i in ('certutil -hashfile "%~1" MD5 ^| find /v "MD5" ^| find /v "CertUtil"') do (echo   MD5: %%i)
