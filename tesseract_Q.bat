@@ -101,5 +101,5 @@ exit
 :shortcut
 powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Tesseract OCR.lnk'); ^
-$s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,55'; $s.Save()"
+$s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,201'; $s.Save()"
 echo. & echo  Shortcut 'Tesseract OCR.lnk' created. & echo. & timeout 2
