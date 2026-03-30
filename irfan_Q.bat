@@ -240,7 +240,7 @@ echo. & echo Current associations: & "%fta%" get | findstr /i "irfan" & echo. & 
 
 :process
 assoc .%1=irfan_%1
-ftype irfan_%1="%app%" "%%1"
+ftype irfan_%1="%app_path%" "%%1"
 reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f >nul
 "%fta%" .%1 irfan_%1
 reg add "HKCU\Software\Classes\irfan_%1\DefaultIcon" /ve /d "%dir%Plugins\Icons.dll,%2" /f >nul
