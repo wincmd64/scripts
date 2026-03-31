@@ -108,7 +108,6 @@ if not exist "%fta%" (
     if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
     set "fta=%temp%\SetUserFTA.exe"
 )
-set "icons=%dir%mpciconlib.dll"
 
 :: AVI
 call :process avi 8
@@ -203,5 +202,5 @@ assoc .%1=mpc_%1
 ftype mpc_%1="%dir%mpc-hc64.exe" "%%1"
 reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f >nul
 "%fta%" .%1 mpc_%1
-reg add "HKCU\Software\Classes\mpc_%1\DefaultIcon" /ve /d "%icons%,%2" /f >nul
+reg add "HKCU\Software\Classes\mpc_%1\DefaultIcon" /ve /d "%dir%mpciconlib.dll,%2" /f >nul
 exit /b
