@@ -11,6 +11,9 @@ setlocal
 set "dir=%~dp0"
 cd /d "%dir%"
 
+:: arguments
+if "%~1" NEQ "" (if exist "WinMergeU.exe" (start "" "WinMergeU.exe" %* & exit))
+
 if exist "WinMergeU.exe" (
     echo. & echo  Getting current version...
     for /f "tokens=*" %%v in ('powershell -command "(Get-Item 'WinMergeU.exe').VersionInfo.ProductVersion.Trim()"') do set "current_version=v%%v"
@@ -62,4 +65,4 @@ if not exist "winmerge.ini" (
     ) > "winmerge.ini"
 )
 
-color A & echo. & echo. & echo  DONE. & timeout 3
+start "" WinMergeU.exe "%~1" "%~2"
