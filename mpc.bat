@@ -4,7 +4,7 @@
 :: Look for mpc-hc64.exe in the script directory.
 :: If present, check for updates; otherwise offer to download the latest version.
 
-:: Use /a to associate with .torrent files
+:: Use /a to associate with video files
 
 @echo off
 setlocal
