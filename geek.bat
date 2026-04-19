@@ -31,11 +31,11 @@ if not defined current_version (echo. & echo  Download Geek Uninstaller to "%dir
 tasklist /fi "imagename eq geek.exe" | find /i "geek.exe" >nul
 if not errorlevel 1 (echo. & echo  [!] Geek Uninstaller is running. Please close it to continue. & echo. & pause & goto check_task)
 
-:: download and unpack
+:download
 echo. & echo  Downloading...
 curl.exe "https://geekuninstaller.com/geek.zip" -fRLO# --output-dir "%temp%"
-if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
+if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo. & timeout 5 & goto download)
 echo. & echo  Extracting ...
 tar -xf "%temp%\geek.zip"
-if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo  DOWNLOADED. Now launching Geek Uninstaller... & echo.)
+if errorlevel 1 (color C & echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo  DOWNLOADED. Now launching... & echo. & timeout 3)
 start "" /b powershell -windowstyle hidden -C "Start-Process 'geek.exe' -Verb RunAs"
