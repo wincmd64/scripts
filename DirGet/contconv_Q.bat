@@ -28,6 +28,7 @@ if exist "%app%" (
     cls
 )
 
+:update
 if not defined file_date (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current file date: %file_date% & echo  Checking for updates...)
 
