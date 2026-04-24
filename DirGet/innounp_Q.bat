@@ -13,9 +13,9 @@
 setlocal
 
 :: [SETTINGS]
+set "name=InnoUnp CLI"
 set "app=innounp.exe"
 set "dir=%~dp0"
-set "app_path=%dir%%app%"
 cd /d "%dir%"
 
 :: no args - download or update, else - proceed
@@ -28,7 +28,7 @@ if exist "%app%" (
     cls
 )
 
-if not defined file_date (echo. & echo  Download InnoUnp CLI to "%dir%" ? & echo. & pause
+if not defined file_date (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current file date: %file_date% & echo  Checking for updates...)
 
 :: getting server file date
@@ -42,14 +42,15 @@ if defined file_date (
 )
 
 :: download and unpack
+:download
 curl.exe -fRLO# "https://www.rathlev-home.de/tools/download/innounp-2.zip" --output-dir "%temp%"
-if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
+if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo. & timeout 5 & goto download)
 tar -xf "%temp%\innounp-2.zip" innounp.exe
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (echo. & echo. & echo  DONE. & echo. & pause)
 
 :skip_download
 cls
-TITLE %app%
+TITLE %dir%%app%
 :: /s arg
 if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
@@ -63,5 +64,5 @@ color A & timeout 2 & exit
 :shortcut
 powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\InnoUnpacker.lnk'); ^
-$s.TargetPath = '%~f0'; $s.IconLocation = '%app_path%'; $s.Save()"
+$s.TargetPath = '%~f0'; $s.IconLocation = '%dir%%app%'; $s.Save()"
 echo. & echo  Shortcut 'InnoUnpacker.lnk' created. & echo. & timeout 2
