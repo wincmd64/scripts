@@ -28,9 +28,10 @@ if exist "%app%" (for /f "tokens=2" %%i in ('"%app%" -V') do set current_version
 if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current version: v%current_version% & echo  Checking for updates...)
 
-:: function: get_latest
-call :get_latest "Lymphatus/caesium-clt" "*windows-msvc.zip" "https://github.com/Lymphatus/caesium-clt/releases"
-if not defined url (goto update) else (echo. & echo  Update? & echo. & pause)
+:: github latest ver
+call :github "Lymphatus/caesium-clt" "*windows-msvc.zip" "https://github.com/Lymphatus/caesium-clt/releases"
+if not defined url (goto update)
+if defined current_version (echo. & echo  Update? & echo. & pause)
 
 :: download and unpack
 :download
@@ -60,7 +61,7 @@ powershell -NoP -C ^
 $s.TargetPath = '%~f0'; $s.IconLocation = 'shell32.dll,139'; $s.Save()"
 echo. & echo  Shortcut 'Image compression.lnk' created. & echo. & timeout 2 & exit
 
-:get_latest
+:github
 set "repo=%~1"
 set "filter=%~2"
 set "manual_url=%~3"

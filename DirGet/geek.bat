@@ -40,4 +40,4 @@ if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo.
 echo. & echo  Extracting ...
 tar -xf "%temp%\geek.zip"
 if errorlevel 1 (color C & echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo  DOWNLOADED. Now launching... & echo.)
-start "" geek.exe
+start "" %app%

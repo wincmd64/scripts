@@ -41,5 +41,5 @@ if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo.
 echo. & echo  Extracting ...
 tar -xf "%temp%\cdm.zip" DiskMark64.exe CdmResource
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching... & echo.)
-start "" DiskMark64.exe
+start "" %app%
 timeout 3

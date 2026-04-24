@@ -14,9 +14,9 @@
 setlocal
 
 :: [SETTINGS]
+set "name=IrfanView"
 set "app=i_view64.exe"
 set "dir=%~dp0"
-set "app_path=%dir%%app%"
 cd /d "%dir%"
 
 :: no args - download or update, else - proceed
@@ -35,7 +35,7 @@ if exist "%app%" (
     cls
 )
 :: update logic
-if not defined current_version (echo. & echo  Download IrfanView to "%dir%" ? & echo. & pause
+if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (
     echo. & echo  Current version: %current_version%
     echo   Latest version: %latest_version%
@@ -43,8 +43,8 @@ if not defined current_version (echo. & echo  Download IrfanView to "%dir%" ? & 
 )
 
 :check_task
-tasklist /fi "imagename eq i_view64.exe" | find /i "i_view64.exe" >nul
-if not errorlevel 1 (echo. & echo  [!] IrfanView is running. Please close it to continue. & echo. & pause & goto check_task)
+tasklist /fi "imagename eq %app%" | find /i "%app%" >nul
+if not errorlevel 1 (echo. & echo  [!] %name% is running. Please close it to continue. & echo. & pause & goto check_task)
 
 :: download and unpack
 echo. & echo  Downloading... & echo.
@@ -91,7 +91,7 @@ echo. & echo. & echo  DONE. & echo. & pause
 
 :skip_download
 cls
-TITLE %app%
+TITLE %dir%%app%
 :: arguments
 if /i "%~1"=="/a" (if "%~2"=="" goto associate)
 if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
@@ -210,7 +210,7 @@ start "" "%app%" "%~1" /wall=4 /killmesoftly & exit
 :shortcut
 powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\IrfanView converter.lnk'); ^
-$s.TargetPath = '%~f0'; $s.IconLocation = '%app_path%'; $s.Save()"
+$s.TargetPath = '%~f0'; $s.IconLocation = '%dir%%app%'; $s.Save()"
 echo. & echo  Shortcut 'IrfanView converter.lnk' created. & echo. & timeout 2 & exit
 
 :associate
@@ -240,7 +240,7 @@ echo. & echo Current associations: & "%fta%" get | findstr /i "irfan" & echo. & 
 
 :process
 assoc .%1=irfan_%1
-ftype irfan_%1="%app_path%" "%%1"
+ftype irfan_%1="%dir%%app%" "%%1"
 reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f >nul
 "%fta%" .%1 irfan_%1
 reg add "HKCU\Software\Classes\irfan_%1\DefaultIcon" /ve /d "%dir%Plugins\Icons.dll,%2" /f >nul

@@ -10,6 +10,8 @@
 setlocal
 
 :: [SETTINGS]
+set "name=KeePass"
+set "app=KeePass.exe"
 set "dir=%~dp0"
 cd /d "%dir%"
 
@@ -17,13 +19,13 @@ cd /d "%dir%"
 if /i "%~1"=="/a" goto associate
 
 :: get local ver
-if exist "KeePass.exe" (
+if exist "%app%" (
     echo. & echo  Getting local version...
-    for /f "tokens=*" %%v in ('powershell -command "(Get-Item 'KeePass.exe').VersionInfo.ProductVersion.Trim()"') do set "current_version=%%v"
+    for /f "tokens=*" %%v in ('powershell -command "(Get-Item '%app%').VersionInfo.ProductVersion.Trim()"') do set "current_version=%%v"
     cls
 )
 
-if not defined current_version (echo. & echo  Download KeePass to "%dir%" ? & echo. & pause
+if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current version: v%current_version% & echo  Checking for updates...)
 
 for /f %%a in ('powershell -command "$req = [System.Net.HttpWebRequest]::Create('https://sourceforge.net/projects/keepass/files/latest/download'); $req.AllowAutoRedirect = $true; $res = $req.GetResponse(); $finalUrl = $res.ResponseUri.ToString(); if ($finalUrl -match 'KeePass-([\d\.]+)\.zip') { $matches[1] }"') do (
@@ -37,8 +39,8 @@ if defined current_version (
 )
 
 :check_task
-tasklist /fi "imagename eq KeePass.exe" | find /i "KeePass.exe" >nul
-if not errorlevel 1 (echo. & echo  [!] KeePass is running. Please close it to continue. & echo. & pause & goto check_task)
+tasklist /fi "imagename eq %app%" | find /i "%app%" >nul
+if not errorlevel 1 (echo. & echo  [!] %name% is running. Please close it to continue. & echo. & pause & goto check_task)
 
 :: download and unpack
 echo. & echo  Downloading: %download_url%
@@ -49,14 +51,13 @@ echo. & echo  Extracting ...
 tar -xf "%temp%\kpass.zip" 2>nul
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
 if exist "%temp%\KeePass-%latest_version%-Russian.zip" tar -xf "%temp%\KeePass-%latest_version%-Russian.zip" -C "Languages" 2>nul
-color A & echo. & echo. & echo  DOWNLOADED. Now launching KeePass... & echo.
-
-start "" KeePass.exe
-timeout 2 & exit
+color A & echo. & echo. & echo  DOWNLOADED. Now launching... & echo.
+start "" %app%
+timeout 3 & exit
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
-if not exist "KeePass.exe" (echo. & echo  KeePass.exe not found. & echo. & pause & exit)
+if not exist "%app%" (echo. & echo  %app% not found. & echo. & pause & exit)
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
 if not defined fta if exist "%dir%SetUserFTA.exe" set "fta=%dir%SetUserFTA.exe"
 :: get SetUserFTA.exe
@@ -69,8 +70,8 @@ if not exist "%fta%" (
     set "fta=%temp%\SetUserFTA.exe"
 )
 assoc .kdbx=kpass2
-ftype kpass2="%dir%KeePass.exe" "%%1"
+ftype kpass2="%dir%%app%" "%%1"
 reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f >nul
 "%fta%" .kdbx kpass2
-reg add "HKCU\Software\Classes\kpass2\DefaultIcon" /ve /d "%dir%KeePass.exe" /f >nul
+reg add "HKCU\Software\Classes\kpass2\DefaultIcon" /ve /d "%dir%%app%" /f >nul
 echo. & echo Current KeePass associations: & "%fta%" get | findstr /i "kpass2" & echo. & pause & exit

@@ -20,6 +20,7 @@ if exist "%app%" (
     cls
 )
 
+:update
 if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current version: %current_version% & echo  Checking for updates...)
 
@@ -42,7 +43,7 @@ tar -xf "%temp%\%filename%"
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching... & echo.)
 type nul > "portable"
 
-start "" HTTP_Downloader.exe --clipboard
+start "" %app% --clipboard
 timeout 3 & exit
 
 :github

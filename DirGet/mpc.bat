@@ -10,46 +10,38 @@
 setlocal
 
 :: [SETTINGS]
+set "name=MPC-HC"
+set "app=mpc-hc64.exe"
 set "dir=%~dp0"
 cd /d "%dir%"
 
 :: arguments
 if /i "%~1"=="/a" goto associate
 
-if exist "mpc-hc64.exe" (
+if exist "%app%" (
     echo. & echo  Getting current version...
-    for /f "tokens=*" %%v in ('powershell -command "$v = (Get-Item 'mpc-hc64.exe').VersionInfo.ProductVersion; if ($v -match '^\d+\.\d+\.\d+') { $matches[0] } else { $v.Trim() }"') do set "current_version=%%v"
+    for /f "tokens=*" %%v in ('powershell -command "$v = (Get-Item '%app%').VersionInfo.ProductVersion; if ($v -match '^\d+\.\d+\.\d+') { $matches[0] } else { $v.Trim() }"') do set "current_version=%%v"
     cls
 )
 
-if not defined current_version (echo. & echo  Download MPC-HC to "%dir%" ? & echo. & pause
+:update
+if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current version: %current_version% & echo  Checking for updates...)
 
-:: getting URL, filename and latest_ver
-set "ps_cmd=$r=Invoke-RestMethod 'https://api.github.com/repos/clsid2/mpc-hc/releases/latest'; $a=$r.assets|?{$_.name -like '*x64.zip'}|select -f 1; echo $r.tag_name; echo $a.browser_download_url; echo $a.name"
-for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do (
-    if not defined latest_version (set "latest_version=%%a") else if not defined url (set "url=%%a") else (set "filename=%%a")
-)
-if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try manual: https://github.com/clsid2/mpc-hc/releases & pause & exit /b)
+:: github latest ver
+call :github "clsid2/mpc-hc" "*x64.zip" "https://github.com/clsid2/mpc-hc/releases"
+if not defined url (goto update)
+if defined current_version (echo. & echo  Update? & echo. & pause)
 
-:: update logic
-if defined current_version (
-    echo   Latest version: %latest_version%
-    echo. & echo  Update? & echo. 
-    pause
-    :check_task
-    tasklist /fi "imagename eq mpc-hc64.exe" | find /i "mpc-hc64.exe" >nul
-    if not errorlevel 1 (echo. & echo  [!] MPC-HC is running. Please close it to continue. & echo. & pause & goto check_task)
-)
+:check_task
+tasklist /fi "imagename eq %app%" | find /i "%app%" >nul
+if not errorlevel 1 (echo. & echo  [!] %name% running. Please close it to continue. & echo. & pause & goto check_task)
 
 :: download and unpack
-if not exist "%temp%\%filename%" (
-    echo. & echo  Downloading: %filename%
-    curl.exe -fRL# "%url%" -o "%temp%\%filename%"
-    if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
-) else (
-    echo. & echo  Downloading: %filename% ^(already in TEMP^)
-)
+:download
+echo. & echo  Downloading: %filename%
+curl.exe -fRL# "%url%" -o "%temp%\%filename%"
+if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo. & timeout 5 & goto download)
 echo. & echo  Extracting ...
 tar -xf "%temp%\%filename%" 2>nul
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
@@ -92,13 +84,13 @@ set "final_ini=mpc-hc64.ini"
 powershell -command "Get-Content '%temp_ini%' | Out-File -FilePath '%final_ini%' -Encoding utf8; Remove-Item '%temp_ini%'"
 
 :done
-color A & echo. & echo. & echo  DOWNLOADED. Now launching MPC-HC... & echo.
-start "" mpc-hc64.exe
-timeout 2 & exit
+color A & echo. & echo. & echo  DOWNLOADED. Now launching... & echo.
+start "" %app%
+timeout 3 & exit
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
-if not exist "mpc-hc64.exe" (echo. & echo  mpc-hc64.exe not found. & echo. & pause & exit)
+if not exist "%app%" (echo. & echo  %app% not found. & echo. & pause & exit)
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
 if not defined fta if exist "%dir%SetUserFTA.exe" set "fta=%dir%SetUserFTA.exe"
 :: get SetUserFTA.exe
@@ -197,12 +189,51 @@ call :process mod 0
 call :process 264 0
 call :process hevc 0
 
-echo. & echo Current MPC-HC associations: & "%fta%" get | findstr /i "mpc" & echo. & pause & exit
+echo. & echo Current associations: & "%fta%" get | findstr /i "mpc" & echo. & pause & exit
 
 :process
 assoc .%1=mpc_%1
-ftype mpc_%1="%dir%mpc-hc64.exe" "%%1"
+ftype mpc_%1="%dir%%app%" "%%1"
 reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f >nul
 "%fta%" .%1 mpc_%1
 reg add "HKCU\Software\Classes\mpc_%1\DefaultIcon" /ve /d "%dir%mpciconlib.dll,%2" /f >nul
 exit /b
+
+:github
+set "repo=%~1"
+set "filter=%~2"
+set "manual_url=%~3"
+set "latest_version="
+set "url="
+set "filename="
+set "server_date="
+
+set "ps_cmd=$ErrorActionPreference = 'SilentlyContinue'; $r=Invoke-RestMethod 'https://api.github.com/repos/%repo%/releases'; if(!$r){exit}; if($r -is [array]){$rel=$r[0]}else{$rel=$r}; $a=$rel.assets|?{$_.name -like '%filter%'}|select -f 1; echo $rel.tag_name; echo $a.browser_download_url; echo $a.name; echo ([datetime]$rel.published_at).ToString('dd.MM.yyyy')"
+for /f "usebackq tokens=*" %%a in (`powershell -command "%ps_cmd%" 2^>nul`) do (
+    if not defined latest_version (
+        set "latest_version=%%a"
+    ) else if not defined url (
+        set "url=%%a"
+    ) else if not defined filename (
+        set "filename=%%a"
+    ) else (
+        set "server_date=%%a"
+    )
+)
+
+:: if PS failed, latest_version will contain error text or be empty
+if "%url:~0,4%" NEQ "http" (
+    set "url="
+    set "latest_version="
+    echo.
+    echo  Error: Repository "%repo%" not found or API limit reached.
+    echo  Try manual: %manual_url%  & echo. & pause
+    exit /b
+)
+
+echo. & echo  Repo: %repo%
+echo   Ver: %latest_version% (%server_date%)
+echo  File: %filename%
+echo  Link: %url%
+echo.
+goto :eof
