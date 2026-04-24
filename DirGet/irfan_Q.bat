@@ -215,7 +215,6 @@ echo. & echo  Shortcut 'IrfanView converter.lnk' created. & echo. & timeout 2 & 
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
-if not exist "%app%" (echo. & echo  %app% not found. & echo. & pause & exit)
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
 if not defined fta if exist "%dir%SetUserFTA.exe" set "fta=%dir%SetUserFTA.exe"
 :: get SetUserFTA.exe
@@ -226,6 +225,7 @@ if not exist "%fta%" (
     tar -xf "%temp%\SetUserFTA.zip" -C "%temp%"
     if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
     set "fta=%temp%\SetUserFTA.exe"
+    echo.
 )
 
 call :process jpg 14

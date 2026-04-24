@@ -16,7 +16,7 @@ set "dir=%~dp0"
 cd /d "%dir%"
 
 :: arguments
-if /i "%~1"=="/a" goto associate
+if exist "%app%" if /i "%~1"=="/a" goto associate
 
 :: get local ver
 if exist "%app%" (
@@ -57,7 +57,6 @@ timeout 3 & exit
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
-if not exist "%app%" (echo. & echo  %app% not found. & echo. & pause & exit)
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
 if not defined fta if exist "%dir%SetUserFTA.exe" set "fta=%dir%SetUserFTA.exe"
 :: get SetUserFTA.exe
@@ -68,10 +67,11 @@ if not exist "%fta%" (
     tar -xf "%temp%\SetUserFTA.zip" -C "%temp%"
     if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
     set "fta=%temp%\SetUserFTA.exe"
+    echo.
 )
 assoc .kdbx=kpass2
 ftype kpass2="%dir%%app%" "%%1"
 reg add "HKCU\Software\Kolbicz IT\SetUserFTA" /v RunCount /t REG_DWORD /d 1 /f >nul
 "%fta%" .kdbx kpass2
 reg add "HKCU\Software\Classes\kpass2\DefaultIcon" /ve /d "%dir%%app%" /f >nul
-echo. & echo Current KeePass associations: & "%fta%" get | findstr /i "kpass2" & echo. & pause & exit
+echo. & echo Current associations: & "%fta%" get | findstr /i "kpass2" & echo. & pause & exit

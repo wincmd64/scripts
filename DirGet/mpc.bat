@@ -16,7 +16,7 @@ set "dir=%~dp0"
 cd /d "%dir%"
 
 :: arguments
-if /i "%~1"=="/a" goto associate
+if exist "%app%" if /i "%~1"=="/a" goto associate
 
 if exist "%app%" (
     echo. & echo  Getting current version...
@@ -90,7 +90,6 @@ timeout 3 & exit
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
-if not exist "%app%" (echo. & echo  %app% not found. & echo. & pause & exit)
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "fta=%%a"
 if not defined fta if exist "%dir%SetUserFTA.exe" set "fta=%dir%SetUserFTA.exe"
 :: get SetUserFTA.exe
@@ -101,6 +100,7 @@ if not exist "%fta%" (
     tar -xf "%temp%\SetUserFTA.zip" -C "%temp%"
     if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
     set "fta=%temp%\SetUserFTA.exe"
+    echo.
 )
 
 :: AVI
