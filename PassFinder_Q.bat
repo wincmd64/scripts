@@ -18,23 +18,18 @@ set "dir=%~dp0"
 cd /d "%dir%"
 
 :7z
-for /f "tokens=* delims=" %%a in ('where 7z.exe 2^>nul') do set "app=%%a"
-if not defined app if exist "C:\Program Files\7-Zip\7z.exe" set "app=C:\Program Files\7-Zip\7z.exe"
-if not defined app if exist "%dir%7z.exe" set "app=%dir%7z.exe"
-if exist "%app%" goto skip_7z
+for /f "tokens=* delims=" %%a in ('where 7z.exe 2^>nul') do set "zp=%%a"
+if not defined zp if exist "C:\Program Files\7-Zip\7z.exe" set "zp=C:\Program Files\7-Zip\7z.exe"
+if exist "%zp%" goto skip_7z
 echo. & echo  "7z.exe" not found. & echo  Try to download it to "%dir%" ? & echo. & pause
 :: getting the latest version via the GitHub API
 echo. & echo  Getting the latest version...
 set "ps_cmd=$r=Invoke-RestMethod 'https://api.github.com/repos/ip7z/7zip/releases/latest'; $a=$r.assets|?{$_.name -like '*x64.msi'}|select -f 1; echo $a.browser_download_url; echo $a.name"
 for /f "tokens=*" %%a in ('powershell -command "%ps_cmd%"') do (if not defined url (set "url=%%a") else (set "filename=%%a"))
 if "%url%"=="" (echo  Error: Could not find download URL. & echo  Try: winget install 7zip.7zip & pause & exit /b)
-if not exist "%temp%\%filename%" (
-    echo. & echo  Downloading: %filename%
-    curl.exe -fRL# "%url%" -o "%temp%\%filename%"
-    if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
-) else (
-    echo. & echo  Downloading: %filename% ^(already in TEMP^)
-)
+echo. & echo  Downloading: %filename%
+curl.exe -fRL# "%url%" -o "%temp%\%filename%"
+if errorlevel 1 (echo. & echo  Error: download failed. & echo. & pause & goto 7z)
 echo. & echo  Extracting ...
 msiexec /a "%temp%\%filename%" /qn TARGETDIR="%temp%\7z"
 :: finds 7z.exe+7z.dll and move it
@@ -44,7 +39,7 @@ goto 7z
 
 :skip_7z
 cls
-TITLE %app%
+TITLE %zp%
 :: escape colors
 for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1) do rem"') do set "ESC=%%b"
 :: arguments
@@ -91,7 +86,7 @@ for /F "usebackq delims=" %%P in ("!pw_list!") do (
         <nul set /p "=." 
         if !dot_count! EQU 50 (echo. & set dot_count=0)
         
-        "%app%" t -p"%%P" "!target!" >nul 2>&1
+        "%zp%" t -p"%%P" "!target!" >nul 2>&1
         if !errorlevel! EQU 0 (
             echo. & echo.
             echo   %ESC%[42mPASSWORD FOUND: %%P%ESC%[0m
