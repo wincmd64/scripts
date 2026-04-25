@@ -14,9 +14,9 @@ setlocal
 chcp 1251 >nul
 
 :: [SETTINGS]
+set "name=TrID CLI"
 set "app=trid.exe"
 set "dir=%~dp0"
-set "app_path=%dir%%app%"
 cd /d "%dir%"
 
 :: no args - download or update, else - proceed
@@ -29,7 +29,7 @@ if exist "%app%" (
     cls
 )
 
-if not defined file_date (echo. & echo  Download TrID CLI to "%dir%" ? & echo. & pause
+if not defined file_date (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current file date: %file_date% & echo  Checking for updates...)
 
 :: getting server file date
@@ -52,7 +52,7 @@ echo. & echo. & echo  DONE. & echo. & pause
 
 :skip_download
 cls
-TITLE %app%
+TITLE %dir%%app%
 :: /s arg
 if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
@@ -73,12 +73,12 @@ pushd "%~dp1"
     )
 ) > "%TEMP%\tridlist.txt"
 :: add -o "trid.csv" to generate the results in CSV format
-"%app_path%" -d "%dir%triddefs.trd" -f "%TEMP%\tridlist.txt"
+"%dir%%app%" -d "%dir%triddefs.trd" -f "%TEMP%\tridlist.txt"
 del "%TEMP%\tridlist.txt"
 echo. & echo. & echo  DONE. & echo. & pause & exit
 
 :shortcut
 powershell -NoP -C ^
 "$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\File Identifier.lnk'); ^
-$s.TargetPath = '%~f0'; $s.IconLocation = '%app_path%'; $s.Save()"
+$s.TargetPath = '%~f0'; $s.IconLocation = '%dir%%app%'; $s.Save()"
 echo. & echo  Shortcut 'File Identifier.lnk' created. & echo. & timeout 2

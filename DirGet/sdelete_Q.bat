@@ -13,9 +13,9 @@
 setlocal
 
 :: [SETTINGS]
+set "name=SDelete CLI"
 set "app=sdelete64.exe"
 set "dir=%~dp0"
-set "app_path=%dir%%app%"
 cd /d "%dir%"
 
 :: no args - download or update, else - proceed
@@ -28,7 +28,7 @@ if exist "%app%" (
     cls
 )
 
-if not defined file_date (echo. & echo  Download SDelete CLI to "%dir%" ? & echo. & pause
+if not defined file_date (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current file date: %file_date% & echo  Checking for updates...)
 
 :: getting server file date
@@ -41,13 +41,13 @@ if defined file_date (
     pause
 )
 
-:: download
+:download
 curl.exe -fRLO# "https://live.sysinternals.com/sdelete64.exe"
-if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b) else (echo. & echo. & echo  DONE. & echo. & pause)
+if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo. & timeout 5 & goto download)
 
 :skip_download
 cls
-TITLE %app%
+TITLE %dir%%app%
 :: escape colors
 for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1) do rem"') do set "ESC=%%b"
 :: /s arg

@@ -20,3 +20,4 @@ if errorlevel 1 (color C & echo. & echo  Error: download failed. Try manual: htt
 for %%i in ("AnyDesk.exe") do set "new_date=%%~ti"
 if "%old_date%"=="%new_date%" (echo. & echo  Up to date.) else (color A & echo. & echo  Updated successfully! & timeout 2)
 start "" "AnyDesk.exe"
+exit

@@ -12,24 +12,24 @@
 setlocal
 
 :: [SETTINGS]
+set "name=Emsisoft CLI Scanner"
 set "app=a2cmd.exe"
 set "dir=%~dp0"
-set "app_path=%dir%%app%"
 cd /d "%dir%"
 set "prm=/a /pup /cloud=0"
 
-:start
+:download
 if exist "%app%" goto skip_download
-echo. & echo  Download Emsisoft CLI Scanner ^(~300mb^) to "%dir%" ? & echo. & pause
+echo. & echo  Download %name% ^(~300mb^) to "%dir%" ? & echo. & pause
 curl.exe -fRLO# "https://dl.emsisoft.com/EmsisoftCommandlineScanner64.exe"
-if errorlevel 1 (echo. & echo  Error: download failed. & echo. & pause & goto start)
+if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo. & timeout 5 & goto download)
 echo  Extracting...
 EmsisoftCommandlineScanner64.exe -s -o+ -d"%dir%."
 del EmsisoftCommandlineScanner64.exe
 
 :skip_download
 cls
-TITLE %app%
+TITLE %dir%%app%
 :: /s arg
 if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
 
@@ -130,6 +130,6 @@ echo. & pause & goto main
 
 :shortcut
 powershell -NoP -C ^
-"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\Emsisoft scanner.lnk'); ^
-$s.TargetPath = '%~f0'; $s.IconLocation = '%app_path%'; $s.Save()"
-echo. & echo  Shortcut 'Emsisoft scanner.lnk' created. & echo. & timeout 2
+"$s = (New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('SendTo') + '\%name%.lnk'); ^
+$s.TargetPath = '%~f0'; $s.IconLocation = '%dir%%app%'; $s.Save()"
+echo. & echo  Shortcut '%name%.lnk' created. & echo. & timeout 2

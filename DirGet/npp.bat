@@ -46,14 +46,14 @@ mkdir "%temp%\npp_update"
 tar -xf "%temp%\%filename%" -C "%temp%\npp_update"
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
 robocopy "%temp%\npp_update\localization" "%dir%localization" english.xml russian.xml ukrainian.xml /move /r:0 /w:0 >nul
-if exist "notepad++.exe" (
+if exist "%app%" (
     :: ignore root *.xml
     robocopy "%temp%\npp_update" "%dir%." /move /xf *.xml /xd localization updater /r:0 /w:0 >nul
 ) else (
     robocopy "%temp%\npp_update" "%dir%." /e /move /xd localization updater /r:0 /w:0 >nul
 )
 color A & echo. & echo. & echo  DOWNLOADED. Now launching...
-start "" notepad++.exe
+start "" %app%
 timeout 3 & exit
 
 :github
@@ -65,7 +65,7 @@ set "url="
 set "filename="
 set "server_date="
 
-set "ps_cmd=$ErrorActionPreference = 'SilentlyContinue'; $r=Invoke-RestMethod 'https://api.github.com/repos/%repo%/releases'; if(!$r){exit}; if($r -is [array]){$rel=$r[0]}else{$rel=$r}; $a=$rel.assets|?{$_.name -like '%filter%'}|select -f 1; echo $rel.tag_name; echo $a.browser_download_url; echo $a.name; echo ([datetime]$rel.published_at).ToString('dd.MM.yyyy')"
+set "ps_cmd=$ErrorActionPreference='SilentlyContinue'; $r=Invoke-RestMethod 'https://api.github.com/repos/%repo%/releases'; if(!$r){exit}; $rel = $r | Where-Object { !$_.prerelease -and ($_.assets.name -like '%filter%') } | Select-Object -First 1; if(!$rel){exit}; $a=$rel.assets | Where-Object { $_.name -like '%filter%' } | Select-Object -First 1; echo $rel.tag_name; echo $a.browser_download_url; echo $a.name; echo ([datetime]$rel.published_at).ToString('dd.MM.yyyy')"
 for /f "usebackq tokens=*" %%a in (`powershell -command "%ps_cmd%" 2^>nul`) do (
     if not defined latest_version (
         set "latest_version=%%a"

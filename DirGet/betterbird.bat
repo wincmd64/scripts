@@ -44,4 +44,4 @@ echo. & echo  Extracting ...
 tar -xf "%temp%\%filename%" 2>nul
 if errorlevel 1 (color C & echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo  DOWNLOADED. Now launching... & echo.)
 start "" BetterbirdLauncher.exe
-timeout 3
+timeout 3 & exit

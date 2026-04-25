@@ -42,4 +42,4 @@ tar -xf "%temp%\ahk-v2.zip" AutoHotkey64.exe AutoHotkey.chm UX/WindowSpy.ahk
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
 move /y "UX\WindowSpy.ahk" "WindowSpy.ahk" >nul
 rd "UX"
-color A & echo. & echo. & echo  DONE. & timeout 3
+color A & echo. & echo. & echo  DONE. & timeout 3 & exit

@@ -10,6 +10,8 @@
 setlocal
 
 :: [SETTINGS]
+set "name=Viber"
+set "app=Viber.exe"
 set "dir=%~dp0"
 cd /d "%dir%"
 
@@ -17,15 +19,15 @@ cd /d "%dir%"
 if /i "%~1"=="/h" goto remove_ads
 
 :: get local ver
-if exist "Viber.exe" (
+if exist "%app%" (
     echo. & echo  Getting local version...
-    for /f "tokens=*" %%v in ('powershell -command "(Get-Item 'Viber.exe').VersionInfo.ProductVersion.Trim()"') do set "current_version=v%%v"
-    for /f "tokens=*" %%d in ('powershell -command "(Get-Item 'Viber.exe').LastWriteTime.ToString('dd.MM.yyyy')"') do set "file_date=%%d"
+    for /f "tokens=*" %%v in ('powershell -command "(Get-Item '%app%').VersionInfo.ProductVersion.Trim()"') do set "current_version=v%%v"
+    for /f "tokens=*" %%d in ('powershell -command "(Get-Item '%app%').LastWriteTime.ToString('dd.MM.yyyy')"') do set "file_date=%%d"
     echo  Getting latest version...
     for /f "usebackq tokens=*" %%a in (`powershell -command "$req = [Net.HttpWebRequest]::Create('http://download.cdn.viber.com/desktop/windows/update/update.zip'); $res = $req.GetResponse(); $res.LastModified.ToString('dd.MM.yyyy'); $res.Close()"`) do set "latest_date=%%a"
     cls
 )
-if not defined current_version (echo. & echo  Download Viber to "%dir%" ? & echo. & pause
+if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (
     echo. & echo  Current version: %current_version% ^(%file_date%^)
     echo  Latest update.zip: %latest_date%
@@ -33,13 +35,14 @@ if not defined current_version (echo. & echo  Download Viber to "%dir%" ? & echo
 )
 
 :check_task
-tasklist /fi "imagename eq Viber.exe" | find /i "Viber.exe" >nul
-if not errorlevel 1 (echo. & echo  [!] Viber is running. Please close it to continue. & echo. & pause & goto check_task)
+tasklist /fi "imagename eq %app%" | find /i "%app%" >nul
+if not errorlevel 1 (echo. & echo  [!] %name% is running. Please close it to continue. & echo. & pause & goto check_task)
 
 :: download and unpack
+:download
 echo. & echo  Downloading...
 curl.exe "http://download.cdn.viber.com/desktop/windows/update/update.zip" -fRLO# --output-dir "%temp%"
-if errorlevel 1 (color C & echo. & echo  Error: download failed. & echo. & pause & exit /b)
+if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo. & timeout 5 & goto download)
 echo. & echo  Extracting ...
 echo  Getting 7-zip.org/a/7zr.exe
 curl.exe "https://www.7-zip.org/a/7zr.exe" -fRLO# --output-dir "%temp%"
@@ -49,10 +52,10 @@ if errorlevel 1 (echo. & echo  Error: download failed. & echo. & pause)
 tar -xf "%temp%\update.zip" -C "%temp%" --strip-components=1
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause)
 "%temp%\7zr.exe" x "%temp%\pack.exe" -o".\" -y -bso0
-if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching Viber... & echo.)
+if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching... & echo.)
 
 start "" Viber.exe
-timeout 2 & exit
+timeout 3 & exit
 
 :remove_ads
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/h' & Exit /B)

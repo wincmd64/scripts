@@ -19,6 +19,7 @@ if exist "%app%" (
     for /f "tokens=*" %%v in ('powershell -command "$v = (Get-Item '%app%').VersionInfo.ProductVersion; if ($v -match '^\d+\.\d+\.\d+') { $matches[0] } else { $v.Trim() }"') do set "current_version=%%v"
     cls
 )
+
 :update
 if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current version: v%current_version% & echo  Checking for updates...)

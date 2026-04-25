@@ -7,6 +7,7 @@
 :: [COMMAND LINE ARGUMENTS]
 :: /i - add WinDirStat to Folder/Drive context menu (hold Shift to activate)
 :: /u - remove WinDirStat from context menu
+:: (no arguments) - check/update software in script dir
 
 @echo off
 setlocal
@@ -28,20 +29,14 @@ if exist "%app%" (
     cls
 )
 
+:update
 if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current version: v%current_version% & echo  Checking for updates...)
 
-:: github api
-set "ps_cmd=$r=Invoke-RestMethod 'https://api.github.com/repos/windirstat/windirstat/releases/latest'; $v=$r.tag_name.Split('/')[-1]; echo $v"
-for /f "usebackq tokens=*" %%a in (`powershell -command "%ps_cmd%"`) do (set "latest_version=%%a")
-if "%latest_version%"=="" (echo  Error: Could not find download URL. & echo  Try manual: https://github.com/windirstat/windirstat/releases & pause & exit /b)
-
-:: update logic
-if defined current_version (
-    echo  Latest version:  %latest_version%
-    echo. & echo  Update? & echo.
-    pause
-)
+:: github latest ver
+call :github "windirstat/windirstat" "*x64.msi" "https://github.com/windirstat/windirstat/releases"
+if not defined url (goto update)
+if defined current_version (echo. & echo  Update? & echo. & pause)
 
 :check_task
 tasklist /fi "imagename eq %app%" | find /i "%app%" >nul
@@ -61,7 +56,8 @@ if not exist "WinDirStat.ini" (
      echo ShowTreeMap=0
     ) > "WinDirStat.ini"
 )
-color A & echo. & echo  DONE. & timeout 3 & exit
+color A & echo. & echo. & echo  DOWNLOADED. Now launching...
+start "" %app% & timeout 2 & exit
 
 :add_menu
 reg add "HKCU\Software\Classes\Directory\shell\WinDirStat" /v "MUIVerb" /d "WinDirStat" /f
@@ -74,8 +70,47 @@ reg add "HKCU\Software\Classes\Drive\shell\WinDirStat" /v "MUIVerb" /d "WinDirSt
 reg add "HKCU\Software\Classes\Drive\shell\WinDirStat" /v "Icon" /d "%dir%%app%" /f
 reg add "HKCU\Software\Classes\Drive\shell\WinDirStat" /v "Position" /d "Bottom" /f
 reg add "HKCU\Software\Classes\Drive\shell\WinDirStat" /v "Extended" /f
-reg add "HKCU\Software\Classes\Drive\shell\WinDirStat\command" /ve /d "\"%dir%%app%\" \"%%1\"" /f && (color A & timeout 3 & exit) || (echo. & pause & exit)
+reg add "HKCU\Software\Classes\Drive\shell\WinDirStat\command" /ve /d "\"%dir%%app%\" \"%%1\"" /f && (color A & timeout 2 & exit) || (echo. & pause & exit)
 
 :del_menu
 reg delete "HKCU\Software\Classes\Directory\shell\WinDirStat" /f
-reg delete "HKCU\Software\Classes\Drive\shell\WinDirStat" /f && (color A & timeout 2) || (echo. & pause)
+reg delete "HKCU\Software\Classes\Drive\shell\WinDirStat" /f && (color A & timeout 2 & exit) || (echo. & pause & exit)
+
+:github
+set "repo=%~1"
+set "filter=%~2"
+set "manual_url=%~3"
+set "latest_version="
+set "url="
+set "filename="
+set "server_date="
+
+set "ps_cmd=$ErrorActionPreference='SilentlyContinue'; $r=Invoke-RestMethod 'https://api.github.com/repos/%repo%/releases'; if(!$r){exit}; $rel = $r | Where-Object { !$_.prerelease -and ($_.assets.name -like '%filter%') } | Select-Object -First 1; if(!$rel){exit}; $a=$rel.assets | Where-Object { $_.name -like '%filter%' } | Select-Object -First 1; echo $rel.tag_name; echo $a.browser_download_url; echo $a.name; echo ([datetime]$rel.published_at).ToString('dd.MM.yyyy')"
+for /f "usebackq tokens=*" %%a in (`powershell -command "%ps_cmd%" 2^>nul`) do (
+    if not defined latest_version (
+        set "latest_version=%%a"
+    ) else if not defined url (
+        set "url=%%a"
+    ) else if not defined filename (
+        set "filename=%%a"
+    ) else (
+        set "server_date=%%a"
+    )
+)
+
+:: if PS failed, latest_version will contain error text or be empty
+if "%url:~0,4%" NEQ "http" (
+    set "url="
+    set "latest_version="
+    echo.
+    echo  Error: Repository "%repo%" not found or API limit reached.
+    echo  Try manual: %manual_url%  & echo. & pause
+    exit /b
+)
+
+echo. & echo  Repo: %repo%
+echo   Ver: %latest_version% (%server_date%)
+echo  File: %filename%
+echo  Link: %url%
+echo.
+goto :eof

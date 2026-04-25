@@ -42,4 +42,4 @@ echo. & echo  Extracting ...
 tar -xf "%temp%\cdm.zip" DiskMark64.exe CdmResource
 if errorlevel 1 (echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo. & echo  DOWNLOADED. Now launching... & echo.)
 start "" %app%
-timeout 3
+timeout 3 & exit
