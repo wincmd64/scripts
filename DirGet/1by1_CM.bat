@@ -82,7 +82,7 @@ if not exist "1by1.ini" (
         echo list_style=176
     )>"1by1.ini"
 )
-color A & echo. & echo  DONE. & timeout 3 & exit
+color A & echo. & echo. & echo  DOWNLOADED. Now launching... & start "" %app% & timeout 2 & exit
 
 :add_menu
 reg add "HKCU\Software\Classes\Directory\shell\wincmd64_1by1" /v "MUIVerb" /d "1by1 player" /f
