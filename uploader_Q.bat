@@ -22,6 +22,8 @@ for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1)
 :: Service options: litterbox / x0 / whalebone
 set "service=litterbox"
 
+:: validation
+if /i not "%service%"=="x0" if /i not "%service%"=="whalebone" set "service=litterbox"
 TITLE Temporary file hoster: %service%
 
 :: arguments
