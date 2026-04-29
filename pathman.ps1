@@ -10,7 +10,19 @@ param(
 )
 
 # List current user PATH if -List is specified
-if ($List) { [System.Environment]::GetEnvironmentVariable('PATH', 'User') -split [IO.Path]::PathSeparator | Write-Host; exit 0 }
+if ($List) {
+    $currentPaths = [System.Environment]::GetEnvironmentVariable('PATH', 'User') -split [IO.Path]::PathSeparator
+    foreach ($p in $currentPaths) {
+        if ([string]::IsNullOrWhiteSpace($p)) { continue }
+        
+        if (Test-Path -LiteralPath $p -PathType Container) {
+            Write-Host $p
+        } else {
+            Write-Host $p -ForegroundColor Red
+        }
+    }
+    exit 0
+}
 # If no path provided, use current directory
 if (-not $Path) { $Path = $PWD.Path }
 # Validate path
