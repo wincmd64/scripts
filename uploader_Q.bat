@@ -1,11 +1,6 @@
 :: Temporary file hoster
 :: by github.com/wincmd64
 
-::  Change service in [SETTINGS] below
-::    litterbox.catbox.moe -- 1 GB, 3 days
-::    x0.at -- 1 GB, 3 days min
-::    transfer.whalebone.io -- 250 MB, 7 days
-
 :: [USAGE]
 :: Create a shortcut to this .bat file in the Shell:SendTo folder
 :: or button in TotalCmd with the %P%S parameter
@@ -15,23 +10,37 @@
 
 @echo off
 setlocal
-:: escape colors
-for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1) do rem"') do set "ESC=%%b"
-
-:: [SETTINGS]
-:: Service options: litterbox / x0 / whalebone
-set "service=litterbox"
-
-:: validation
-if /i not "%service%"=="x0" if /i not "%service%"=="whalebone" set "service=litterbox"
-TITLE Temporary file hoster: %service%
+chcp 65001 >nul
 
 :: arguments
 if /i "%~1"=="/s" (if "%~2"=="" goto shortcut)
+:: escape colors
+for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1) do rem"') do set "ESC=%%b"
 
 set count=0
 for %%A in (%*) do set /a count+=1
 if %count% equ 0 (echo. & echo  No objects selected & echo. & pause & exit)
+
+:: pixeldrain API Key
+set "PD_KEY_FILE=%AppData%\pixeldrain"
+set "PIXELDRAIN_KEY="
+if exist "%PD_KEY_FILE%" set /p PIXELDRAIN_KEY=<"%PD_KEY_FILE%"
+
+:menu
+cls
+echo.
+echo  [1] litterbox.catbox.moe -- 1 GB, 3 days
+echo  [2] x0.at -- 1 GB, 3 days min
+echo  [3] transfer.whalebone.io -- 250 MB, 7 days
+echo  [4] pixeldrain.com -- 10 GB, 60 days
+echo.
+CHOICE /C 1234 /M "Your choice?:" >nul 2>&1
+set "err=%errorlevel%"
+if %err% equ 4 (
+    if not defined PIXELDRAIN_KEY (echo. & echo  Error: Pixeldrain key missing! & echo. & pause & goto menu)
+    set "service=pixeldrain"
+) else if %err% equ 3 (set "service=whalebone") else if %err% equ 2 (set "service=x0") else (set "service=litterbox")
+TITLE Temporary file hoster: %service%
 
 if %count% equ 1 (
     echo. & echo  File: %1
@@ -41,6 +50,9 @@ if %count% equ 1 (
         for /f "delims=" %%i in ('curl -# -F "file=@%~1" https://x0.at') do (set "LNK=%%i")
     ) else if /i "%service%"=="whalebone" (
         for /f "delims=" %%i in ('curl -# --upload-file "%~1" https://transfer.whalebone.io') do (set "LNK=%%i")
+    ) else if /i "%service%"=="pixeldrain" (
+        curl -# -u :%PIXELDRAIN_KEY% -T "%~1" https://pixeldrain.com/api/file/ > "%temp%\pd.json"
+        for /f "delims=" %%i in ('powershell -NoP -C "($input | ConvertFrom-Json).id" ^< "%temp%\pd.json"') do set "LNK=https://pixeldrain.com/u/%%i"
     )
     if not defined LNK (echo  Error: Failed to get link. & exit /b)
     call echo  Link: %ESC%[36m%%LNK%%%ESC%[0m
