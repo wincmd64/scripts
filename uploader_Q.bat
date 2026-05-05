@@ -50,8 +50,7 @@ if %count% equ 1 (
     ) else if /i "%service%"=="whalebone" (
         for /f "delims=" %%i in ('curl -# --upload-file "%~1" https://transfer.whalebone.io') do (set "LNK=%%i")
     ) else if /i "%service%"=="pixeldrain" (
-        curl -u :%PIXELDRAIN_KEY% -#T "%~1" https://pixeldrain.com/api/file/ > "%temp%\pd.json"
-        for /f "delims=" %%i in ('powershell -NoP -C "($input | ConvertFrom-Json).id" ^< "%temp%\pd.json"') do set "LNK=https://pixeldrain.com/u/%%i"
+        for /f "delims=" %%i in ('curl -u :%PIXELDRAIN_KEY% -#T "%~1" https://pixeldrain.com/api/file/ ^| powershell -NoP -C "($input | ConvertFrom-Json).id"') do set "LNK=https://pixeldrain.com/u/%%i"
     )
     if not defined LNK (echo  Error: Failed to get link. & exit /b)
     call echo  Link: %ESC%[36m%%LNK%%%ESC%[0m
