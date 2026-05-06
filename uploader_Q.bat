@@ -42,33 +42,40 @@ if %err% equ 4 (
 ) else if %err% equ 3 (set "service=whalebone") else if %err% equ 2 (set "service=x0") else (set "service=litterbox")
 TITLE Uploading to %service%
 
+set "current=0"
 FOR %%k IN (%*) DO (
-    set "LNK="
-    echo  FILE: "%%~nxk"
-    
-    if /i "%service%"=="litterbox" (
-        for /f "delims=" %%i in ('curl -# -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@%%~k" https://litterbox.catbox.moe/resources/internals/api.php') do set "LNK=%%i"
-    ) else if /i "%service%"=="x0" (
-        for /f "delims=" %%i in ('curl -# -F "file=@%%~k" https://x0.at') do set "LNK=%%i"
-    ) else if /i "%service%"=="whalebone" (
-        for /f "delims=" %%i in ('curl -# --upload-file "%%~k" https://transfer.whalebone.io') do set "LNK=%%i"
-    ) else if /i "%service%"=="pixeldrain" (
-        for /f "delims=" %%i in ('curl -u :%PIXELDRAIN_KEY% -#T "%%~k" https://pixeldrain.com/api/file/ ^| powershell -NoP -C "($input | ConvertFrom-Json).id"') do set "LNK=https://pixeldrain.com/u/%%i"
-    )
-
-    if defined LNK (
-        call echo  Link: %ESC%[36m%%LNK%%%ESC%[0m
-        :: copy to clipboard if only one link
-        if %count% equ 1 (call echo | set /p="%%LNK%%" | clip)
-    ) else (echo  %ESC%[91mError: Failed to upload %%~nxk%ESC%[0m)
-
-    :: MD5 hash
-    for /f "tokens=*" %%i in ('certutil -hashfile "%%~k" MD5 ^| find /v "MD5" ^| find /v "CertUtil"') do echo   MD5: %%i
-    echo.
+    set /a current+=1
+    call :upload "%%~k"
 )
 
-echo  %ESC%[7m ALL TASKS FINISHED %ESC%[0m & echo. & pause
+echo  %ESC%[7m%count% TASK^(S^) FINISHED%ESC%[0m & echo. & pause & exit
 exit
+
+:upload
+set "LNK="
+echo  [%current%/%count%] FILE: "%~nx1"
+
+if /i "%service%"=="litterbox" (
+    for /f "delims=" %%i in ('curl -# -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@%~1" https://litterbox.catbox.moe/resources/internals/api.php') do set "LNK=%%i"
+) else if /i "%service%"=="x0" (
+    for /f "delims=" %%i in ('curl -# -F "file=@%~1" https://x0.at') do set "LNK=%%i"
+) else if /i "%service%"=="whalebone" (
+    for /f "delims=" %%i in ('curl -# --upload-file "%~1" https://transfer.whalebone.io') do set "LNK=%%i"
+) else if /i "%service%"=="pixeldrain" (
+    for /f "delims=" %%i in ('curl -u :%PIXELDRAIN_KEY% -#T "%~1" https://pixeldrain.com/api/file/ ^| powershell -NoP -C "($input | ConvertFrom-Json).id"') do set "LNK=https://pixeldrain.com/u/%%i"
+)
+
+if defined LNK (
+    call echo  Link: %ESC%[36m%%LNK%%%ESC%[0m
+    :: copy to clipboard if only one link
+    if %count% equ 1 (call echo | set /p="%%LNK%%" | clip)
+) else (echo  %ESC%[91mError: Failed to upload %%~nxk%ESC%[0m)
+
+:: MD5 hash
+for /f "tokens=*" %%i in ('certutil -hashfile "%~1" MD5 ^| find /v "MD5" ^| find /v "CertUtil"') do echo   MD5: %%i
+echo.
+goto :eof
+
 
 :shortcut
 powershell -NoP -C ^
