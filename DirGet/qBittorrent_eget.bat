@@ -52,10 +52,10 @@ if defined current_version (
     echo  %ESC%[7mUpdate current %current_version% ?%ESC%[0m & echo. & pause & echo.
 )
 
-:: download and unpack
+:download
 if not exist "profile\" (md "profile")
-"eget.exe" dl --file "qbittorrent.exe" --asset "x64,setup,exe,^asc,^lt20" "sourceforge:qbittorrent/qbittorrent-win32"
-if %errorlevel% neq 0 (echo. & puase) else (echo. & echo  %ESC%[7mDONE.%ESC%[0m & timeout 3 & exit)
+"eget.exe" dl --file "%app%" --asset "x64,setup,exe,^asc,^lt20" "sourceforge:qbittorrent/qbittorrent-win32"
+if %errorlevel% neq 0 (echo. & pause & echo. & goto download) else (echo. & echo  %ESC%[7mDONE.%ESC%[0m & timeout 3 & exit)
 
 :associate
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/a' & Exit /B)
