@@ -27,6 +27,8 @@
 
 `yt-dlp.bat`. Враппер для [yt-dlp](https://github.com/yt-dlp/yt-dlp). Качает по ссылке из буфера обмена, параметра ком.строки или пакетно.
 
+`SetUserFTA.bat`. Враппер для [SetUserFTA](https://setuserfta.com). Пакетная ассоциация файлов согласно списку из `SetUserFTA.ini`.
+
 `filter.ps1`. Быстрый фильтр строк текстовых файлов. Удобно для [текстовых таблиц](https://www.tablesgenerator.com/text_tables).
 
 `pass.ps1`. Секьюрный генератор паролей.
