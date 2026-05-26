@@ -1,9 +1,10 @@
-:: Association Manager
+:: File Association Manager
 :: by github.com/wincmd64
 
-:: Batch registers and maps file extensions to specific target applications 
-:: by parsing an accompanying, mandatory '%~n0.ini' configuration list 
-:: to dynamically apply paths, extensions, and custom icons.
+:: Batch associates files according to a mandatory '%~n0.ini' configuration list
+
+:: TIP: how to reset to defaults.
+:: Open Settings -> Apps -> Default apps -> Click 'Reset' at the bottom
 
 
 @echo off
@@ -43,7 +44,7 @@ for %%i in (%1) do set "APP_NAME=%%~ni"
 set "ICON_PATH=%~3"
 set "ICON_INDEX=%~4"
 
-:: Handle shifted arguments when ;; syntax leaves %4 empty but puts index into %3
+:: Handle argument shift when empty path (;;) pushes the icon index into %3
 if "[%~4]"=="[]" (
     if not "[%~3]"=="[]" (
         :: Check if %3 is a pure number (icon index) without spaces
