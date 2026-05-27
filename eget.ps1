@@ -2,7 +2,7 @@
 # by github.com/wincmd64
 
 # Supported apps:
-# CrystalDiskMark, KeePass, MPC-HC, qBittorrent, Rufus, SystemInformer, Ventoy, Victoria, WinMTR
+# CrystalDiskMark, HTTP Downloader, KeePass, MPC-HC, qBittorrent, Rufus, SystemInformer, Ventoy, Victoria, WinMTR
 
 # check for eGet
 if (Test-Path "$PSScriptRoot\eget.exe") { $env:PATH += ";$PSScriptRoot" }
@@ -24,6 +24,17 @@ $Apps = @(
         QueryTarget = "sourceforge:crystaldiskmark"
         Action      = {
             eget dl --file "DiskMark64.exe,CdmResource" --asset "zip,^Shizuku,^Aoi,^Src" "sourceforge:crystaldiskmark"
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "HTTP_Downloader.exe"
+        Name        = "HTTP Downloader"
+        Source      = "GitHub"
+        QueryTarget = "erickutcher/httpdownloader"
+        Action      = {
+            eget dl --extract-all --asset "64,zip,^Link,^DM,^LS" erickutcher/httpdownloader
+            Write-Host "Enabling portable mode for HTTP Downloader..." -ForegroundColor Cyan
+            New-Item -Path ".\portable" -ItemType File -Force | Out-Null
         }
     },
     [PSCustomObject]@{
