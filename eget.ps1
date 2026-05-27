@@ -6,7 +6,7 @@
 
 # check for eGet
 if (Test-Path "$PSScriptRoot\eget.exe") { $env:PATH += ";$PSScriptRoot" }
-if (-not (Get-Command "eget" -ErrorAction SilentlyContinue)) {
+if (-not (Get-Command "eget.exe" -ErrorAction SilentlyContinue)) {
     Write-Warning "eget.exe not found."
     $choice = Read-Host "Open github.com/inherelab/eget page? (Y/N)"
     if ($choice -match "y") { Start-Process "https://github.com/inherelab/eget" }
@@ -23,7 +23,7 @@ $Apps = @(
         Source      = "SourceForge"
         QueryTarget = "sourceforge:crystaldiskmark"
         Action      = {
-            eget dl --file "DiskMark64.exe,CdmResource" --asset "zip,^Shizuku,^Aoi,^Src" "sourceforge:crystaldiskmark"
+            eget.exe dl --file "DiskMark64.exe,CdmResource" --asset "zip,^Shizuku,^Aoi,^Src" "sourceforge:crystaldiskmark"
         }
     },
     [PSCustomObject]@{
@@ -32,7 +32,7 @@ $Apps = @(
         Source      = "GitHub"
         QueryTarget = "erickutcher/httpdownloader"
         Action      = {
-            eget dl --extract-all --asset "64,zip,^Link,^DM,^LS" erickutcher/httpdownloader
+            eget.exe dl --extract-all --asset "64,zip,^Link,^DM,^LS" erickutcher/httpdownloader
             Write-Host "Enabling portable mode for HTTP Downloader..." -ForegroundColor Cyan
             New-Item -Path ".\portable" -ItemType File -Force | Out-Null
         }
@@ -43,9 +43,9 @@ $Apps = @(
         Source      = "SourceForge"
         QueryTarget = "sourceforge:keepass/KeePass 2.x"
         Action      = {
-            eget dl --extract-all --asset "zip,^REG:Source" "sourceforge:keepass/KeePass 2.x"
-            eget dl --fallback-versions 5 --asset "Ukrainian,zip" --extract-all --to .\Languages "sourceforge:keepass/Translations 2.x"
-            eget dl --fallback-versions 2 --asset "Russian,zip" --extract-all --to .\Languages "sourceforge:keepass/Translations 2.x"
+            eget.exe dl --extract-all --asset "zip,^REG:Source" "sourceforge:keepass/KeePass 2.x"
+            eget.exe dl --fallback-versions 5 --asset "Ukrainian,zip" --extract-all --to .\Languages "sourceforge:keepass/Translations 2.x"
+            eget.exe dl --fallback-versions 2 --asset "Russian,zip" --extract-all --to .\Languages "sourceforge:keepass/Translations 2.x"
         }
     },
     [PSCustomObject]@{
@@ -61,7 +61,7 @@ $Apps = @(
                 sleep 1
                 return
             }
-            eget dl --file "qbittorrent.exe" --asset "x64,setup,exe,^asc,^lt20" "sourceforge:qbittorrent/qbittorrent-win32"
+            eget.exe dl --file "qbittorrent.exe" --asset "x64,setup,exe,^asc,^lt20" "sourceforge:qbittorrent/qbittorrent-win32"
             # portable
             if (-not (Test-Path "profile")) { New-Item -ItemType Directory -Name "profile" | Out-Null }
         }
@@ -72,7 +72,7 @@ $Apps = @(
         Source      = "GitHub"
         QueryTarget = "pbatard/rufus"
         Action      = {
-            eget dl --asset "p.exe" pbatard/rufus
+            eget.exe dl --asset "p.exe" pbatard/rufus
         }
     },
     [PSCustomObject]@{
@@ -81,7 +81,7 @@ $Apps = @(
         Source      = "GitHub"
         QueryTarget = "winsiderss/si-builds"
         Action      = {
-            eget dl --file "^x86*,^*.sig" --asset "win64,zip" winsiderss/si-builds
+            eget.exe dl --file "^x86*,^*.sig" --asset "win64,zip" winsiderss/si-builds
 
             $settingsFile = ".\SystemInformer.exe.settings.xml"
             if (-not (Test-Path $settingsFile)) {
@@ -101,7 +101,7 @@ $Apps = @(
         Source      = "GitHub"
         QueryTarget = "clsid2/mpc-hc"
         Action      = {
-            eget dl --extract-all --asset "x64,zip" clsid2/mpc-hc
+            eget.exe dl --extract-all --asset "x64,zip" clsid2/mpc-hc
             
             $iniFile = ".\mpc-hc64.ini"
             if (-not (Test-Path $iniFile)) {
@@ -148,7 +148,7 @@ ButtonSequenceSize=48
         Source      = "GitHub"
         QueryTarget = "ventoy/Ventoy"
         Action      = {
-            eget dl --extract-all --strip-components 1 --asset "windows,zip" ventoy/Ventoy
+            eget.exe dl --extract-all --strip-components 1 --asset "windows,zip" ventoy/Ventoy
         }
     },
     [PSCustomObject]@{
@@ -157,7 +157,7 @@ ButtonSequenceSize=48
         Source      = "SourceForge"
         QueryTarget = "sourceforge:victoria-ssd-hdd"
         Action      = {
-            eget dl --extract-all --strip-components 1 sourceforge:victoria-ssd-hdd
+            eget.exe dl --extract-all --strip-components 1 sourceforge:victoria-ssd-hdd
         }
     },
     [PSCustomObject]@{
@@ -166,7 +166,7 @@ ButtonSequenceSize=48
         Source      = "GitHub"
         QueryTarget = "leeter/WinMTR-refresh"
         Action      = {
-            eget dl --extract-all --asset "x64,zip" leeter/WinMTR-refresh
+            eget.exe dl --extract-all --asset "x64,zip" leeter/WinMTR-refresh
         }
     }
 )
@@ -209,7 +209,7 @@ foreach ($item in $Selected) {
 
     # eget query
     if ($item.Version -ne "Not Installed") {
-        eget query $app.QueryTarget
+        eget.exe query $app.QueryTarget
         
         $choice = Read-Host "Update current $($item.Version) ? (Y/N)"
         if ($choice -notmatch "y") { continue }
