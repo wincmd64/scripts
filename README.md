@@ -29,6 +29,8 @@
 
 `SetUserFTA.bat`. Враппер для [SetUserFTA](https://setuserfta.com). Пакетная ассоциация файлов согласно списку из `SetUserFTA.ini`.
 
+`eget.ps1`. GUI-враппер для [eget](https://github.com/inherelab/eget). Умеет загружать \ обновлять софт прямо в текущей директории. Легко кастомизируется под личный набор утилит.
+
 `filter.ps1`. Быстрый фильтр строк текстовых файлов. Удобно для [текстовых таблиц](https://www.tablesgenerator.com/text_tables).
 
 `pass.ps1`. Секьюрный генератор паролей.
