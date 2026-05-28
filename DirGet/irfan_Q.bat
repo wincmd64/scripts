@@ -16,7 +16,7 @@ setlocal
 :: [SETTINGS]
 set "name=IrfanView"
 set "app=i_view64.exe"
-set "dir=D:\soft\IrfanView"
+set "dir=%~dp0"
 cd /d "%dir%"
 
 :: no args - download or update, else - proceed
@@ -207,7 +207,7 @@ color A & timeout 1 & exit
 <nul set /p "= Gathering display info... "
 powershell -C "exit (Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorBasicDisplayParams).Count"
 set nMons=%ERRORLEVEL%
-<nul set /p "=%CR% done."
+<nul set /p "= done."
 echo.
 if %nMons% LSS 2 (
     echo  Setting wallpaper: "%~1"
@@ -248,6 +248,7 @@ if not exist "%fta%" (
 )
 
 call :process jpg 14
+call :process jpeg 14
 call :process png 21
 call :process bmp 0
 call :process gif 10
