@@ -16,7 +16,7 @@ setlocal
 :: [SETTINGS]
 set "name=IrfanView"
 set "app=i_view64.exe"
-set "dir=%~dp0"
+set "dir=D:\soft\IrfanView"
 cd /d "%dir%"
 
 :: no args - download or update, else - proceed
@@ -204,8 +204,27 @@ pushd "%~dp1"
 del listfile.txt
 color A & timeout 1 & exit
 :Option_9
-echo Setting wallpaper: "%~1"
-start "" "%app%" "%~1" /wall=4 /killmesoftly & exit
+<nul set /p "= Gathering display info... "
+powershell -C "exit (Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorBasicDisplayParams).Count"
+set nMons=%ERRORLEVEL%
+<nul set /p "=%CR% done."
+echo.
+if %nMons% LSS 2 (
+    echo  Setting wallpaper: "%~1"
+    start "" "%app%" "%~1" /wall=4 /cmdexit
+    exit
+)
+:SelectMonitor
+echo. & echo  Detected %nMons% monitors.
+echo  Enter monitor number (1-%nMons%) or press ENTER for all/default.
+set "mon_num="
+set /p mon_num="> "
+if "%mon_num%"=="" (start "" "%app%" "%~1" /wall=4 /cmdexit & exit)
+echo %mon_num%| findstr /r "^[1-9][0-9]*$" >nul
+if errorlevel 1 goto SelectMonitor
+if %mon_num% GTR %nMons% goto SelectMonitor
+start "" "%app%" "%~1" /wall=4 /monitor=%mon_num% /cmdexit
+exit
 
 :shortcut
 powershell -NoP -C ^
