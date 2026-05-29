@@ -98,9 +98,9 @@ if not defined FOLDER_SOURCE echo  Cancelled. & echo. & pause & exit
 echo  Selected: "%FOLDER_SOURCE%"
 "%temp%\%file%" /I0".\"RSHG0D0 "%FOLDER_SOURCE%"
 if errorlevel 1 (color C & echo. & echo  ERROR: update failed. & echo. & pause & exit)
+:: pushd "%FOLDER_SOURCE%"
+:: del *unin* NO.BAR UNRAR64.DLL WCMICONS.DLL WCMICON2.DLL TcUsbRun.exe CGLPT64.SYS *.MANIFEST KEYBOARD.TXT FILTER64\SoundTouchDLL_License.txt
 echo. & echo  DONE. & echo. & timeout 2
-::pushd "%FOLDER_SOURCE%"
-::del *unin* NO.BAR UNRAR64.DLL WCMICONS.DLL WCMICON2.DLL TcUsbRun.exe CGLPT64.SYS *.MANIFEST KEYBOARD.TXT FILTER64\SoundTouchDLL_License.txt
 if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /A /R="%FOLDER_SOURCE%") else (explorer "%FOLDER_SOURCE%")
 exit
 
@@ -108,7 +108,7 @@ exit
 call :download_temp
 "%temp%\%file%" /I0".\"RSHG0D0 "%COMMANDER_PATH%"
 if errorlevel 1 (color C & echo. & echo  ERROR: update failed. & echo. & pause & exit)
+:: pushd "%COMMANDER_PATH%"
+:: del *unin* NO.BAR UNRAR64.DLL WCMICONS.DLL WCMICON2.DLL TcUsbRun.exe CGLPT64.SYS *.MANIFEST KEYBOARD.TXT FILTER64\SoundTouchDLL_License.txt
 echo. & echo  DONE. & echo. & timeout 2
-::pushd "%COMMANDER_PATH%"
-::del *unin* NO.BAR UNRAR64.DLL WCMICONS.DLL WCMICON2.DLL TcUsbRun.exe CGLPT64.SYS *.MANIFEST KEYBOARD.TXT FILTER64\SoundTouchDLL_License.txt
 exit
