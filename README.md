@@ -27,7 +27,7 @@
 
 `yt-dlp.bat`. Враппер для [yt-dlp](https://github.com/yt-dlp/yt-dlp). Качает по ссылке из буфера обмена, параметра ком.строки или пакетно.
 
-`SetUserFTA.bat`. Враппер для [SetUserFTA](https://setuserfta.com). Пакетная ассоциация файлов согласно списку из `SetUserFTA.ini`.
+`SetUserFTA.bat`. Враппер для [SetUserFTA](https://setuserfta.com). Пакетная ассоциация файлов согласно списку из `SetUserFTA.csv`.
 
 `eget.ps1`. GUI-враппер для [eget](https://github.com/inherelab/eget). Умеет загружать \ обновлять софт прямо в текущей директории. Легко кастомизируется под личный набор утилит.
 
