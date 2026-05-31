@@ -2,7 +2,7 @@
 # by github.com/wincmd64
 
 # Supported apps:
-# CrystalDiskMark, HTTP Downloader, KeePass, MPC-HC, qBittorrent, Rufus, SystemInformer, Ventoy, Victoria, WinMTR
+# CrystalDiskMark, HTTP Downloader, KeePass, MPC-HC, qBittorrent, Rufus, SystemInformer, Ventoy, Victoria, WinMTR, UniExtract2
 
 # check for eGet
 if (Test-Path "$PSScriptRoot\eget.exe") { $env:PATH += ";$PSScriptRoot" }
@@ -110,7 +110,7 @@ $Apps = @(
 [Commands2]
 ;- Esc instead of Alt+X
 ;- Enter instead of Alt+Enter
-;- Alt 1..3 è 1..3 vice versa
+;- Alt 1..3 - 1..3 vice versa
 CommandMod0=816 1 1b "" 5 0 0 0 0 0
 CommandMod1=827 11 31 "" 5 0 0 0 0 0
 CommandMod2=828 11 32 "" 5 0 0 0 0 0
@@ -168,6 +168,15 @@ ButtonSequenceSize=48
         Action      = {
             eget.exe dl --extract-all --asset "x64,zip" leeter/WinMTR-refresh
         }
+    },
+    [PSCustomObject]@{
+        ID          = "UniExtract.exe"
+        Name        = "Universal Extractor"
+        Source      = "GitHub"
+        QueryTarget = "gvp9000/UniExtract2"
+        Action      = {
+            eget.exe dl --extract-all --strip-components 1 --asset "zip" gvp9000/UniExtract2
+        }
     }
 )
 # ===============================================================================
@@ -217,4 +226,4 @@ foreach ($item in $Selected) {
     
     Invoke-Command -ScriptBlock $app.Action
 }
-sleep 1
+sleep 5
