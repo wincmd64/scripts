@@ -1,7 +1,7 @@
 :: File Association Manager
 :: by github.com/wincmd64
 
-:: Batch associates files according to a mandatory '%~n0.ini' configuration list
+:: Batch associates files according to a mandatory '%~n0.csv' configuration list
 
 :: TIP: how to reset to defaults.
 :: Open Settings -> Apps -> Default apps -> Click 'Reset' at the bottom
@@ -10,9 +10,9 @@
 @echo off
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs & Exit /B)
 
-:: ini
-set "INI_FILE=%~n0.ini"
-if not exist "%INI_FILE%" (echo. & echo  [ERROR] Configuration file %INI_FILE% not found! & echo. & pause & exit /b)
+:: csv
+set "CSV_FILE=%~n0.csv"
+if not exist "%CSV_FILE%" (echo. & echo  [ERROR] Configuration file %CSV_FILE% not found! & echo. & pause & exit /b)
 
 :: get SetUserFTA.exe
 for /f "tokens=* delims=" %%a in ('where SetUserFTA.exe 2^>nul') do set "FTA=%%a"
@@ -28,16 +28,21 @@ if not exist "%FTA%" (
 )
 
 set "TOTAL_LINES=0"
-for /f %%i in ('findstr /v /r "^#" "%INI_FILE%" ^| findstr /r "." ^| find /c /v ""') do set "TOTAL_LINES=%%i"
+:: Count lines excluding comments (#) and the header row (APP_PATH;EXTENSION)
+for /f %%i in ('findstr /v /r "^#" "%CSV_FILE%" ^| findstr /v /i "APP_PATH;EXTENSION" ^| findstr /r "." ^| find /c /v ""') do set "TOTAL_LINES=%%i"
 echo. & echo  Apply %TOTAL_LINES% file associations? & echo. & pause
-:: Read .ini line by line ignores lines starting with a #
+
+:: Read .csv line by line ignores lines starting with a #
 :: tokens=1-4 delims=; splits line by semicolon
-for /f "usebackq eol=# tokens=1-4 delims=;" %%a in ("%INI_FILE%") do (
+for /f "usebackq eol=# tokens=1-4 delims=;" %%a in ("%CSV_FILE%") do (
     call :process "%%a" "%%b" "%%c" "%%d"
 )
 echo. & echo  DONE. & pause & exit
 
 :process
+:: Ignore the header row by checking the second column
+if /i "%~2"=="EXTENSION" goto :eof
+
 :: Get EXE filename without extension to use as ProgID base (e.g., mpc-hc64)
 for %%i in (%1) do set "APP_NAME=%%~ni"
 
