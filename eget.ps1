@@ -226,4 +226,4 @@ foreach ($item in $Selected) {
     
     Invoke-Command -ScriptBlock $app.Action
 }
-sleep 5
+sleep 1
