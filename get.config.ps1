@@ -2,7 +2,7 @@
 # by github.com/wincmd64
 
 # Supported apps:
-# CrystalDiskMark, HTTP Downloader, KeePass, LAV Filters, MPC-HC, qBittorrent, Rufus, SystemInformer, Ventoy, Victoria, WinMTR, UniExtract2
+# CrystalDiskMark, FFmpeg, HTTP Downloader, KeePass, LAV Filters, MPC-HC, qBittorrent, Rufus, SystemInformer, Ventoy, Victoria, WinMTR, UniExtract2
 
 $Apps = @(
     [PSCustomObject]@{
@@ -173,6 +173,15 @@ ButtonSequenceSize=48
         QueryTarget = "Nevcairiel/LAVFilters"
         Action      = {
             eget.exe dl --file "*.ax,*.dll,*.manifest" --asset "x64,zip" Nevcairiel/LAVFilters
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "ffmpeg.exe"
+        Name        = "FFmpeg"
+        Source      = "GitHub"
+        QueryTarget = "GyanD/codexffmpeg"
+        Action      = {
+            eget.exe dl --file "*.exe" --strip-components 2 --asset "essentials,zip" GyanD/codexffmpeg
         }
     }
 )
