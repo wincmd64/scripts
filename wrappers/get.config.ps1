@@ -1,8 +1,10 @@
 # eGet Wrapper - Apps configuration
 # by github.com/wincmd64
 
-# Supported apps:
-# CrystalDiskMark, fastfetch, FFmpeg, HTTP Downloader, KeePass, LAV Filters, MPC-HC, qBittorrent, Rufus, SystemInformer, Ventoy, Victoria, WinMTR, UniExtract2
+#   [Supported apps]
+# CrystalDiskMark, fastfetch, FFmpeg, HTTP Downloader,
+# KeePass, LAV Filters, MPC-HC, qBittorrent, Rufus,
+# SystemInformer, Ventoy, Victoria, WinDirStat, WinMTR, UniExtract2
 
 $Apps = @(
     [PSCustomObject]@{
@@ -84,53 +86,6 @@ $Apps = @(
        }
     },
     [PSCustomObject]@{
-        ID          = "mpc-hc64.exe"
-        Name        = "MPC-HC"
-        Source      = "GitHub"
-        QueryTarget = "clsid2/mpc-hc"
-        Action      = {
-            eget.exe dl --extract-all --asset "x64,zip" clsid2/mpc-hc
-            
-            $iniFile = ".\mpc-hc64.ini"
-            if (-not (Test-Path $iniFile)) {
-                Write-Host "Creating mpc-hc64.ini with custom hotkeys and settings..." -ForegroundColor Cyan
-                $iniContent = @'
-[Commands2]
-;- Esc instead of Alt+X
-;- Enter instead of Alt+Enter
-;- Alt 1..3 - 1..3 vice versa
-CommandMod0=816 1 1b "" 5 0 0 0 0 0
-CommandMod1=827 11 31 "" 5 0 0 0 0 0
-CommandMod2=828 11 32 "" 5 0 0 0 0 0
-CommandMod3=829 11 33 "" 5 0 0 0 0 0
-CommandMod4=830 1 d "" 5 3 0 3 0 0
-CommandMod5=832 1 31 "" 5 0 0 0 0 0
-CommandMod6=833 1 32 "" 5 0 0 0 0 0
-CommandMod7=834 1 33 "" 5 0 0 0 0 0
-[Settings]
-UpdaterAutoCheck=0
-AllowMultipleInstances=1
-AfterPlayback=1
-UseSeekPreview=1
-AudioRendererType=MPC Audio Renderer
-SpeedStep=25
-; black theme
-ModernThemeMode=0
-; files
-RememberFilePos=1
-RememberPosForLongerThan=2
-RecentFilesNumber=5
-;Statusbar
-ShowFPSInStatusbar=1
-[Toolbars\PlayerToolBar]
-ButtonSequence=HHDAAAAAIHDAAAAAKHDAAAAAJJDAAAAAOHDAAAAAPHDAAAAAKJDAAAAALHDAAAAACNDAAAAADNDAAAAABLDAAAAANIDAAAAA
-ButtonSequenceSize=48
-'@
-                $iniContent | Out-File -FilePath $iniFile -Encoding utf8 -Force
-                }
-        }
-    },
-    [PSCustomObject]@{
         ID          = "Ventoy2Disk.exe"
         Name        = "Ventoy"
         Source      = "GitHub"
@@ -182,6 +137,74 @@ ButtonSequenceSize=48
         QueryTarget = "GyanD/codexffmpeg"
         Action      = {
             eget.exe dl --file "*.exe" --strip-components 2 --asset "essentials,zip" GyanD/codexffmpeg
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "WinDirStat.exe"
+        Name        = "WinDirStat"
+        Source      = "GitHub"
+        QueryTarget = "windirstat/windirstat"
+        Action      = {
+            eget.exe dl --asset "zip" --file "x64/*.exe" --strip-components 1 windirstat/windirstat
+            
+            $iniFile = ".\WinDirStat.ini"
+            if (-not (Test-Path $iniFile)) {
+                Write-Host "Creating WinDirStat.ini..." -ForegroundColor Cyan
+                $iniContent = @'
+[Options]
+ShowElevationPrompt=0
+[TreeMapView]
+ShowTreeMap=0
+'@
+                $iniContent | Out-File -FilePath $iniFile
+                }
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "mpc-hc64.exe"
+        Name        = "MPC-HC"
+        Source      = "GitHub"
+        QueryTarget = "clsid2/mpc-hc"
+        Action      = {
+            eget.exe dl --extract-all --asset "x64,zip" clsid2/mpc-hc
+            
+            $iniFile = ".\mpc-hc64.ini"
+            if (-not (Test-Path $iniFile)) {
+                Write-Host "Creating mpc-hc64.ini..." -ForegroundColor Cyan
+                $iniContent = @'
+[Commands2]
+;- Esc instead of Alt+X
+;- Enter instead of Alt+Enter
+;- Alt 1..3 - 1..3 vice versa
+CommandMod0=816 1 1b "" 5 0 0 0 0 0
+CommandMod1=827 11 31 "" 5 0 0 0 0 0
+CommandMod2=828 11 32 "" 5 0 0 0 0 0
+CommandMod3=829 11 33 "" 5 0 0 0 0 0
+CommandMod4=830 1 d "" 5 3 0 3 0 0
+CommandMod5=832 1 31 "" 5 0 0 0 0 0
+CommandMod6=833 1 32 "" 5 0 0 0 0 0
+CommandMod7=834 1 33 "" 5 0 0 0 0 0
+[Settings]
+UpdaterAutoCheck=0
+AllowMultipleInstances=1
+AfterPlayback=1
+UseSeekPreview=1
+AudioRendererType=MPC Audio Renderer
+SpeedStep=25
+; black theme
+ModernThemeMode=0
+; files
+RememberFilePos=1
+RememberPosForLongerThan=2
+RecentFilesNumber=5
+;Statusbar
+ShowFPSInStatusbar=1
+[Toolbars\PlayerToolBar]
+ButtonSequence=HHDAAAAAIHDAAAAAKHDAAAAAJJDAAAAAOHDAAAAAPHDAAAAAKJDAAAAALHDAAAAACNDAAAAADNDAAAAABLDAAAAANIDAAAAA
+ButtonSequenceSize=48
+'@
+                $iniContent | Out-File -FilePath $iniFile -Encoding utf8 -Force
+                }
         }
     },
     [PSCustomObject]@{
