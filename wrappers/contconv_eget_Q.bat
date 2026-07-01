@@ -25,11 +25,11 @@ if exist "%app%" if "%~1" NEQ "" (goto skip_download)
 if exist "%app%" (
     eget.exe query DarkHobbit/doublecontact
     echo. & echo  Update? & echo. & pause
-    eget.exe dl --file "*.dll,contconv.exe" --tag "0.2.5b3" --strip-components 1 --asset "zip" DarkHobbit/doublecontact
+    eget.exe dl --prerelease --file "*.dll,contconv.exe" --strip-components 1 --asset "zip" DarkHobbit/doublecontact
     if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo. & timeout 5 & goto download)
 ) else (
     echo. & echo  Download %app% to "%dir%" ? & echo. & pause
-    eget.exe dl --file "*.dll,contconv.exe" --tag "0.2.5b3" --strip-components 1 --asset "zip" DarkHobbit/doublecontact
+    eget.exe dl --prerelease --file "*.dll,contconv.exe" --strip-components 1 --asset "zip" DarkHobbit/doublecontact
     if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo. & timeout 5 & goto download)
 )
 
