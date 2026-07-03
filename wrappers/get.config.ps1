@@ -8,6 +8,15 @@
 
 $Apps = @(
     [PSCustomObject]@{
+        ID          = "eget.exe"
+        Name        = "eget"
+        Source      = "GitHub"
+        QueryTarget = "inherelab/eget"
+        Action      = {
+            eget.exe update --self
+        }
+    },
+    [PSCustomObject]@{
         ID          = "DiskMark64.exe"
         Name        = "CrystalDiskMark"
         Source      = "SourceForge"
