@@ -41,6 +41,7 @@ echo  [1] litterbox.catbox.moe -- 1 GB, 3 days
 echo  [2] x0.at -- 1 GB, 3 days min
 echo  [3] transfer.whalebone.io -- 250 MB, 7 days
 if not defined PIXELDRAIN_KEY (echo  %ESC%[90m[4] pixeldrain.com -- 10 GB, 60 days -- API Key missing%ESC%[0m) else (echo  [4] pixeldrain.com -- 10 GB, 60 days)
+echo.
 if defined ZP (if "%zip%"=="1" (echo  [0] Archivate: zip) else (echo  [0] Archivate: off)) else (echo  %ESC%[90m[0] Archivate: 7z.exe missing%ESC%[0m)
 echo.
 CHOICE /C 12340 /M "Your choice?:" >nul 2>&1
@@ -102,7 +103,6 @@ if defined LNK (
 for /f "tokens=*" %%i in ('certutil -hashfile "%~1" MD5 ^| find /v "MD5" ^| find /v "CertUtil"') do echo   MD5: %%i
 echo.
 goto :eof
-
 
 :shortcut
 powershell -NoP -C ^
