@@ -2,7 +2,7 @@
 # by github.com/wincmd64
 
 #   [Supported apps]
-# CrystalDiskMark, fastfetch, FFmpeg, HTTP Downloader,
+# AutoHotkey, CrystalDiskMark, fastfetch, FFmpeg, HTTP Downloader,
 # KeePass, LAV Filters, MPC-HC, qBittorrent, Rufus,
 # SystemInformer, Ventoy, Victoria, WinDirStat, WinMTR, UniExtract2
 
@@ -14,6 +14,16 @@ $Apps = @(
         QueryTarget = "inherelab/eget"
         Action      = {
             eget.exe update --self
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "AutoHotkey64.exe"
+        Name        = "AutoHotkey"
+        Source      = "GitHub"
+        QueryTarget = "AutoHotkey/AutoHotkey"
+        Action      = {
+            eget.exe dl --file "AutoHotkey.chm,AutoHotkey64.exe" --asset "zip" AutoHotkey/AutoHotkey
+            eget.exe dl --file "UX/WindowSpy.ahk" --strip-components 1 --asset "zip" AutoHotkey/AutoHotkey
         }
     },
     [PSCustomObject]@{
