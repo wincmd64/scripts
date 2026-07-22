@@ -4,7 +4,7 @@
 #   [Supported apps]
 # AutoHotkey, CrystalDiskMark, fastfetch, FFmpeg, HTTP Downloader,
 # KeePass, LAV Filters, MPC-HC, qBittorrent, Rufus,
-# SystemInformer, Ventoy, Victoria, WinDirStat, WinMTR, UniExtract2
+# SystemInformer, Ventoy, Victoria, WinDirStat, WinDjView Ext, WinMTR, UniExtract2
 
 $Apps = @(
     [PSCustomObject]@{
@@ -24,6 +24,16 @@ $Apps = @(
         Action      = {
             eget.exe dl --file "AutoHotkey.chm,AutoHotkey64.exe" --asset "zip" AutoHotkey/AutoHotkey
             eget.exe dl --file "UX/WindowSpy.ahk" --strip-components 1 --asset "zip" AutoHotkey/AutoHotkey
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "WinDjView.exe"
+        Name        = "WinDjView Extended"
+        Source      = "SourceForge"
+        QueryTarget = "sourceforge:windjviewextended"
+        Action      = {
+            eget.exe dl --extract-all --asset "zip,^source" --strip-components 1 "sourceforge:windjviewextended" --quiet
+            if (-not (Test-Path ".\WinDjView.ini")) { New-Item -Path ".\WinDjView.ini" -ItemType File | Out-Null }
         }
     },
     [PSCustomObject]@{
