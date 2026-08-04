@@ -57,12 +57,24 @@ foreach ($item in $Selected) {
     $app = $Apps | Where-Object { $_.Name -eq $item.App }
     if (-not $app) { continue }
 
-    # eget query
     if ($item.Version -ne "Not Installed") {
+        # eget query
         eget.exe query $app.QueryTarget
         
         $choice = Read-Host "Update current $($item.Version) ? (Y/N)"
         if ($choice -notmatch "y") { continue }
+    } else {
+        # safety check for fresh installs in non-empty directory
+        $ignoredItems = @("eget.exe", "get.config.ps1", $MyInvocation.MyCommand.Name)
+        $dirtyItems = Get-ChildItem -Path ".\" | Where-Object { $_.Name -notin $ignoredItems }
+
+        if ($dirtyItems) {
+            $dirtyChoice = Read-Host "Current directory is not empty. Proceed anyway? (Y/N)"
+            if ($dirtyChoice -notmatch "y") { 
+                Write-Host "Skipping installation of $($item.App)..." -ForegroundColor Gray
+                continue 
+            }
+        }
     }
     
     Invoke-Command -ScriptBlock $app.Action
