@@ -2,8 +2,8 @@
 # by github.com/wincmd64
 
 #   [Supported apps]
-# AutoHotkey, CrystalDiskMark, fastfetch, FFmpeg, HTTP Downloader,
-# KeePass, LAV Filters, MPC-HC, qBittorrent, Rufus,
+# AnyDesk, AutoHotkey, CrystalDiskMark, fastfetch, FFmpeg, Geek Uninstaller,
+# HTTP Downloader, KeePass, LAV Filters, MPC-HC, qBittorrent, Rufus,
 # SystemInformer, Ventoy, Victoria, WinDirStat, WinDjView Ext, WinMTR, UniExtract2
 
 $Apps = @(
@@ -14,6 +14,24 @@ $Apps = @(
         QueryTarget = "inherelab/eget"
         Action      = {
             eget.exe update --self
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "AnyDesk.exe"
+        Name        = "AnyDesk"
+        Source      = "DirectURL"
+        QueryTarget = "https://download.anydesk.com/AnyDesk.exe"
+        Action      = {
+            eget.exe dl https://download.anydesk.com/AnyDesk.exe
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "geek.exe"
+        Name        = "Geek Uninstaller"
+        Source      = "DirectURL"
+        QueryTarget = "https://geekuninstaller.com/geek.zip"
+        Action      = {
+            eget.exe dl --extract-all https://geekuninstaller.com/geek.zip
         }
     },
     [PSCustomObject]@{

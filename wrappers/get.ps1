@@ -24,7 +24,13 @@ $Apps = . $configFile
 
 # Scan current directory and detect versions
 $GridList = foreach ($app in $Apps) {
-    $localFile = Get-ChildItem -Path ".\$($app.ID)" -ErrorAction SilentlyContinue | Select-Object -First 1
+    # Special lookup for eget itself via PATH / $PSScriptRoot
+    if ($app.ID -eq "eget.exe") {
+        $egetCmd = Get-Command "eget.exe" -ErrorAction SilentlyContinue
+        $localFile = if ($egetCmd) { Get-Item $egetCmd.Source } else { $null }
+    } else {
+        $localFile = Get-ChildItem -Path ".\$($app.ID)" -ErrorAction SilentlyContinue | Select-Object -First 1
+    }
     
     $versionDisplay = "Not Installed"
     if ($localFile) {
