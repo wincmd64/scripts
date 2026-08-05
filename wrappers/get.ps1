@@ -1,6 +1,12 @@
 # eGet Wrapper
 # by github.com/wincmd64
 
+[CmdletBinding()]
+param(
+    [Parameter(Position=0, ValueFromPipeline=$true)]
+    [string]$AppName
+)
+
 # check for eGet
 if (Test-Path "$PSScriptRoot\eget.exe") { $env:PATH += ";$PSScriptRoot" }
 if (-not (Get-Command "eget.exe" -ErrorAction SilentlyContinue)) {
@@ -51,11 +57,19 @@ $GridList = foreach ($app in $Apps) {
 }
 
 # Display GUI selection window
-$Selected = $GridList | 
-            Select-Object "App", "Source", "Version" | 
-            Sort-Object @{Expression="Version"; Descending=$true}, @{Expression="App"; Ascending=$true} | 
-            Out-GridView -Title "eGet wrapper - [$PWD]" -OutputMode Multiple
-
+if ($AppName) {
+    $Selected = $GridList | Where-Object { $_.App -like "*$AppName*" }
+    if (-not $Selected) {
+        Write-Warning "App '$AppName' not found in configuration."
+        return
+    }
+} else {
+    # Display GUI selection window
+    $Selected = $GridList | 
+                Select-Object "App", "Source", "Version" | 
+                Sort-Object @{Expression="Version"; Descending=$true}, @{Expression="App"; Ascending=$true} | 
+                Out-GridView -Title "eGet wrapper - [$PWD]" -OutputMode Multiple
+}
 if (-not $Selected) { return }
 
 # Process selected applications
