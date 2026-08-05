@@ -56,8 +56,8 @@ $GridList = foreach ($app in $Apps) {
     }
 }
 
-# Display GUI selection window
 if ($AppName) {
+    # If the app name is passed as an argument, search for it directly; otherwise open Out-GridView
     $Selected = $GridList | Where-Object { $_.App -like "*$AppName*" }
     if (-not $Selected) {
         Write-Warning "App '$AppName' not found in configuration."
