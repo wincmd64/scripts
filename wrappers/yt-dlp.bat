@@ -28,7 +28,7 @@ for /f "tokens=2,*" %%A in ('reg query "HKCU\Software\Microsoft\Windows\CurrentV
 if "%~1" neq "" (set "url=%~1") else (for /f "delims=" %%i in ('powershell Get-Clipboard') do set "url=%%i")
 :: set default options
 set "opt_file=%temp%\yt-dlp-options.log"
-if exist "%opt_file%" (set /p num=<"%opt_file%") else (set num=-S "ext")
+if exist "%opt_file%" (set /p num=<"%opt_file%") else (set num=-S "ext" --mtime)
 :: get ver
 for /f "delims=" %%A in ('"%app%" --version') do set "lastupdate=%%A"
 :main
@@ -120,5 +120,5 @@ echo  Running: yt-dlp.exe %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --n
 "%app%" %num% -P "%DOWNLOADS%" -o "%%(title).50s.%%(ext)s" --no-part %batch_arg% "%url%"
 if ERRORLEVEL 1 (echo. & echo  Redirecting to Option #1 ... & echo. & goto Option_1)
 echo. & pause
-if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /R="%DOWNLOADS%") else (explorer "%DOWNLOADS%")
+if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /R="%DOWNLOADS%") else (explorer "%DOWNLOADS%")
 goto main
