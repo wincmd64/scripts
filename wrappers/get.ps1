@@ -54,7 +54,7 @@ $GridList = foreach ($app in $Apps) {
 $Selected = $GridList | 
             Select-Object "App", "Source", "Version" | 
             Sort-Object @{Expression="Version"; Descending=$true}, @{Expression="App"; Ascending=$true} | 
-            Out-GridView -Title "eGet wrapper - by github.com/wincmd64" -OutputMode Multiple
+            Out-GridView -Title "eGet wrapper - [$PWD]" -OutputMode Multiple
 
 if (-not $Selected) { return }
 
@@ -64,20 +64,20 @@ foreach ($item in $Selected) {
     if (-not $app) { continue }
 
     if ($item.Version -ne "Not Installed") {
-        # eget query
+        # UPDATE
         eget.exe query $app.QueryTarget
         
         $choice = Read-Host "Update current $($item.Version) ? (Y/N)"
         if ($choice -notmatch "y") { continue }
     } else {
-        # safety check for fresh installs in non-empty directory
+        # INSTALLS in non-empty directory
         $ignoredItems = @("eget.exe", "get.config.ps1", $MyInvocation.MyCommand.Name)
         $dirtyItems = Get-ChildItem -Path ".\" | Where-Object { $_.Name -notin $ignoredItems }
 
         if ($dirtyItems) {
-            $dirtyChoice = Read-Host "Current directory is not empty. Proceed anyway? (Y/N)"
+            $dirtyChoice = Read-Host "`n Current directory is not empty. Proceed with $($app.Name) anyway? (Y/N)"
             if ($dirtyChoice -notmatch "y") { 
-                Write-Host "Skipping installation of $($item.App)..." -ForegroundColor Gray
+                Write-Host "`n Skipping installation of $($app.Name)..." -ForegroundColor Gray
                 continue 
             }
         }

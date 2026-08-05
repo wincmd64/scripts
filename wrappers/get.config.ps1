@@ -3,13 +3,13 @@
 
 #   [Supported apps]
 # AnyDesk, AutoHotkey, CrystalDiskMark, fastfetch, FFmpeg, Geek Uninstaller,
-# HTTP Downloader, KeePass, LAV Filters, MPC-HC, qBittorrent, Rufus,
+# HTTP Downloader, KeePass, LAV Filters, MPC-HC, Notepad++, qBittorrent, Rufus,
 # SystemInformer, Ventoy, Victoria, WinDirStat, WinDjView Ext, WinMTR, UniExtract2
 
 $Apps = @(
     [PSCustomObject]@{
         ID          = "eget.exe"
-        Name        = "eget"
+        Name        = "eGet"
         Source      = "GitHub"
         QueryTarget = "inherelab/eget"
         Action      = {
@@ -92,7 +92,7 @@ $Apps = @(
         QueryTarget = "sourceforge:qbittorrent/qbittorrent-win32"
         Action      = {
             # 7z.exe/7z.dll requires to unpack qBittorrent.exe
-            if (Test-Path "$PSScriptRoot\7z.exe") { $env:PATH += ";$PSScriptRoot" }
+            if (Test-Path "$PSScriptRoot\7z.exe") { $env:PATH += ";$PSScriptRoot" } elseif (Test-Path "C:\Program Files\7-Zip\7z.exe") { $env:PATH += ";C:\Program Files\7-Zip" }
             if (-not (Get-Command "7z" -ErrorAction SilentlyContinue)) {
                 Write-Warning "7z.exe not found."
                 sleep 1
@@ -184,6 +184,15 @@ $Apps = @(
         QueryTarget = "GyanD/codexffmpeg"
         Action      = {
             eget.exe dl --file "*.exe" --strip-components 2 --asset "essentials,zip" GyanD/codexffmpeg
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "notepad++.exe"
+        Name        = "Notepad++"
+        Source      = "GitHub"
+        QueryTarget = "notepad-plus-plus/notepad-plus-plus"
+        Action      = {
+            eget.exe dl --extract-all --asset "portable.x64.7z" notepad-plus-plus/notepad-plus-plus
         }
     },
     [PSCustomObject]@{
