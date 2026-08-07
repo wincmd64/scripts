@@ -10,12 +10,40 @@ param(
 # check for eGet
 if (Test-Path "$PSScriptRoot\eget.exe") { $env:PATH += ";$PSScriptRoot" }
 if (-not (Get-Command "eget.exe" -ErrorAction SilentlyContinue)) {
-    Write-Warning "eget.exe not found."
-    $choice = Read-Host "Open github.com/inherelab/eget page? (Y/N)"
-    if ($choice -match "y") { Start-Process "https://github.com/inherelab/eget" }
-    Write-Host "Please install eget and re-run the script. Exiting..."
-    sleep 1
-    return
+    Write-Warning "eget.exe not found in $PSScriptRoot."
+    $choice = Read-Host "Download and extract eget.exe automatically? (Y/N)"
+    
+    if ($choice -match "y") {
+        $zip = "$PSScriptRoot\eget-windows-amd64.zip"
+        
+        try {
+            Write-Host "Downloading..." -ForegroundColor Cyan
+            Invoke-WebRequest -Uri "https://github.com/inherelab/eget/releases/latest/download/eget-windows-amd64.zip" -OutFile $zip -UseBasicParsing
+            
+            Write-Host "Extracting..." -ForegroundColor Cyan
+            Expand-Archive -Path $zip -DestinationPath $PSScriptRoot -Force
+            Remove-Item -Path $zip -Force
+
+            if (Test-Path "$PSScriptRoot\eget-windows-amd64.exe") {
+                Rename-Item -Path "$PSScriptRoot\eget-windows-amd64.exe" -NewName "eget.exe" -Force
+            }
+
+            if (Test-Path "$PSScriptRoot\eget.exe") {
+                $env:PATH += ";$PSScriptRoot"
+                Write-Host "Done." -ForegroundColor Green
+            } else {
+                throw "eget.exe was not found after extraction."
+            }
+        }
+        catch {
+            Write-Error "Failed to download/extract eget.exe: $_"
+            if (Test-Path $zip) { Remove-Item -Path $zip -Force }
+            return
+        }
+    } else {
+        Write-Host "Exiting script..."
+        return
+    }
 }
 
 # Load applications configuration

@@ -2,7 +2,7 @@
 # by github.com/wincmd64
 
 #   [Supported apps]
-# AnyDesk, AutoHotkey, CrystalDiskMark, fastfetch, FFmpeg, Geek Uninstaller,
+# AnyDesk, AutoHotkey, CrystalDiskMark, Far Manager, fastfetch, FFmpeg, Geek Uninstaller,
 # HTTP Downloader, KeePass, LAV Filters, MPC-HC, Notepad++, qBittorrent, Rufus,
 # SystemInformer, Ventoy, Victoria, WinDirStat, WinDjView Ext, WinMTR, UniExtract2
 
@@ -72,6 +72,19 @@ $Apps = @(
             eget.exe dl --extract-all --asset "64,zip,^Link,^DM,^LS" erickutcher/httpdownloader
             Write-Host "Enabling portable mode for HTTP Downloader..." -ForegroundColor Cyan
             New-Item -Path ".\portable" -ItemType File -Force | Out-Null
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "Far.exe"
+        Name        = "Far Manager"
+        Source      = "GitHub"
+        QueryTarget = "FarGroup/FarManager"
+        Action      = {
+            eget dl --asset "x64,7z,^.pdb." --file "^REG:(?i)(^|/)(Documentation|Encyclopedia|PluginSDK|VisualElements)(/|$),^REG:(?i)\.(map|cmd|md|txt|diz)$,^REG:(?i)(^|/)[^/.]+$" FarGroup/FarManager
+            if (-not (Test-Path -Path "Far.exe.ini")) {
+                Rename-Item -Path "Far.exe.example.ini" -NewName "Far.exe.ini" -Force
+                (Get-Content -Path "Far.exe.ini") -replace '^;UseSystemProfiles=1$', 'UseSystemProfiles=0' | Set-Content -Path "Far.exe.ini"
+            }
         }
     },
     [PSCustomObject]@{
