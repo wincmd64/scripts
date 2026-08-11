@@ -128,9 +128,18 @@ foreach ($item in $Selected) {
     Invoke-Command -ScriptBlock $app.Action
     if ($LastExitCode -eq 0 -and $?) {
         Write-Host "`n Successfully processed: $($app.Name)" -ForegroundColor Green
-        sleep 2
     } else {
         Write-Warning "`n Error occurred while processing $($app.Name)."
-        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    }
+}
+
+
+# Exiting
+Write-Host `n
+for ($s = 3; $s -gt 0; $s--) {
+    Write-Host -NoNewline "`r Press any key to continue (or wait $s seconds)... " -BackgroundColor DarkGray
+    for ($j = 0; $j -lt 20; $j++) {
+        if ([Console]::KeyAvailable) { [Console]::ReadKey($true) | Out-Null; exit }
+        Start-Sleep -m 50
     }
 }

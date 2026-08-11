@@ -3,7 +3,7 @@
 
 #   [Supported apps]
 # AnyDesk, AutoHotkey, CrystalDiskMark, Far Manager, fastfetch, FFmpeg, Geek Uninstaller,
-# HTTP Downloader, KeePass, LAV Filters, MPC-HC, Notepad++, qBittorrent, Rufus,
+# HTTP Downloader, KeePass, LAV Filters, LocalSend, MPC-HC, Notepad++, qBittorrent, Rufus,
 # SystemInformer, Ventoy, Victoria, WinDirStat, WinDjView Ext, WinMTR, UniExtract2
 
 $Apps = @(
@@ -52,6 +52,16 @@ $Apps = @(
         Action      = {
             eget.exe dl --extract-all --asset "zip,^source" --strip-components 1 "sourceforge:windjviewextended" --quiet
             if (-not (Test-Path ".\WinDjView.ini")) { New-Item -Path ".\WinDjView.ini" -ItemType File | Out-Null }
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "localsend_app.exe"
+        Name        = "LocalSend"
+        Source      = "GitHub"
+        QueryTarget = "localsend/localsend"
+        Action      = {
+            eget.exe dl --extract-all --file "^settings.json" --asset "x86-64,zip" localsend/localsend
+            if (-not (Test-Path ".\settings.json")) { New-Item -Path ".\settings.json" -ItemType File | Out-Null }
         }
     },
     [PSCustomObject]@{
