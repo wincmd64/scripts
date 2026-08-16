@@ -107,21 +107,67 @@ foreach ($item in $Selected) {
 
     if ($item.Version -ne "Not Installed") {
         # UPDATE
+        Write-Host
         eget.exe query $app.QueryTarget
         
-        $choice = Read-Host "Update current $($item.Version) ? (Y/N)"
-        if ($choice -notmatch "y") { continue }
+        Write-Host "> Update current $($item.Version) ? [Enter=Yes / Esc=Skip / C=Changelog]: " -NoNewline -ForegroundColor Yellow
+
+        $shouldUpdate = $false
+        while ($true) {
+            $keyInfo = [Console]::ReadKey($true)
+            
+            if ($keyInfo.Key -eq 'Enter') {
+                Write-Host "Yes" -ForegroundColor Green
+                $shouldUpdate = $true
+                break
+            }
+            elseif ($keyInfo.Key -eq 'Escape') {
+                Write-Host "Skipped" -ForegroundColor Gray
+                break
+            }
+            elseif ($keyInfo.Key -eq 'C' -or $keyInfo.KeyChar -in @('c', 'C', 'ñ', 'Ñ')) {
+                Write-Host "Opening Changelog..." -ForegroundColor Cyan
+                if ($app.Changelog) {
+                    Start-Process $app.Changelog
+                } else {
+                    Write-Warning "Changelog URL is empty for $($app.Name)."
+                }
+                # Prompt again after opening URL
+                Write-Host "> Update current $($item.Version) ? [Enter=Yes / Esc=Skip / C=Changelog]: " -NoNewline -ForegroundColor Yellow
+            }
+            else {
+                Write-Host "Skipped" -ForegroundColor Gray
+                break
+            }
+        }
+
+        if (-not $shouldUpdate) { continue }
+
     } else {
         # INSTALLS in non-empty directory
         $ignoredItems = @("eget.exe", "get.config.ps1", $MyInvocation.MyCommand.Name)
         $dirtyItems = Get-ChildItem -Path ".\" | Where-Object { $_.Name -notin $ignoredItems }
 
         if ($dirtyItems) {
-            $dirtyChoice = Read-Host "`n Current directory is not empty. Proceed with $($app.Name) anyway? (Y/N)"
-            if ($dirtyChoice -notmatch "y") { 
-                Write-Host "`n Skipping installation of $($app.Name)..." -ForegroundColor Gray
-                continue 
+            Write-Host
+            Write-Host "> Current directory is not empty. Proceed with $($app.Name)? [Enter=Yes / Esc=Skip]: " -NoNewline -ForegroundColor Yellow
+
+            $shouldProceed = $false
+            while ($true) {
+                $keyInfo = [Console]::ReadKey($true)
+                
+                if ($keyInfo.Key -eq 'Enter') {
+                    Write-Host "Yes" -ForegroundColor Green
+                    $shouldProceed = $true
+                    break
+                }
+                else {
+                    Write-Host "Skipped" -ForegroundColor Gray
+                    break
+                }
             }
+
+            if (-not $shouldProceed) { continue }
         }
     }
     

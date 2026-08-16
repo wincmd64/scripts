@@ -11,6 +11,7 @@ $Apps = @(
         ID          = "eget.exe"
         Name        = "eGet"
         Source      = "GitHub"
+        Changelog   = "https://github.com/inherelab/eget/releases"
         QueryTarget = "inherelab/eget"
         Action      = {
             eget.exe update --self
@@ -20,6 +21,7 @@ $Apps = @(
         ID          = "AnyDesk.exe"
         Name        = "AnyDesk"
         Source      = "DirectURL"
+        Changelog   = "https://anydesk.com/changelog/windows"
         QueryTarget = "https://download.anydesk.com/AnyDesk.exe"
         Action      = {
             eget.exe dl https://download.anydesk.com/AnyDesk.exe
@@ -29,6 +31,7 @@ $Apps = @(
         ID          = "geek.exe"
         Name        = "Geek Uninstaller"
         Source      = "DirectURL"
+        Changelog   = "https://geekuninstaller.com/download"
         QueryTarget = "https://geekuninstaller.com/geek.zip"
         Action      = {
             eget.exe dl --extract-all https://geekuninstaller.com/geek.zip
@@ -38,6 +41,7 @@ $Apps = @(
         ID          = "AutoHotkey64.exe"
         Name        = "AutoHotkey"
         Source      = "GitHub"
+        Changelog   = "https://www.autohotkey.com/docs/v2/ChangeLog.htm"
         QueryTarget = "AutoHotkey/AutoHotkey"
         Action      = {
             eget.exe dl --file "AutoHotkey.chm,AutoHotkey64.exe" --asset "zip" AutoHotkey/AutoHotkey
@@ -48,6 +52,7 @@ $Apps = @(
         ID          = "WinDjView.exe"
         Name        = "WinDjView Extended"
         Source      = "SourceForge"
+        Changelog   = "https://sourceforge.net/projects/windjviewextended/files/"
         QueryTarget = "sourceforge:windjviewextended"
         Action      = {
             eget.exe dl --extract-all --asset "zip,^source" --strip-components 1 "sourceforge:windjviewextended" --quiet
@@ -58,6 +63,7 @@ $Apps = @(
         ID          = "localsend_app.exe"
         Name        = "LocalSend"
         Source      = "GitHub"
+        Changelog   = "https://github.com/localsend/localsend/releases"
         QueryTarget = "localsend/localsend"
         Action      = {
             eget.exe dl --extract-all --file "^settings.json" --asset "x86-64,zip" localsend/localsend
@@ -68,6 +74,7 @@ $Apps = @(
         ID          = "DiskMark64.exe"
         Name        = "CrystalDiskMark"
         Source      = "SourceForge"
+        Changelog   = "https://crystalmark.info/en/software/crystaldiskmark/crystaldiskmark-history/"
         QueryTarget = "sourceforge:crystaldiskmark"
         Action      = {
             eget.exe dl --file "DiskMark64.exe,CdmResource" --asset "zip,^Shizuku,^Aoi,^Src" "sourceforge:crystaldiskmark"
@@ -77,6 +84,7 @@ $Apps = @(
         ID          = "HTTP_Downloader.exe"
         Name        = "HTTP Downloader"
         Source      = "GitHub"
+        Changelog   = "https://raw.githubusercontent.com/erickutcher/httpdownloader/master/HTTP_Downloader/changelog.txt"
         QueryTarget = "erickutcher/httpdownloader"
         Action      = {
             eget.exe dl --extract-all --asset "64,zip,^Link,^DM,^LS" erickutcher/httpdownloader
@@ -88,6 +96,7 @@ $Apps = @(
         ID          = "Far.exe"
         Name        = "Far Manager"
         Source      = "GitHub"
+        Changelog   = "https://raw.githubusercontent.com/FarGroup/FarManager/refs/heads/master/far/changelog"
         QueryTarget = "FarGroup/FarManager"
         Action      = {
             eget dl --asset "x64,7z,^.pdb." --file "^REG:(?i)(^|/)(Documentation|Encyclopedia|PluginSDK|VisualElements)(/|$),^REG:(?i)\.(map|cmd|md|txt|diz)$,^REG:(?i)(^|/)[^/.]+$" FarGroup/FarManager
@@ -101,6 +110,7 @@ $Apps = @(
         ID          = "KeePass.exe"
         Name        = "KeePass"
         Source      = "SourceForge"
+        Changelog   = "https://keepass.info/news/news_all.html"
         QueryTarget = "sourceforge:keepass/KeePass 2.x"
         Action      = {
             eget.exe dl --extract-all --asset "zip,^REG:Source" "sourceforge:keepass/KeePass 2.x"
@@ -112,6 +122,7 @@ $Apps = @(
         ID          = "qbittorrent.exe"
         Name        = "qBittorrent"
         Source      = "SourceForge"
+        Changelog   = "https://www.qbittorrent.org/news"
         QueryTarget = "sourceforge:qbittorrent/qbittorrent-win32"
         Action      = {
             # 7z.exe/7z.dll requires to unpack qBittorrent.exe
@@ -130,6 +141,7 @@ $Apps = @(
         ID          = "*rufus*.exe"
         Name        = "Rufus"
         Source      = "GitHub"
+        Changelog   = "https://github.com/pbatard/rufus/blob/master/ChangeLog.txt"
         QueryTarget = "pbatard/rufus"
         Action      = {
             eget.exe dl --asset "p.exe" pbatard/rufus
@@ -139,6 +151,7 @@ $Apps = @(
         ID          = "SystemInformer.exe"
         Name        = "SystemInformer"
         Source      = "GitHub"
+        Changelog   = "https://github.com/winsiderss/systeminformer/commits/master"
         QueryTarget = "winsiderss/si-builds"
         Action      = {
             eget.exe dl --file "^x86*,^*.sig" --asset "win64,zip" winsiderss/si-builds
@@ -159,6 +172,7 @@ $Apps = @(
         ID          = "Ventoy2Disk.exe"
         Name        = "Ventoy"
         Source      = "GitHub"
+        Changelog   = "https://github.com/ventoy/Ventoy/releases"
         QueryTarget = "ventoy/Ventoy"
         Action      = {
             eget.exe dl --extract-all --strip-components 1 --asset "windows,zip" ventoy/Ventoy
@@ -168,6 +182,7 @@ $Apps = @(
         ID          = "Victoria.exe"
         Name        = "Victoria"
         Source      = "SourceForge"
+        Changelog   = "https://hdd.by/victoria"
         QueryTarget = "sourceforge:victoria-ssd-hdd"
         Action      = {
             eget.exe dl --extract-all --strip-components 1 sourceforge:victoria-ssd-hdd
@@ -177,6 +192,7 @@ $Apps = @(
         ID          = "WinMTR.exe"
         Name        = "WinMTR"
         Source      = "GitHub"
+        Changelog   = "https://github.com/leeter/WinMTR-refresh/releases"
         QueryTarget = "leeter/WinMTR-refresh"
         Action      = {
             eget.exe dl --extract-all --asset "x64,zip" leeter/WinMTR-refresh
@@ -186,6 +202,7 @@ $Apps = @(
         ID          = "UniExtract.exe"
         Name        = "Universal Extractor"
         Source      = "GitHub"
+        Changelog   = "https://github.com/gvp9000/UniExtract2/releases"
         QueryTarget = "gvp9000/UniExtract2"
         Action      = {
             eget.exe dl --extract-all --strip-components 1 --asset "zip" gvp9000/UniExtract2
@@ -195,6 +212,7 @@ $Apps = @(
         ID          = "LAVAudio.ax"
         Name        = "LAV Filters"
         Source      = "GitHub"
+        Changelog   = "https://github.com/nevcairiel/lavfilters/releases"
         QueryTarget = "Nevcairiel/LAVFilters"
         Action      = {
             eget.exe dl --file "*.ax,*.dll,*.manifest" --asset "x64,zip" Nevcairiel/LAVFilters
@@ -204,6 +222,7 @@ $Apps = @(
         ID          = "ffmpeg.exe"
         Name        = "FFmpeg"
         Source      = "GitHub"
+        Changelog   = "https://github.com/FFmpeg/FFmpeg/blob/master/Changelog"
         QueryTarget = "GyanD/codexffmpeg"
         Action      = {
             eget.exe dl --file "*.exe" --strip-components 2 --asset "essentials,zip" GyanD/codexffmpeg
@@ -213,6 +232,7 @@ $Apps = @(
         ID          = "notepad++.exe"
         Name        = "Notepad++"
         Source      = "GitHub"
+        Changelog   = "https://notepad-plus-plus.org/news"
         QueryTarget = "notepad-plus-plus/notepad-plus-plus"
         Action      = {
             eget.exe dl --extract-all --asset "portable.x64.7z" notepad-plus-plus/notepad-plus-plus
@@ -222,6 +242,7 @@ $Apps = @(
         ID          = "WinDirStat.exe"
         Name        = "WinDirStat"
         Source      = "GitHub"
+        Changelog   = "https://github.com/windirstat/windirstat/blob/release/v2.8.0/CHANGELOG.md"
         QueryTarget = "windirstat/windirstat"
         Action      = {
             eget.exe dl --asset "zip" --file "x64/*.exe" --strip-components 1 windirstat/windirstat
@@ -243,6 +264,7 @@ ShowTreeMap=0
         ID          = "mpc-hc64.exe"
         Name        = "MPC-HC"
         Source      = "GitHub"
+        Changelog   = "https://github.com/clsid2/mpc-hc/releases"
         QueryTarget = "clsid2/mpc-hc"
         Action      = {
             eget.exe dl --extract-all --asset "x64,zip" clsid2/mpc-hc
@@ -290,6 +312,7 @@ ButtonSequenceSize=48
         ID          = "fastfetch.exe"
         Name        = "fastfetch CLI"
         Source      = "GitHub"
+        Changelog   = "https://github.com/fastfetch-cli/fastfetch/releases"
         QueryTarget = "fastfetch-cli/fastfetch"
         Action      = {
             eget.exe dl --file "fastfetch.exe" --asset "windows,amd64,7z" fastfetch-cli/fastfetch
