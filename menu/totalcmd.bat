@@ -1,5 +1,6 @@
 :: Adds "Open in Total Commander" entry to the Explorer context menu
-:: [area] files, dirs and desktop
+::   [area] files, dirs and desktop
+:: by github.com/wincmd64
 
 
 @echo off
