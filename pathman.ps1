@@ -91,5 +91,13 @@ if ($pathsToAdd.Count -gt 0) {
 # Apply changes
 $newPath = $arrPath -join [IO.Path]::PathSeparator
 [System.Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
-Write-Host "`n DONE.`n"
-sleep 1
+
+# Exiting
+Write-Host `n
+for ($s = 3; $s -gt 0; $s--) {
+    Write-Host -NoNewline "`r Press any key to continue (or wait $s seconds)... " -BackgroundColor DarkGray
+    for ($j = 0; $j -lt 20; $j++) {
+        if ([Console]::KeyAvailable) { [Console]::ReadKey($true) | Out-Null; exit }
+        Start-Sleep -m 50
+    }
+}
