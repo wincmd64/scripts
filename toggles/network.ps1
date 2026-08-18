@@ -3,9 +3,9 @@ Toggles the Windows Firewall default outbound policy
 for all network profiles (Domain, Private, Public).
 
 Modes:
-  .\theme.ps1           displays the current outbound policy state
-  .\theme.ps1 on        sets DefaultOutboundAction to Allow
-  .\theme.ps1 off       sets DefaultOutboundAction to Block
+  .\network.ps1           displays the current outbound policy state
+  .\network.ps1 on        sets DefaultOutboundAction to Allow
+  .\network.ps1 off       sets DefaultOutboundAction to Block
 
 Administrative privileges are required.
 #>
