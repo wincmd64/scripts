@@ -1,4 +1,5 @@
-# Creates a scheduled task to run an executable with highest privileges at user logon without UAC prompt
+# Creates a scheduled task to run '.exe', '.cmd', '.bat' and '.ps1' with highest privileges at user logon without UAC prompt
+# Run with -Install to create shortcut in Shell:SendTo folder
 # by github.com/wincmd64
 
 param(
@@ -6,7 +7,7 @@ param(
     [Switch]$Install
 )
 
-# --- INSTALL LOGIC ---
+# Shell:SendTo
 if ($Install) {
     $sendToPath = [Environment]::GetFolderPath('SendTo')
     $shortcutPath = Join-Path $sendToPath "Add to schtasks.lnk"
@@ -31,9 +32,6 @@ if ($Install) {
 
 # Existing
 if (-not $FilePath) { Write-Warning "No file specified! Use -Install to setup."; exit 1}
-# Check if running as administrator
-$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
-if (-not $isAdmin) {Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -FilePath `"$FilePath`"" -Verb RunAs; exit}
 # Verify target file exists
 if (-not (Test-Path $FilePath)) {Write-Warning "File not found: $FilePath"; exit 1}
 # Verify .ext
@@ -42,13 +40,16 @@ $fileExtension = [System.IO.Path]::GetExtension($FilePath)
 if ($allowedExtensions -notcontains $fileExtension) {
     Write-Warning "Unsupported file type: $fileExtension. Allowed: $($allowedExtensions -join ', ')"; pause; exit 1
 }
+# Check if running as administrator
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
+if (-not $isAdmin) {Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`" -FilePath `"$FilePath`"" -Verb RunAs; exit}
+# Ask for parameters
+Write-Host "`n '$([System.IO.Path]::GetFileName($FilePath))' will run with highest privileges at user logon without a UAC prompt.`n" -ForegroundColor Cyan
+$params = Read-Host "Enter parameters (or press Enter for none)"
 
 # Remove existing task
 $taskName = "[hideUAC] " + [System.IO.Path]::GetFileName($FilePath)
 schtasks /Delete /TN $taskName /F 2>&1 | Out-Null
-
-# Ask for parameters
-$params = Read-Host "Enter parameters (or press Enter for none)"
 
 if ($fileExtension -eq '.ps1') {
     if ($params) {
