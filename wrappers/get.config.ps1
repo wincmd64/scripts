@@ -44,8 +44,7 @@ $Apps = @(
         Changelog   = "https://www.autohotkey.com/docs/v2/ChangeLog.htm"
         QueryTarget = "AutoHotkey/AutoHotkey"
         Action      = {
-            eget.exe dl --file "AutoHotkey.chm,AutoHotkey64.exe" --asset "zip" AutoHotkey/AutoHotkey
-            eget.exe dl --file "UX/WindowSpy.ahk" --strip-components 1 --asset "zip" AutoHotkey/AutoHotkey
+            eget.exe dl --file "AutoHotkey.chm,AutoHotkey64.exe,UX/WindowSpy.ahk" --asset "zip" --rename "UX/WindowSpy.ahk=WindowSpy.ahk" AutoHotkey/AutoHotkey
         }
     },
     [PSCustomObject]@{
