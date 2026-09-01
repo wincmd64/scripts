@@ -148,13 +148,13 @@ $Apps = @(
     },
     [PSCustomObject]@{
         ID          = "SystemInformer.exe"
-        Name        = "SystemInformer"
+        Name        = "System Informer"
         Source      = "GitHub"
-        Changelog   = "https://github.com/winsiderss/systeminformer/commits/master"
-        QueryTarget = "winsiderss/si-builds"
+        Changelog   = "https://github.com/winsiderss/systeminformer/releases"
+        QueryTarget = "winsiderss/systeminformer"
         Action      = {
-            eget.exe dl --file "^x86*,^*.sig" --asset "win64,zip" winsiderss/si-builds
-
+            eget.exe dl --file "amd64/**,^amd64/x86/**,^*.sig" --strip-components 1 --asset "bin,zip" winsiderss/systeminformer
+            
             $settingsFile = ".\SystemInformer.exe.settings.xml"
             if (-not (Test-Path $settingsFile)) {
             Write-Host "Creating SystemInformer.exe.settings.xml..." -ForegroundColor Cyan
