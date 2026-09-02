@@ -125,7 +125,7 @@ foreach ($item in $Selected) {
                 Write-Host "Skipped" -ForegroundColor Gray
                 break
             }
-            elseif ($keyInfo.Key -eq 'C' -or $keyInfo.KeyChar -in @('c', 'C', 'ñ', 'Ñ')) {
+            elseif ($keyInfo.Key -eq [ConsoleKey]::C) {
                 Write-Host "Opening Changelog..." -ForegroundColor Cyan
                 if ($app.Changelog) {
                     Start-Process $app.Changelog
@@ -172,10 +172,23 @@ foreach ($item in $Selected) {
     }
     
     Invoke-Command -ScriptBlock $app.Action
+    while ($LastExitCode -ne 0 -or -not $?) {
+        Write-Host; Write-Warning "Error occurred while processing $($app.Name)."; 
+        Write-Host "`n> Retry? [Enter=Yes / Esc=Skip]: " -NoNewline -ForegroundColor Yellow
+
+        $retry = $false
+        while ($true) {
+            $key = [Console]::ReadKey($true).Key
+            if ($key -eq 'Enter') { Write-Host "Yes" -ForegroundColor Green; $retry = $true; break }
+            if ($key -eq 'Escape') { Write-Host "Skipped" -ForegroundColor Gray; break }
+        }
+
+        if (-not $retry) { break }
+        Invoke-Command -ScriptBlock $app.Action
+    }
+
     if ($LastExitCode -eq 0 -and $?) {
         Write-Host "`n Successfully processed: $($app.Name)" -ForegroundColor Green
-    } else {
-        Write-Warning "`n Error occurred while processing $($app.Name)."
     }
 }
 
