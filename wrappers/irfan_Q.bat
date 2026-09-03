@@ -67,6 +67,7 @@ if not exist "i_view64.ini" (
       echo FitWindowOption=3
       echo ShowMultipageDlg=1
       echo [Others]
+      echo ShowPNGAlpha=1
       echo LoopCurDir=1
       echo BeepOnLoop=0
       echo JumpAfterDelete=1
