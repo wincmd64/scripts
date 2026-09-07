@@ -1,5 +1,5 @@
-:: Windows quick setup v25.10
-::   tested on: Win 11 25H2, Win 10 22H2
+:: Windows quick setup v26.9
+::   tested on: Win 11 25H2, Win 10 LTSC 2021
 :: by github.com/wincmd64
 
 @echo off
@@ -31,9 +31,6 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Sn
 
 :: Параметры > Система > Дисплей > Настройки графики. ON "Уменьшить время задержки и увеличить производительность" 
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v HwSchMode /t REG_DWORD /d 2 /f
-
-:: Панель управления > Звуки. OFF "Проигрывать мелодию запуска Windows"
-reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation" /v DisableStartupSound /t REG_DWORD /d 1 /f
 
 :: Проводник. Скрыть папки из 'Этот компьютер' : Объемные объекты, Музыка, Загрузки, Изображения, Видео, Документы, Рабочий стол -- https://www.tenforums.com/tutorials/6015-add-remove-folders-pc-windows-10-a.html
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v ThisPCPolicy /d Hide /f
@@ -78,9 +75,6 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Ta
 :: Параметры > Персонализация > Панель задач. OFF Мини-приложения
 reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\NewsAndInterests\AllowNewsAndInterests" /v "Value" /t REG_DWORD /d 0 /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v "AllowNewsAndInterests" /t REG_DWORD /d 0 /f
-
-:: Панель управления > Звуки. OFF "Проигрывать мелодию запуска Windows"
-reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides" /v UserSetting_DisableStartupSound /t REG_DWORD /d 1 /f
 
 :: Проводник. Компактное представление
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v UseCompactMode /t REG_DWORD /d 1 /f
@@ -168,6 +162,9 @@ powershell -NoP -NoL -Ep Bp -c "$s=(New-Object -ComObject WScript.Shell).CreateS
 
 :: Панель управления. Крупные значки
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel" /v StartupPage /t REG_DWORD /d 1 /f
+
+:: Панель управления > Звук. OFF "Проигрывать мелодию запуска Windows"
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableStartupSound /t REG_DWORD /d 1 /f
 
 :: Параметры > Система > Уведомления. OFF "Продолжить способы завершения настройки устройства". Это предотвратит появление навязчивого окна, которое появляется через какое-то время после установки
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement" /v ScoobeSystemSettingEnabled /t REG_DWORD /d 0 /f
