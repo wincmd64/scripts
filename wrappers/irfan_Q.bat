@@ -120,7 +120,7 @@ if %count% equ 0 (
 
 if %count% equ 1 (echo  Processing: %* & echo.) else (echo  Processing: %count% files & echo.)
 if "%~x1"=="" echo  NOTICE: first argument is likely a folder or has no extension. & echo.
-echo   [1] resize image by 50%%
+echo   [1] resize images
 echo   [2] blur effect
 echo   [3] horizontal panorama
 echo   [4] vertical panorama
@@ -143,9 +143,11 @@ if errorlevel 1 goto Option_1
 exit
 
 :Option_1
+set "pct=50"
+set /p "pct=Enter resize percentage or press Enter for default (%pct%%%): "
 FOR %%k IN (%*) DO (
     echo  FILE: "%%~k"
-    "%app%" "%%~k" /resize=^(50p,50p^) /resample /convert="%%~dpnk_resized%%~xk"
+    "%app%" "%%~k" /resize=^(%pct%p,%pct%p^) /resample /convert="%%~dpnk_resized%%~xk"
 )
 color A & timeout 1 & exit
 :Option_2
