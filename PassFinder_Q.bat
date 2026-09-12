@@ -1,5 +1,4 @@
-:: Tries to open an archive using a list of passwords.
-::   If no local password list <archive_name>.txt is found, downloads a default list from SecLists on GitHub.
+:: Demonstrates a dictionary attack method on password-protected archives.
 ::   NOTICE: filenames containing the character "!" are not supported.
 :: by github.com/wincmd64
 
@@ -15,6 +14,8 @@ setlocal enabledelayedexpansion
 
 :: [SETTINGS]
 set "dir=%~dp0"
+:: if no local password list <archive_name>.txt is found, downloads this one:
+set "DEFAULT_PASS_URL=https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Default-Credentials/default-passwords.txt"
 cd /d "%dir%"
 
 :7z
@@ -73,7 +74,7 @@ if not exist "!pw_list!" (
     set "pw_list=%temp%\default-passwords.txt"
     if not exist "!pw_list!" (
         echo  Downloading default password list...
-        powershell -C "iwr 'https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Default-Credentials/default-passwords.txt' -OutFile '!pw_list!'"
+        powershell -C "iwr '%DEFAULT_PASS_URL%' -OutFile '!pw_list!'"
     )
 )
 
@@ -90,6 +91,7 @@ for /F "usebackq delims=" %%P in ("!pw_list!") do (
         if !errorlevel! EQU 0 (
             echo. & echo.
             echo   %ESC%[42mPASSWORD FOUND: %%P%ESC%[0m
+            powershell -c "[Console]::Beep(800, 300)" >nul 2>&1
             echo.
             goto :file_done
         )
