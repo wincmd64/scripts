@@ -5,9 +5,8 @@
 chcp 1251 >nul
 (Net session >nul 2>&1)&&(cd /d "%~dp0")||(PowerShell start """%~0""" -verb RunAs & Exit /B)
 
-:: ver finder https://en.wikipedia.org/wiki/Microsoft_Office#History_of_releases
 for /F "tokens=3 delims=." %%O in ('reg query "HKCR\Word.Application\CurVer" 2^>nul') do set officeVer=%%O
-if defined officeVer (TITLE Office v%officeVer% detected) else (TITLE Office Deployment Tool)
+if defined officeVer (echo. & echo    WARNING: Office v%officeVer% already installed & echo.)
 
 echo. & echo   This script runs MS Office setup using an XML configuration file. & echo.
 echo   [1] select XML file
@@ -45,8 +44,9 @@ set "XML_SOURCE=%temp%\office2024.xml"
 )
 
 :RUN
-curl.exe https://officecdn.microsoft.com/pr/wsus/setup.exe -RLO# --output-dir "%temp%" & echo.
-if exist "%temp%\setup.exe" (echo   RUN: setup.exe /configure "%XML_SOURCE%" ? & echo. & pause) else (color C & echo  setup.exe not found. & pause & exit)
+echo.
+curl.exe https://officecdn.microsoft.com/pr/wsus/setup.exe -fRLO# --output-dir "%temp%"
+if errorlevel 1 (echo  Error: download failed. & timeout 5 & goto RUN) else (echo. & echo   RUN: setup.exe /configure "%XML_SOURCE%" ? & echo. & pause)
 start "" "%temp%\setup.exe" /configure "%XML_SOURCE%"
 echo. & echo  Installation started...
 color A & timeout 3
