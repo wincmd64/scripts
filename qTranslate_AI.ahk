@@ -6,7 +6,10 @@
 ; =========================================================
 
 ; ---------------- SETTINGS ----------------
-TargetLang    := "ru"    ; language to translate into: https://docs.cloud.google.com/translate/docs/languages
+; Comma-separated list of target languages, e.g. "ru,uk,en". The first one
+; is used by default. Right-click the result window's title to switch
+; between them — the choice sticks for the rest of the script's run. https://docs.cloud.google.com/translate/docs/languages
+TargetLang    := "ru,uk,en"
 SourceLang    := "auto"  ; auto-detect the source language
 WindowOpacity := 92      ; result window opacity, 0-100 (100 = fully opaque)
 
@@ -36,8 +39,22 @@ global TitleCtrlHwnd := 0
 global TranslateEditCtrl := ""
 global EditStartY := 0
 
+; parse the TargetLang setting into a list, first entry is the default
+global TargetLangList := []
+for lang in StrSplit(TargetLang, ",")
+    TargetLangList.Push(Trim(lang))
+global CurrentTargetLang := TargetLangList[1]
+
+; remembers the last translated text/position so the right-click
+; language menu can re-translate without a fresh text selection
+global LastOriginalText := ""
+global LastMouseX := 0
+global LastMouseY := 0
+
 ; intercept clicks on the empty top area / title so the window can be dragged
 OnMessage(0x201, On_TitleMouseDown)  ; WM_LBUTTONDOWN
+; right-click on the same area opens the target-language menu
+OnMessage(0x7B, On_TitleRightClick)  ; WM_CONTEXTMENU
 
 ; register whichever triggers are enabled — both can be active together
 if !(Hotkey1 = "" || StrLower(Hotkey1) = "none")
@@ -77,9 +94,14 @@ TranslateHotkeyHandler(*) {
 }
 
 DoTranslate(text, mx, my) {
-    global TargetLang, SourceLang, WindowStartWidth, WindowStartHeight, AutoSelectTranslatedText
+    global SourceLang, WindowStartWidth, WindowStartHeight, AutoSelectTranslatedText, CurrentTargetLang, LastOriginalText, LastMouseX, LastMouseY
+
+    LastOriginalText := text
+    LastMouseX := mx
+    LastMouseY := my
+
     try {
-        result := TranslateGoogle(text, TargetLang, SourceLang)
+        result := TranslateGoogle(text, CurrentTargetLang, SourceLang)
     } catch as e {
         ToolTip()
         ToolTip("Translation error: " e.Message)
@@ -88,7 +110,7 @@ DoTranslate(text, mx, my) {
     }
 
     ToolTip()
-    ShowTranslation(mx, my, text, result.translated, result.detectedLang, TargetLang, WindowStartWidth, WindowStartHeight, AutoSelectTranslatedText)
+    ShowTranslation(mx, my, text, result.translated, result.detectedLang, CurrentTargetLang, WindowStartWidth, WindowStartHeight, AutoSelectTranslatedText)
 }
 
 ; ---------------------------------------------------------
@@ -386,6 +408,35 @@ On_TitleMouseDown(wParam, lParam, msg, hwnd) {
     global TranslateGui
     if (IsObject(TranslateGui) && hwnd = TranslateGui.Hwnd)
         PostMessage(0xA1, 2, , , "ahk_id " TranslateGui.Hwnd)  ; WM_NCLBUTTONDOWN, HTCAPTION
+}
+
+On_TitleRightClick(wParam, lParam, msg, hwnd) {
+    global TranslateGui
+    if (IsObject(TranslateGui) && hwnd = TranslateGui.Hwnd)
+        ShowLanguageMenu()
+}
+
+; builds and shows the target-language picker, with a check mark on
+; whichever language is currently active
+ShowLanguageMenu() {
+    global TargetLangList, CurrentTargetLang
+    langMenu := Menu()
+    for lang in TargetLangList {
+        label := StrUpper(lang)
+        langMenu.Add(label, LangMenuHandler)
+        if (lang = CurrentTargetLang)
+            langMenu.Check(label)
+    }
+    langMenu.Show()
+}
+
+; switches the active target language and, if we have a previous
+; translation on hand, re-translates it right away
+LangMenuHandler(itemName, itemPos, menuObj) {
+    global CurrentTargetLang, LastOriginalText, LastMouseX, LastMouseY
+    CurrentTargetLang := StrLower(itemName)
+    if (LastOriginalText != "")
+        DoTranslate(LastOriginalText, LastMouseX, LastMouseY)
 }
 
 On_GuiResize(guiObj, minMax, w, h) {
