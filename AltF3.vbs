@@ -32,7 +32,7 @@ Config = Array( _
     Array("mp3DirectCut.exe",                 ".mp3 .cue", "https://mpesch3.de"), _
     Array("gfie.exe",                         ".dll .ico", "https://greenfishsoftware.org"), _
     Array("csvlens.exe",                      ".csv",      "https://github.com/ys-l/csvlens"), _
-    Array("wordpad.exe",                      ".rtf",      "https://github.com/wincmd64/blog/wiki/Как-вернуть-WordPad-в-Windows-11"), _
+    Array("wordpad.exe",                      ".rtf",      "https://github.com/wincmd64/blog/wiki/РљР°Рє-РІРµСЂРЅСѓС‚СЊ-WordPad-РІ-Windows-11"), _
     Array("ISIDE.exe",                        ".iss",      "https://jrsoftware.org/isdl.php"), _
     Array("fmp.exe",                          ".swf",      "https://www.eolsoft.com/freeware/flash_movie_player"), _
     Array("notepad++.exe",                    ".log",      "https://notepad-plus-plus.org"), _
