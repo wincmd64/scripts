@@ -12,7 +12,7 @@ by github.com/wincmd64
 
 
 # Supports -Confirm and -WhatIf switches
-[CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+[CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [Parameter(Position = 0, ValueFromPipeline = $true)]
     [string]$Path,
