@@ -94,7 +94,7 @@ TranslateHotkeyHandler(*) {
 }
 
 DoTranslate(text, mx, my) {
-    global SourceLang, WindowStartWidth, WindowStartHeight, AutoSelectTranslatedText, CurrentTargetLang, LastOriginalText, LastMouseX, LastMouseY
+    global SourceLang, WindowStartWidth, WindowStartHeight, AutoSelectTranslatedText, CurrentTargetLang, LastOriginalText, LastMouseX, LastMouseY, TranslateGui
 
     LastOriginalText := text
     LastMouseX := mx
@@ -110,7 +110,20 @@ DoTranslate(text, mx, my) {
     }
 
     ToolTip()
-    ShowTranslation(mx, my, text, result.translated, result.detectedLang, CurrentTargetLang, WindowStartWidth, WindowStartHeight, AutoSelectTranslatedText)
+
+    ; if a translation window is already open (e.g. re-translating via
+    ; the language menu), keep its current size/position instead of
+    ; resetting to the defaults
+    if IsObject(TranslateGui) {
+        TranslateGui.GetPos(&winX, &winY, &winW, &winH)
+    } else {
+        winX := mx + 15
+        winY := my + 15
+        winW := WindowStartWidth
+        winH := WindowStartHeight
+    }
+
+    ShowTranslation(winX, winY, text, result.translated, result.detectedLang, CurrentTargetLang, winW, winH, AutoSelectTranslatedText)
 }
 
 ; ---------------------------------------------------------
@@ -376,8 +389,8 @@ ShowTranslation(x, y, original, translated, detectedLang, targetLang, startW, st
     ; beyond startW/startH, hence the small safety margin below
     resizeBorder := 12
     wa := GetWorkAreaAt(x, y)
-    posX := x + 15
-    posY := y + 15
+    posX := x
+    posY := y
     if (posX + startW + resizeBorder > wa.R)
         posX := wa.R - startW - resizeBorder
     if (posY + startH + resizeBorder > wa.B)
