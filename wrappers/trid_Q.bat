@@ -11,7 +11,7 @@
 
 @echo off
 setlocal
-chcp 1251 >nul
+chcp 65001 >nul
 
 :: [SETTINGS]
 set "name=TrID CLI"
