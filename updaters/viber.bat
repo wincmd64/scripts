@@ -61,6 +61,8 @@ timeout 3 & exit
 (Net session >nul 2>&1)&&(cd /d "%dir%")||(PowerShell start """%~0""" -verb RunAs -ArgumentList '/h' & Exit /B)
 set "HOSTS=%WINDIR%\System32\drivers\etc\hosts"
 
+echo.>>"%HOSTS%"
+echo #viber>>"%HOSTS%"
 call :add 0.0.0.0 ads.viber.com
 call :add 0.0.0.0 ads.aws.viber.com
 call :add 0.0.0.0 ads-d.viber.com
