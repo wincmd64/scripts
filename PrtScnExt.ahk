@@ -2,7 +2,7 @@
 Enhances PrintScreen functionality
 by github.com/wincmd64
 
-    PrtScn:       Launches native Snipping Tool (respects OS registry settings)
+    PrtScn:       Launches native Snipping Tool (ignore OS settings)
     Shift+PrtScn: Snips and auto-pastes the image into MS Paint
     Ctrl+PrtScn:  Snips and auto-pastes into a custom user editor (e.g., IrfanView)
 */
@@ -10,22 +10,12 @@ by github.com/wincmd64
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-; User Editor Path
+; USER EDITOR PATH:
 global UserEditorPath := "D:\soft\IrfanView\i_view64.exe"
 
-; PrintScreen: do nothing if Win11 native snipping already handles it
-~PrintScreen:: {
-    try if RegRead("HKCU\Control Panel\Keyboard", "PrintScreenKeyForSnippingEnabled") = 1
-        return
-    Run "ms-screenclip:"
-}
-
-; Shift+PrintScreen: snip -> paste result into Paint
-+PrintScreen::SnipAndPaste("mspaint.exe")
-
-; Ctrl+PrintScreen: snip -> paste result into the user's editor
-^PrintScreen::SnipAndPaste(UserEditorPath)
-
+PrintScreen::Run "ms-screenclip:"           ; PrintScreen: always open the snip UI
++PrintScreen::SnipAndPaste("mspaint.exe")   ; Shift+PrintScreen: snip -> paste result into Paint
+^PrintScreen::SnipAndPaste(UserEditorPath)  ; Ctrl+PrintScreen: snip -> paste result into the user's editor
 
 
 SnipAndPaste(exePath) {
