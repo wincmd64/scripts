@@ -48,11 +48,11 @@ global CyrillicLanguageNames := ["Russian", "Ukrainian"]
 
 ; Hotkey to toggle AutoCorrect on/off (shows a tooltip near the cursor for 2 sec)
 ; Set to "" to disable the hotkey entirely.
-global ToggleHotkey := "^!+F11" ; Ctrl+Alt+Shift+F11
+global ToggleHotkey := "^!+F12" ; Ctrl+Alt+Shift+F12
 
 ; Hotkey to show a MsgBox with details of the last replacement
 ; Set to "" to disable.
-global ShowLastReplacementHotkey := "^!+F10" ; Ctrl+Alt+Shift+F10
+global ShowLastReplacementHotkey := "^!+F11" ; Ctrl+Alt+Shift+F11
 
 ; ---------------- END SETTINGS ----------------
 

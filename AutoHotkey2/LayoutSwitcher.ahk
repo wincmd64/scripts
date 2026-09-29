@@ -1,11 +1,14 @@
-﻿; Keyboard Layout Switcher
-; by github.com/wincmd64
-;
-; Left Ctrl+Shift - English
-; Right Ctrl+Shift - Russian
-; AltGr - Ukrainian
-;
-; Ctrl+Alt+Shift+F12 - Show installed layouts (for testing/customization)
+﻿/*
+Keyboard Layout Switcher
+by github.com/wincmd64
+
+    Left Ctrl+Shift - English
+    Right Ctrl+Shift - Russian
+    AltGr - Ukrainian
+
+    Run LayoutSwitcher.ahk with -layouts to show all installed layouts (for testing/customization)
+*/
+
 
 #Requires AutoHotkey v2.0
 #SingleInstance Force
@@ -13,6 +16,15 @@
 ; Get installed keyboard layouts once at startup
 installedLayouts := GetInstalledLayoutsWithNames()
 
+; -layouts
+if (A_Args.Length && A_Args[1] = "-layouts") {
+    allLayoutsStr := ""
+    for layoutID, langName in installedLayouts {
+        allLayoutsStr .= Format("0x{:08X}", layoutID) . " - " . langName . "`n"
+    }
+    MsgBox(Trim(allLayoutsStr, "`n"), "Installed layouts")
+    ExitApp
+}
 
 ; Left Ctrl+Shift - English
 ~LShift Up::
@@ -36,16 +48,6 @@ installedLayouts := GetInstalledLayoutsWithNames()
 ~RAlt::
 RAlt & RCtrl::{ ; AltGr
     SwitchLayout(0x04220422)
-}
-
-; Ctrl+Alt+Shift+F12 - List of installed layouts
-!^+F12::
-{
-    allLayoutsStr := ""
-    for layoutID, langName in installedLayouts {
-        allLayoutsStr .= Format("0x{:08X}", layoutID) . " - " . langName . "`n"
-    }
-    MsgBox(Trim(allLayoutsStr, "`n"), "Installed layouts")
 }
 
 
