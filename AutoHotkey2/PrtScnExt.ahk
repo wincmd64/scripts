@@ -3,8 +3,8 @@ Enhances PrintScreen functionality
 by github.com/wincmd64
 
     PrtScn:       Always launches native Snipping Tool (ignore OS settings)
-    Ctrl+PrtScn:  Snips and pastes the image into MS Paint
-    Shift+PrtScn: Snips and pastes into a custom user editor (e.g., IrfanView)
+    Alt+PrtScn:   Snips and pastes the image into MS Paint
+    Ctrl+PrtScn:  Snips and pastes into a custom user editor (e.g., IrfanView)
 */
 
 #Requires AutoHotkey v2.0
@@ -14,8 +14,8 @@ by github.com/wincmd64
 global UserEditorPath := "D:\soft\IrfanView\i_view64.exe"
 
 PrintScreen::Run "ms-screenclip:"
-^PrintScreen::SnipAndPaste("mspaint.exe")
-+PrintScreen::SnipAndPaste(UserEditorPath)
+!PrintScreen::SnipAndPaste("mspaint.exe")
+^PrintScreen::SnipAndPaste(UserEditorPath)
 
 
 SnipAndPaste(exePath) {
