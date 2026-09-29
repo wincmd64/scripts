@@ -2,9 +2,9 @@
 Enhances PrintScreen functionality
 by github.com/wincmd64
 
-    PrtScn:       Launches native Snipping Tool (ignore OS settings)
-    Shift+PrtScn: Snips and auto-pastes the image into MS Paint
-    Ctrl+PrtScn:  Snips and auto-pastes into a custom user editor (e.g., IrfanView)
+    PrtScn:       Always launches native Snipping Tool (ignore OS settings)
+    Ctrl+PrtScn:  Snips and pastes the image into MS Paint
+    Shift+PrtScn: Snips and pastes into a custom user editor (e.g., IrfanView)
 */
 
 #Requires AutoHotkey v2.0
@@ -13,9 +13,9 @@ by github.com/wincmd64
 ; USER EDITOR PATH:
 global UserEditorPath := "D:\soft\IrfanView\i_view64.exe"
 
-PrintScreen::Run "ms-screenclip:"           ; PrintScreen: always open the snip UI
-+PrintScreen::SnipAndPaste("mspaint.exe")   ; Shift+PrintScreen: snip -> paste result into Paint
-^PrintScreen::SnipAndPaste(UserEditorPath)  ; Ctrl+PrintScreen: snip -> paste result into the user's editor
+PrintScreen::Run "ms-screenclip:"
+^PrintScreen::SnipAndPaste("mspaint.exe")
++PrintScreen::SnipAndPaste(UserEditorPath)
 
 
 SnipAndPaste(exePath) {
@@ -26,15 +26,23 @@ SnipAndPaste(exePath) {
         return
     }
 
-    savedClip := ClipboardAll()
-    A_Clipboard := ""  ; clear so ClipWait reacts to the NEW content, not old
+    overlay := "ahk_exe SnippingTool.exe ahk_class XamlWindow"
+    ; Clipboard "version" - lets us detect a new image without touching the clipboard
+    seq := DllCall("GetClipboardSequenceNumber")
 
     Run "ms-screenclip:"
+    if !WinWait(overlay, , 5)
+        return                  ; overlay never appeared
+    WinWaitClose(overlay)       ; wait as long as the user needs (Esc / X / snip done)
 
-    if !ClipWait(5, 1) {
-        A_Clipboard := savedClip  ; user cancelled (Esc) / timed out - restore
-        return
+    ; The image may land on the clipboard a moment after the overlay closes
+    Loop 20 {
+        if DllCall("GetClipboardSequenceNumber") != seq
+            break
+        Sleep 50
     }
+    if DllCall("GetClipboardSequenceNumber") = seq
+        return                  ; cancelled, clipboard untouched
 
     Run exePath
     exeName := ""
