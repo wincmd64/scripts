@@ -9,7 +9,7 @@
 ; Comma-separated list of target languages, e.g. "ru,uk,en". The first one
 ; is used by default. Right-click the result window's title to switch
 ; between them — the choice sticks for the rest of the script's run. https://docs.cloud.google.com/translate/docs/languages
-TargetLang    := "ru,uk,en"
+TargetLang    := "ru,en,uk"
 SourceLang    := "auto"  ; auto-detect the source language
 WindowOpacity := 92      ; result window opacity, 0-100 (100 = fully opaque)
 
@@ -36,6 +36,7 @@ AutoSelectTranslatedText := false ; select the whole translated text when the wi
 global TranslateGui := ""
 global FocusWatchTimer := ""
 global TitleCtrlHwnd := 0
+global TranslateTitleCtrl := ""
 global TranslateEditCtrl := ""
 global EditStartY := 0
 
@@ -79,6 +80,8 @@ DoubleTapHandler(*) {
 }
 
 TranslateHotkeyHandler(*) {
+    global WindowStartWidth, WindowStartHeight, LastOriginalText, LastMouseX, LastMouseY
+
     text := GetSelectedText()
     if (text = "") {
         ToolTip("No text selected")
@@ -87,43 +90,76 @@ TranslateHotkeyHandler(*) {
     }
 
     MouseGetPos(&mx, &my)
-    ToolTip("Translating...", mx + 15, my + 15)
-
-    ; defer the actual network call so it never blocks the hotkey/hook thread
-    SetTimer(DoTranslate.Bind(text, mx, my), -1)
-}
-
-DoTranslate(text, mx, my) {
-    global SourceLang, WindowStartWidth, WindowStartHeight, AutoSelectTranslatedText, CurrentTargetLang, LastOriginalText, LastMouseX, LastMouseY, TranslateGui
-
     LastOriginalText := text
     LastMouseX := mx
     LastMouseY := my
 
+    ; show the window right away with a loading placeholder — this is a
+    ; brand-new translation, so it opens fresh near the cursor
+    ShowTranslationWindow(mx + 15, my + 15, WindowStartWidth, WindowStartHeight, "Translating...", "Loading text...")
+
+    ; defer the actual network call so it never blocks the hotkey/hook thread
+    SetTimer(DoTranslate.Bind(text), -1)
+}
+
+; picks which language to actually translate into: normally the
+; session's current target, but if the text is already in that
+; language, steps to the next different one in TargetLangList
+; (wrapping around) so we never show a same>same translation
+PickEffectiveTargetLang(detectedLang) {
+    global TargetLangList, CurrentTargetLang
+    d := StrLower(detectedLang)
+    c := StrLower(CurrentTargetLang)
+    if (d != c)
+        return {lang: CurrentTargetLang, isAuto: false}
+
+    n := TargetLangList.Length
+    idx := 1
+    for i, lang in TargetLangList {
+        if (StrLower(lang) = c) {
+            idx := i
+            break
+        }
+    }
+    loop n {
+        idx := Mod(idx, n) + 1
+        if (StrLower(TargetLangList[idx]) != d)
+            return {lang: TargetLangList[idx], isAuto: true}
+    }
+    return {lang: CurrentTargetLang, isAuto: false} ; degenerate: list has just this one language
+}
+
+DoTranslate(text) {
+    global SourceLang, AutoSelectTranslatedText, CurrentTargetLang
+
     try {
-        result := TranslateGoogle(text, CurrentTargetLang, SourceLang)
+        firstPass := TranslateGoogle(text, CurrentTargetLang, SourceLang)
     } catch as e {
-        ToolTip()
-        ToolTip("Translation error: " e.Message)
-        SetTimer(() => ToolTip(), -2000)
+        UpdateTranslationWindow("Error", "Translation error: " e.Message)
         return
     }
 
-    ToolTip()
-
-    ; if a translation window is already open (e.g. re-translating via
-    ; the language menu), keep its current size/position instead of
-    ; resetting to the defaults
-    if IsObject(TranslateGui) {
-        TranslateGui.GetPos(&winX, &winY, &winW, &winH)
+    pick := PickEffectiveTargetLang(firstPass.detectedLang)
+    if !pick.isAuto {
+        result := firstPass
+        effectiveLang := CurrentTargetLang
     } else {
-        winX := mx + 15
-        winY := my + 15
-        winW := WindowStartWidth
-        winH := WindowStartHeight
+        ; source language equals the current target — re-request
+        ; against the next different language in the list instead
+        try {
+            result := TranslateGoogle(text, pick.lang, SourceLang)
+        } catch as e {
+            UpdateTranslationWindow("Error", "Translation error: " e.Message)
+            return
+        }
+        effectiveLang := pick.lang
     }
 
-    ShowTranslation(winX, winY, text, result.translated, result.detectedLang, CurrentTargetLang, winW, winH, AutoSelectTranslatedText)
+    titleText := "Translate from " StrUpper(firstPass.detectedLang) " to " StrUpper(effectiveLang)
+    if pick.isAuto
+        titleText .= " (auto)"
+
+    UpdateTranslationWindow(titleText, result.translated, AutoSelectTranslatedText)
 }
 
 ; ---------------------------------------------------------
@@ -349,8 +385,11 @@ GetWorkAreaAt(px, py) {
 ; ---------------------------------------------------------
 ; 4. Result GUI
 ; ---------------------------------------------------------
-ShowTranslation(x, y, original, translated, detectedLang, targetLang, startW, startH, autoSelect) {
-    global TranslateGui, TitleCtrlHwnd, WindowOpacity, FocusWatchTimer, TranslateEditCtrl, EditStartY, TitleFontSize, TextFontSize
+
+; creates a brand-new window at (x, y) with the given starting
+; content — used only for a fresh hotkey-triggered translation
+ShowTranslationWindow(x, y, startW, startH, titleText, bodyText) {
+    global TranslateGui, TitleCtrlHwnd, TranslateTitleCtrl, WindowOpacity, FocusWatchTimer, TranslateEditCtrl, EditStartY, TitleFontSize, TextFontSize
 
     DestroyTranslateGui()
 
@@ -366,12 +405,12 @@ ShowTranslation(x, y, original, translated, detectedLang, targetLang, startW, st
     TranslateGui.SetFont("s" TitleFontSize " cGray Bold", "Segoe UI")
     ; +E0x20 = WS_EX_TRANSPARENT — clicks on this control fall through
     ; straight to the window itself, otherwise OnMessage never sees them
-    titleText := "Translate from " StrUpper(detectedLang) " to " StrUpper(targetLang)
     titleCtrl := TranslateGui.Add("Text", "w" (startW - 20) " +E0x20", titleText)
     TitleCtrlHwnd := titleCtrl.Hwnd
+    TranslateTitleCtrl := titleCtrl
 
     TranslateGui.SetFont("s" TextFontSize " c" textColor " Norm", "Segoe UI")
-    editCtrl := TranslateGui.Add("Edit", "w" (startW - 20) " r4 -VScroll ReadOnly -E0x200 Background" bgColor, translated)
+    editCtrl := TranslateGui.Add("Edit", "w" (startW - 20) " r4 -VScroll ReadOnly -E0x200 Background" bgColor, bodyText)
     TranslateEditCtrl := editCtrl
     editCtrl.GetPos(&ex, &EditStartY, &ew, &eh)
 
@@ -398,19 +437,34 @@ ShowTranslation(x, y, original, translated, detectedLang, targetLang, startW, st
 
     TranslateGui.Show("x" posX " y" posY " w" startW " h" startH)
 
+    opacity255 := Round(255 * (WindowOpacity < 0 ? 0 : WindowOpacity > 100 ? 100 : WindowOpacity) / 100)
+    WinSetTransparent(opacity255, TranslateGui)
+
+    FocusWatchTimer := SetTimer(CheckFocus, 150)
+}
+
+; updates the title/body of the CURRENT window in place — no
+; recreation, so its position/size (and any manual resize/drag
+; the person already did) stay exactly as they are. Used both
+; for the "Translating..." placeholder and the final result.
+UpdateTranslationWindow(titleText, bodyText, autoSelect := false) {
+    global TranslateGui, TranslateTitleCtrl, TranslateEditCtrl
+
+    if !(IsObject(TranslateGui) && IsObject(TranslateTitleCtrl) && IsObject(TranslateEditCtrl))
+        return
+
+    TranslateTitleCtrl.Text := titleText
+    TranslateEditCtrl.Text := bodyText
+    UpdateScrollbar(TranslateEditCtrl)
+
     ; the Edit control auto-selects all its text when it gets focus
     ; (it's the only tab-stop control here) — clear that selection
     ; unless autoSelect is enabled
     ; EM_SETSEL = 0xB1
     if autoSelect
-        PostMessage(0xB1, 0, -1, , "ahk_id " editCtrl.Hwnd)
+        PostMessage(0xB1, 0, -1, , "ahk_id " TranslateEditCtrl.Hwnd)
     else
-        PostMessage(0xB1, 0, 0, , "ahk_id " editCtrl.Hwnd)
-
-    opacity255 := Round(255 * (WindowOpacity < 0 ? 0 : WindowOpacity > 100 ? 100 : WindowOpacity) / 100)
-    WinSetTransparent(opacity255, TranslateGui)
-
-    FocusWatchTimer := SetTimer(CheckFocus, 150)
+        PostMessage(0xB1, 0, 0, , "ahk_id " TranslateEditCtrl.Hwnd)
 }
 
 On_TitleMouseDown(wParam, lParam, msg, hwnd) {
@@ -440,12 +494,18 @@ ShowLanguageMenu() {
 }
 
 ; switches the active target language and, if we have a previous
-; translation on hand, re-translates it right away
+; translation on hand, re-translates it right away — keeps the
+; window exactly where/how it is, just swaps the content
 LangMenuHandler(itemName, itemPos, menuObj) {
-    global CurrentTargetLang, LastOriginalText, LastMouseX, LastMouseY
+    global CurrentTargetLang, LastOriginalText
     CurrentTargetLang := StrLower(itemName)
-    if (LastOriginalText != "")
-        DoTranslate(LastOriginalText, LastMouseX, LastMouseY)
+    if (LastOriginalText = "")
+        return
+
+    ; show a loading placeholder right away so the window doesn't
+    ; look frozen while translating longer text
+    UpdateTranslationWindow("Translating...", "Loading text...")
+    SetTimer(DoTranslate.Bind(LastOriginalText), -1)
 }
 
 On_GuiResize(guiObj, minMax, w, h) {
