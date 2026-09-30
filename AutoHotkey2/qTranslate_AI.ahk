@@ -132,10 +132,6 @@ DoTranslate(text, mx, my) {
 GetSelectedText() {
     oldClip := ClipboardAll()
     A_Clipboard := ""
-    ; if triggered by a Win-based hotkey, Win may still be physically
-    ; held at this point (the hotkey fires on key-down) — release it
-    ; explicitly so Ctrl+C doesn't get sent as Win+Ctrl+C
-    Send("{LWin up}{RWin up}")
     Send("^c")
     if !ClipWait(0.5) {
         A_Clipboard := oldClip
