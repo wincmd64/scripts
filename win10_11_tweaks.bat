@@ -1,4 +1,4 @@
-:: Windows quick setup v26.9
+:: Windows quick setup v26.10
 ::   tested on: Win 11 25H2, Win 10 LTSC 2021
 :: by github.com/wincmd64
 
@@ -237,7 +237,7 @@ schtasks /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\Svc
 :: OFF "Последние действия и результаты сканирования" в Windows Defender (это касается конкретного уведомления - сам AV продолжает работу)
 reg add "HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection" /v SummaryNotificationDisabled /t REG_DWORD /d 1 /f
 
-:: Электропитание - применять лучше для настольных ПК, а не ноутбуков
+::  /!\ Электропитание - применять лучше для настольных ПК, а не ноутбуков
 :: Отключает гибернацию и удаляет файл C:\hiberfil.sys
 powercfg -h off
 :: Не переводить ПК в спящий режим (от сети)
