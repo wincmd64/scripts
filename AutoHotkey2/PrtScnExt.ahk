@@ -13,7 +13,7 @@ by github.com/wincmd64
 ; USER EDITOR PATH:
 global UserEditorPath := "D:\soft\IrfanView\i_view64.exe"
 
-PrintScreen::Run "ms-screenclip:"
+$PrintScreen::Run "ms-screenclip:"
 !PrintScreen::SnipAndPaste("mspaint.exe")
 ^PrintScreen::SnipAndPaste(UserEditorPath)
 

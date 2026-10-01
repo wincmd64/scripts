@@ -1,50 +1,40 @@
-; Ctrl+Shift+V - pastes clipboard content (image or text)  
-; as a new file. Works in three contexts:
-;   - Total Commander  -> saved into the active panel's current path
-;   - Windows Explorer -> saved into the currently open folder
-;   - Desktop          -> saved directly on the desktop
-;
-; Image clipboard data is saved as "<timestamp>_clip.png" (via GDI+),
-; text clipboard data as "<timestamp>_clip.txt".
-;
-; After saving, the script also moves the cursor/selection onto the newly
-; created file, mimicking what Explorer already does natively:
-;   - Total Commander: re-sorts by date to bring the new file to the top,
-;     places the cursor on it, then restores the original name sort
-;     (there is no direct "select file by name" command in TC's internal
-;     command set, see WM_USER+50/51 docs).
-;   - Explorer: uses the Shell.Application COM SelectItem method.
-;   - Desktop: forces Explorer to notice the new icon (SHChangeNotify),
-;     then selects it directly via ListView messages (LVM_FINDITEM /
-;     LVM_SETITEMSTATE), since the desktop has no equivalent of TC's
-;     "reread source" command and no COM selection API either.
+/*
+Ctrl+Shift+V - pastes clipboard content (image or text)  
+as a new file. Works in three contexts:
+  - Total Commander  -> saved into the active panel's current path
+  - Windows Explorer -> saved into the currently open folder
+  - Desktop          -> saved directly on the desktop
 
+Image clipboard data is saved as "<timestamp>_clip.png" (via GDI+),
+text clipboard data as "<timestamp>_clip.txt".
+
+
+Also, Win+F1 / Win+F2 - open Windows Terminal (cmd  / powershell)
+*/
 
 TC_QUERY := 1074 ; WM_USER+50 - query data from Total Commander
 TC_EXEC  := 1075 ; WM_USER+51 - execute a Total Commander internal command
+
+; === Settings ===
+HOTKEY_PASTE      := "^+v"  ; Ctrl+Shift+V - paste clipboard as a new file
+HOTKEY_CMD        := "#F1"  ; Win+F1 - open cmd in the current path
+HOTKEY_POWERSHELL := "#F2"  ; Win+F2 - open PowerShell in the current path
+
 
 #HotIf WinActive("ahk_class TTOTAL_CMD")
     || WinActive("ahk_class CabinetWClass")
     || WinActive("ahk_class Progman")
     || WinActive("ahk_class WorkerW")
 
-^+v:: { ; Ctrl+Shift+V
+Hotkey(HOTKEY_PASTE, PasteClipboard)
+Hotkey(HOTKEY_CMD, (*) => RunTerminal("cmd"))
+Hotkey(HOTKEY_POWERSHELL, (*) => RunTerminal("powershell"))
+
+PasteClipboard(*) {
     activeClass := WinGetClass("A")
-    targetDir := ""
-    explorerWin := ""
 
     ; === 1. Determine the destination folder ===
-    switch activeClass {
-        case "TTOTAL_CMD":
-            targetDir := GetTCPath()
-        case "CabinetWClass":
-            if (explorerWin := GetExplorerWindow())
-                targetDir := explorerWin.Document.Folder.Self.Path
-        case "Progman", "WorkerW":
-            targetDir := A_Desktop
-        default:
-            return
-    }
+    targetDir := GetActiveDirPath()
     if (targetDir == "" || !DirExist(targetDir))
         return
 
@@ -74,7 +64,7 @@ TC_EXEC  := 1075 ; WM_USER+51 - execute a Total Commander internal command
         case "TTOTAL_CMD":
             SelectInTC(fileName)
         case "CabinetWClass":
-            if explorerWin {
+            if (explorerWin := GetExplorerWindow()) {
                 try explorerWin.Document.SelectItem(explorerWin.Document.Folder.ParseName(fileName), 13)
             }
         case "Progman", "WorkerW":
@@ -121,6 +111,37 @@ GetExplorerWindow() {
             return window
     }
     return ""
+}
+
+; --- Current folder path for whichever supported app is active
+;     (Total Commander / Explorer / Desktop). Shared by ^+v and the
+;     Win+F1 / Win+F2 terminal hotkeys below. ---
+GetActiveDirPath() {
+    switch WinGetClass("A") {
+        case "TTOTAL_CMD":
+            return GetTCPath()
+        case "CabinetWClass":
+            if (win := GetExplorerWindow())
+                return win.Document.Folder.Self.Path
+        case "Progman", "WorkerW":
+            return A_Desktop
+    }
+    return ""
+}
+
+; --- Launch Windows Terminal at the active app's current folder
+RunTerminal(shellName) {
+    dir := GetActiveDirPath()
+    if (dir == "" || !DirExist(dir))
+        return
+    try {
+        Run('wt -d "' dir '" "' shellName '"')
+        if WinWait("ahk_class CASCADIA_HOSTING_WINDOW_CLASS", , 5)
+            WinActivate
+    } catch {
+        exe := (shellName = "cmd") ? "cmd.exe" : "powershell.exe"
+        try Run(exe, dir)
+    }
 }
 
 #HotIf
