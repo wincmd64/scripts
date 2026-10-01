@@ -240,6 +240,8 @@ reg add "HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and thre
 :: Электропитание - применять лучше для настольных ПК, а не ноутбуков
 :: Отключает гибернацию и удаляет файл C:\hiberfil.sys
 powercfg -h off
+:: Не переводить ПК в спящий режим (от сети)
+powercfg -change -standby-timeout-ac 0
 :: Панель управления > Электропитание. Схема питания "Высокая производительность"
 powercfg /S 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
 :: Не отключать жесткий диск | https://www.tenforums.com/tutorials/21454-turn-off-hard-disk-after-idle-windows-10-a.html
