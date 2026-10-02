@@ -1,4 +1,4 @@
-/*
+﻿/*
 Enhances PrintScreen functionality
 by github.com/wincmd64
 
@@ -13,6 +13,10 @@ by github.com/wincmd64
 ; USER EDITOR PATH:
 global UserEditorPath := "D:\soft\IrfanView\i_view64.exe"
 
+; Overlays:
+GroupAdd "SnipOverlay", "ahk_exe ScreenClippingHost.exe" ; Windows 10
+GroupAdd "SnipOverlay", "ahk_exe SnippingTool.exe"       ; Windows 11
+
 $PrintScreen::Run "ms-screenclip:"
 !PrintScreen::SnipAndPaste("mspaint.exe")
 ^PrintScreen::SnipAndPaste(UserEditorPath)
@@ -26,16 +30,14 @@ SnipAndPaste(exePath) {
         return
     }
 
-    overlay := "ahk_exe SnippingTool.exe ahk_class XamlWindow"
-    ; Clipboard "version" - lets us detect a new image without touching the clipboard
-    seq := DllCall("GetClipboardSequenceNumber")
+    overlay := "ahk_group SnipOverlay"
+    seq := DllCall("GetClipboardSequenceNumber") ; Clipboard "version" - lets us detect a new image without touching the clipboard
 
     Run "ms-screenclip:"
-    if !WinWait(overlay, , 5)
+    if !WinWaitActive(overlay, , 5)
         return                  ; overlay never appeared
-    WinWaitClose(overlay)       ; wait as long as the user needs (Esc / X / snip done)
+    WinWaitNotActive(overlay)   ; wait until user finishes or cancels (Esc)
 
-    ; The image may land on the clipboard a moment after the overlay closes
     Loop 20 {
         if DllCall("GetClipboardSequenceNumber") != seq
             break
@@ -47,9 +49,9 @@ SnipAndPaste(exePath) {
     Run exePath
     exeName := ""
     SplitPath exePath, &exeName
-    ; WinWaitActive alone can time out
+
     if WinWait("ahk_exe " exeName, , 3) {
-        WinActivate
+        WinActivate "ahk_exe " exeName
         WinWaitActive("ahk_exe " exeName, , 2)
         Sleep 150
         Send "^v"
