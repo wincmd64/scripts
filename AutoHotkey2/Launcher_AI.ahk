@@ -1,7 +1,7 @@
 /*
-Launcher. Shows a popup menu with the contents of one folder for quick launching.
+LAUNCHER. Shows a popup menu with the contents of one folder for quick launching.
 
-FIRST STEP: set "Folder" in the settings below to your own folder.
+   /!\    set "Folder" in the settings below to your own folder with shortcuts.
 
 Show the menu:
   Win+Z (change with ShowHotkey)  |  left click on the tray icon  |  double-click on empty taskbar space
@@ -18,9 +18,10 @@ In the menu:
 #SingleInstance Force
 
 ; ===== User settings =====
-Folder          := "D:\soft\.lnk"       ; folder with shortcuts
+Folder          := "C:\ProgramData\Microsoft\Windows\Start Menu\Programs"       ; folder with shortcuts
 ShowHotkey      := "#z"                 ; hotkey to show the menu (# = Win)
 TaskbarDblClick := 1                    ; 1 = double-click on empty taskbar space shows the menu
+DarkMenu        := "auto"               ; "auto" = follow the Windows app theme, 1 = dark, 0 = light
 TrayIcon        := RegExReplace(A_ScriptFullPath, "\.\w+$", ".ico")   ; "" = default AHK icon
 MaxItems        := 50                  ; max menu entries, the rest is cut off (0 = no limit)
 Debug           := 0                    ; 1 = message box with taskbar element info on every taskbar click (also copied to the clipboard)
@@ -32,8 +33,17 @@ pending  := ""                          ; [index, "R"|"M"] set by the menu hook
 
 hookCb := CallbackCreate(MenuMsgFilter, "F", 3)
 
-if TrayIcon != "" && FileExist(TrayIcon)
-    try TraySetIcon(TrayIcon)
+; Dark/light popup menus via the undocumented uxtheme API (Windows 10 1903+), ignored if unavailable
+dark := DarkMenu
+if DarkMenu = "auto" {
+    dark := 0
+    try dark := !RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme")
+}
+try {
+    ux := DllCall("LoadLibrary", "str", "uxtheme", "ptr")
+    DllCall(DllCall("GetProcAddress", "ptr", ux, "ptr", 135, "ptr"), "int", dark ? 2 : 3)   ; SetPreferredAppMode
+    DllCall(DllCall("GetProcAddress", "ptr", ux, "ptr", 136, "ptr"))                        ; FlushMenuThemes
+}
 
 ; Left click on the tray icon shows the menu
 A_TrayMenu.Insert("1&", "Show menu", (*) => ShowMenu())
@@ -100,8 +110,10 @@ ShowMenu() {
     pending := ""
     hHook := DllCall("SetWindowsHookExW", "int", -1, "ptr", hookCb, "ptr", 0
         , "uint", DllCall("GetCurrentThreadId"), "ptr")    ; WH_MSGFILTER
-    m.Show()
-    DllCall("UnhookWindowsHookEx", "ptr", hHook)
+    try
+        m.Show()
+    finally
+        DllCall("UnhookWindowsHookEx", "ptr", hHook)
 
     if pending {
         path := dir "\" curNames[pending[1] + 1]
@@ -267,7 +279,7 @@ ResolveIcon(&file, &num) {
     if RegExMatch(file, "i)\.(exe|dll|ico|icl|cpl|ocx|scr|bmp|png|jpe?g|gif)$")
         return
     if RegExMatch(file, "i)\.msc$") && FileExist(file) {
-        if RegExMatch(FileRead(file), '<Icon Index="(\d+)" File="([^"]+)"', &m)
+        if RegExMatch(FileRead(file, "m8192"), '<Icon Index="(\d+)" File="([^"]+)"', &m)
             file := ExpandEnv(m[2]), num := m[1] + 1
         return
     }
