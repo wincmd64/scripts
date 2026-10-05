@@ -213,9 +213,8 @@ set nMons=%ERRORLEVEL%
 <nul set /p "= done."
 echo.
 if %nMons% LSS 2 (
-    echo  Setting wallpaper: "%~1"
     start "" "%app%" "%~1" /wall=4 /cmdexit
-    exit
+    color A & timeout 1 & exit
 )
 :SelectMonitor
 echo. & echo  Detected %nMons% monitors.
@@ -227,7 +226,7 @@ echo %mon_num%| findstr /r "^[1-9][0-9]*$" >nul
 if errorlevel 1 goto SelectMonitor
 if %mon_num% GTR %nMons% goto SelectMonitor
 start "" "%app%" "%~1" /wall=4 /monitor=%mon_num% /cmdexit
-exit
+color A & timeout 1 & exit
 
 :shortcut
 powershell -NoP -C ^
