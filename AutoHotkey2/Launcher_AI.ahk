@@ -9,8 +9,8 @@ Show the menu:
 In the menu:
   Left click / Enter       run the item (folder: new tab in Total Commander's active panel, or Explorer)
   Shift + click / Enter    run as administrator
-  Middle click             run as administrator
-  Right click              reveal the item (new tab in Total Commander with the cursor on it, or Explorer)
+  Middle click             reveal the item (new tab in Total Commander with the cursor on it, or Explorer)
+  Right click              show the item's Properties
   Esc / click elsewhere    close the menu
 */
 
@@ -22,7 +22,8 @@ Folder          := "D:\soft\.lnk"       ; folder with shortcuts
 ShowHotkey      := "#z"                 ; hotkey to show the menu (# = Win)
 TaskbarDblClick := 1                    ; 1 = double-click on empty taskbar space shows the menu
 TrayIcon        := RegExReplace(A_ScriptFullPath, "\.\w+$", ".ico")   ; "" = default AHK icon
-MaxItems        := 100                  ; max menu entries, the rest is cut off (0 = no limit)
+MaxItems        := 50                  ; max menu entries, the rest is cut off (0 = no limit)
+Debug           := 0                    ; 1 = message box with taskbar element info on every taskbar click (also copied to the clipboard)
 ; =========================
 
 curMenu  := ""
@@ -105,9 +106,9 @@ ShowMenu() {
     if pending {
         path := dir "\" curNames[pending[1] + 1]
         if pending[2] = "R"
-            Reveal(path)
+            ShowProperties(path)
         else
-            RunPath(path, true)
+            Reveal(path)
     }
 }
 
@@ -132,21 +133,25 @@ MenuMsgFilter(code, wParam, lParam) {
 
 ; Double-click detection on empty taskbar space
 TaskbarClick(*) {
-    static last := 0
-    if !TaskbarEmptySpot() {
+    static last := 0, lx := 0, ly := 0
+    if !TaskbarEmptySpot(&x, &y) {
         last := 0
         return
     }
-    if last && A_TickCount - last <= DllCall("GetDoubleClickTime") {
+    ; Same rule as Windows: within the double-click time and the double-click rectangle
+    if last && A_TickCount - last <= DllCall("GetDoubleClickTime")
+        && Abs(x - lx) <= DllCall("GetSystemMetrics", "int", 36) // 2    ; SM_CXDOUBLECLK
+        && Abs(y - ly) <= DllCall("GetSystemMetrics", "int", 37) // 2 {  ; SM_CYDOUBLECLK
         last := 0
         KeyWait("LButton")              ; show on release, otherwise the menu eats the click
         ShowMenu()
-    } else
-        last := A_TickCount
+    } else {
+        last := A_TickCount, lx := x, ly := y
+    }
 }
 
-; True if the cursor is over the taskbar and not over a button (Windows 10 layout)
-TaskbarEmptySpot() {
+; True if the cursor is over empty taskbar space (not over a button)
+TaskbarEmptySpot(&x, &y) {
     CoordMode("Mouse", "Screen")
     MouseGetPos(&x, &y, &hwnd, &ctrl)
     if !hwnd
@@ -154,27 +159,46 @@ TaskbarEmptySpot() {
     cls := WinGetClass(hwnd)
     if cls != "Shell_TrayWnd" && cls != "Shell_SecondaryTrayWnd"
         return false
-    if ctrl != "" && !RegExMatch(ctrl, "^(MSTaskListWClass|MSTaskSwWClass|ReBarWindow32)")
-        return false                    ; start button, clock, tray area, etc.
+    ; Containers of the taskbar content (Windows 10 and 11); start button, clock, tray etc. are rejected
+    ctrlOk := ctrl = "" || RegExMatch(ctrl, "^(MSTaskListWClass|MSTaskSwWClass|ReBarWindow32|Windows\.UI\.Composition\.DesktopWindowContentBridge)")
+    if !ctrlOk && !Debug
+        return false
 
-    ; Ask accessibility what is under the cursor; taskbar buttons are push buttons
-    var := Buffer(24, 0), pacc := 0
-    pt := (y << 32) | (x & 0xFFFFFFFF)
-    if DllCall("oleacc\AccessibleObjectFromPoint", "int64", pt, "ptr*", &pacc, "ptr", var) < 0 || !pacc
-        return false
-    acc := ComValue(9, pacc)            ; releases the interface when it goes out of scope
-    child := NumGet(var, 8, "int")
-    cv := Buffer(24, 0), out := Buffer(24, 0)
-    NumPut("ushort", 3, cv, 0)          ; VT_I4
-    NumPut("int", child, cv, 8)
+    ; Ask UI Automation what is under the cursor; empty space is a container, not a button
+    static uia := ""
+    el := 0, type := 0, info := ""
     try {
-        if A_PtrSize = 8
-            ComCall(13, pacc, "ptr", cv, "ptr", out)                  ; IAccessible::get_accRole
-        else
-            ComCall(13, pacc, "int64", 3, "int64", child, "ptr", out)
-    } catch
+        if !IsObject(uia)
+            uia := ComObject("{FF48DBA4-60EF-4201-AA87-54103EEF594E}", "{30CBE57D-D9D0-452A-AB13-7AC5AC4825EE}")
+        ComCall(7, uia, "int64", (y << 32) | (x & 0xFFFFFFFF), "ptr*", &el)   ; ElementFromPoint
+        ComCall(21, el, "int*", &type)                                        ; CurrentControlType
+        if Debug
+            info := "UIA class: " UIAString(el, 30) "`nUIA id: " UIAString(el, 29) "`nUIA name: " UIAString(el, 23)
+        ObjRelease(el)
+    } catch as e {
+        if Debug
+            DebugBox("UIA error: " e.Message)
         return false
-    return NumGet(out, 0, "ushort") = 3 && NumGet(out, 8, "uint") != 0x2B   ; 0x2B = ROLE_SYSTEM_PUSHBUTTON
+    }
+    ; ToolBar, Pane, Window, Group
+    empty := ctrlOk && (type = 50021 || type = 50033 || type = 50032 || type = 50026)
+    if Debug
+        DebugBox("Window: " cls "`nControl: " ctrl "`nPos: " x ", " y "`nUIA type: " type "`n" info
+            "`nEmpty spot: " (empty ? "yes" : "no"))
+    return empty
+}
+
+DebugBox(text) {
+    A_Clipboard := text
+    MsgBox(text "`n`n(copied to clipboard)", "Launcher debug", 0x40000)
+}
+
+UIAString(el, idx) {
+    p := 0
+    ComCall(idx, el, "ptr*", &p)
+    str := p ? StrGet(p) : ""
+    DllCall("oleaut32\SysFreeString", "ptr", p)
+    return str
 }
 
 ; LMB / Enter (Shift held = run as admin)
@@ -212,6 +236,10 @@ OpenFolder(path) {
     }
 }
 
+ShowProperties(path) {
+    try Run('properties "' path '"')
+}
+
 Reveal(path) {
     exe := TCPath()
     try {
@@ -230,7 +258,34 @@ SetItemIcon(m, label, path) {
     iconFile := path, iconNum := 1
     if RegExMatch(path, "i)\.lnk$")
         GetLnkIcon(path, &iconFile, &iconNum)
+    ResolveIcon(&iconFile, &iconNum)
     try m.SetIcon(label, iconFile, iconNum)
+}
+
+; Files without an icon of their own: .msc keeps it inside its XML, others use the icon of their file type
+ResolveIcon(&file, &num) {
+    if RegExMatch(file, "i)\.(exe|dll|ico|icl|cpl|ocx|scr|bmp|png|jpe?g|gif)$")
+        return
+    if RegExMatch(file, "i)\.msc$") && FileExist(file) {
+        if RegExMatch(FileRead(file), '<Icon Index="(\d+)" File="([^"]+)"', &m)
+            file := ExpandEnv(m[2]), num := m[1] + 1
+        return
+    }
+    ; Icon registered for the file type, like Explorer does (.vbs, .ps1, .md ...)
+    SplitPath(file, , , &ext)
+    ids := []
+    try ids.Push(RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\." ext "\UserChoice", "ProgId"))
+    try ids.Push(RegRead("HKCR\." ext))
+    for id in ids {
+        def := ""
+        try def := RegRead("HKCR\" id "\DefaultIcon")
+        if !InStr(def, "%1") && RegExMatch(def, '^\s*"?([^"]+?)"?(?:\s*,\s*(-?\d+))?\s*$', &m) {
+            idx := m[2] = "" ? 0 : m[2]
+            file := ExpandEnv(m[1]), num := idx >= 0 ? idx + 1 : idx
+            return
+        }
+    }
+    file := "shell32.dll", num := 1                         ; generic file icon
 }
 
 ; Icon set in the shortcut, otherwise the icon of its target
