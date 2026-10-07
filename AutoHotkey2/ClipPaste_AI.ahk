@@ -21,14 +21,20 @@ HOTKEY_CMD        := "#F1"  ; Win+F1 - open cmd in the current path
 HOTKEY_POWERSHELL := "#F2"  ; Win+F2 - open PowerShell in the current path
 
 
-#HotIf WinActive("ahk_class TTOTAL_CMD")
-    || WinActive("ahk_class CabinetWClass")
-    || WinActive("ahk_class Progman")
-    || WinActive("ahk_class WorkerW")
+; Hotkeys created via the Hotkey() function need their context set via the
+; HotIf() *function* (not the #HotIf *directive*)
+SupportedAppActive(*) {
+    return WinActive("ahk_class TTOTAL_CMD")
+        || WinActive("ahk_class CabinetWClass")
+        || WinActive("ahk_class Progman")
+        || WinActive("ahk_class WorkerW")
+}
 
+HotIf(SupportedAppActive)
 Hotkey(HOTKEY_PASTE, PasteClipboard)
 Hotkey(HOTKEY_CMD, (*) => RunTerminal("cmd"))
 Hotkey(HOTKEY_POWERSHELL, (*) => RunTerminal("powershell"))
+HotIf() ; reset context to unconditional for anything defined after this point
 
 PasteClipboard(*) {
     activeClass := WinGetClass("A")
@@ -143,8 +149,6 @@ RunTerminal(shellName) {
         try Run(exe, dir)
     }
 }
-
-#HotIf
 
 ; --- hwnd of the desktop's icon list (Progman/WorkerW -> SHELLDLL_DefView -> SysListView32) ---
 GetDesktopListView() {
