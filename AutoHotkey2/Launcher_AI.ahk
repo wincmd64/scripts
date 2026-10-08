@@ -18,7 +18,7 @@ In the menu:
 #SingleInstance Force
 
 ; ===== User settings =====
-Folder          := "C:\ProgramData\Microsoft\Windows\Start Menu\Programs"       ; folder with shortcuts
+Folder          := "D:\soft\.lnk"       ; folder with shortcuts
 ShowHotkey      := "#z"                 ; hotkey to show the menu (# = Win)
 TaskbarDblClick := 1                    ; 1 = double-click on empty taskbar space shows the menu
 DarkMenu        := "auto"               ; "auto" = follow the Windows app theme, 1 = dark, 0 = light
@@ -280,10 +280,6 @@ Reveal(path) {
 }
 
 SetItemIcon(m, label, path) {
-    if DirExist(path) {
-        try m.SetIcon(label, "shell32.dll", 4)
-        return
-    }
     iconFile := path, iconNum := 1
     if RegExMatch(path, "i)\.lnk$")
         GetLnkIcon(path, &iconFile, &iconNum)
@@ -293,6 +289,10 @@ SetItemIcon(m, label, path) {
 
 ; Files without an icon of their own: .msc keeps it inside its XML, others use the icon of their file type
 ResolveIcon(&file, &num) {
+    if DirExist(file) {                                     ; folder, or a shortcut to a folder
+        file := "shell32.dll", num := 4
+        return
+    }
     if RegExMatch(file, "i)\.(exe|dll|ico|icl|cpl|ocx|scr|bmp|png|jpe?g|gif)$")
         return
     if RegExMatch(file, "i)\.msc$") && FileExist(file) {
