@@ -46,13 +46,14 @@ PasteClipboard(*) {
 
     ; === 2. Save the clipboard contents to a file ===
     timestamp := FormatTime(, "yyyy-MM-dd_HH-mm-ss")
+    baseDir := RTrim(targetDir, "\") ; avoid a double "\\" when targetDir is a drive root
 
     if DllCall("IsClipboardFormatAvailable", "UInt", 2) { ; CF_BITMAP
-        filePath := targetDir "\" timestamp "_clip.png"
+        filePath := baseDir "\" timestamp "_clip.png"
         if !SaveClipboardImageToPng(filePath)
             return
     } else if (A_Clipboard != "") {
-        filePath := targetDir "\" timestamp "_clip.txt"
+        filePath := baseDir "\" timestamp "_clip.txt"
         FileAppend(A_Clipboard, filePath, "UTF-8")
     } else {
         return
@@ -85,7 +86,10 @@ GetTCPath() {
     leftList := SendMessage(TC_QUERY, 1, 0, , tcHwnd)     ; left panel's file list
     pathCtrl := SendMessage(TC_QUERY, (activeList == leftList) ? 9 : 10, 0, , tcHwnd)
     path := RegExReplace(ControlGetText(pathCtrl), "[>*\r\n]", "")
-    return RTrim(Trim(path), "\")
+    path := RTrim(Trim(path), "\")
+    ; a bare "D:" means "current directory on drive D" in Windows, not
+    ; necessarily its root - make drive roots unambiguous
+    return RegExMatch(path, "^[A-Za-z]:$") ? path . "\" : path
 }
 
 ; --- Put the cursor on the new file in TC: sort by date, then back to name ---
@@ -141,10 +145,16 @@ RunTerminal(shellName) {
     if (dir == "" || !DirExist(dir))
         return
     try {
-        Run('wt -d "' dir '" "' shellName '"')
+        ; A trailing backslash (e.g. a drive root like "D:\") would escape the
+        ; closing quote in the command line below and corrupt the arguments,
+        ; so double it - "D:\\" is parsed back as a single literal backslash.
+        quotedDir := (SubStr(dir, -1) = "\") ? dir . "\" : dir
+        Run('wt -d "' quotedDir '" "' shellName '"')
         if WinWait("ahk_class CASCADIA_HOSTING_WINDOW_CLASS", , 5)
             WinActivate
     } catch {
+        ; Run()'s WorkingDir parameter isn't parsed as command-line text,
+        ; so the trailing-backslash issue above doesn't apply here.
         exe := (shellName = "cmd") ? "cmd.exe" : "powershell.exe"
         try Run(exe, dir)
     }
