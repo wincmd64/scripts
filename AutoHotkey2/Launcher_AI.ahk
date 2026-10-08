@@ -110,9 +110,11 @@ ShowMenu() {
     pending := ""
     hHook := DllCall("SetWindowsHookExW", "int", -1, "ptr", hookCb, "ptr", 0
         , "uint", DllCall("GetCurrentThreadId"), "ptr")    ; WH_MSGFILTER
-    try
-        m.Show()
-    finally
+    try {
+        CoordMode("Menu", "Screen")
+        ClampToWorkArea(&x, &y)
+        m.Show(x, y)
+    } finally
         DllCall("UnhookWindowsHookEx", "ptr", hHook)
 
     if pending {
@@ -121,6 +123,21 @@ ShowMenu() {
             ShowProperties(path)
         else
             Reveal(path)
+    }
+}
+
+; Cursor position, moved out of the taskbar to the nearest point of the monitor's work area
+ClampToWorkArea(&x, &y) {
+    CoordMode("Mouse", "Screen")
+    MouseGetPos(&x, &y)
+    Loop MonitorGetCount() {
+        MonitorGet(A_Index, &ml, &mt, &mr, &mb)
+        if x >= ml && x < mr && y >= mt && y < mb {
+            MonitorGetWorkArea(A_Index, &wl, &wt, &wr, &wb)
+            x := Min(Max(x, wl), wr - 1)
+            y := Min(Max(y, wt), wb - 1)
+            return
+        }
     }
 }
 
