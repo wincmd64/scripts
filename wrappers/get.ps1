@@ -18,7 +18,7 @@ if (-not (Get-Command "eget.exe" -ErrorAction SilentlyContinue)) {
         
         try {
             Write-Host "Downloading..." -ForegroundColor Cyan
-            Invoke-WebRequest -Uri "https://github.com/inherelab/eget/releases/latest/download/eget-windows-amd64.zip" -OutFile $zip -UseBasicParsing
+            Start-BitsTransfer -Source "https://github.com/inherelab/eget/releases/latest/download/eget-windows-amd64.zip" -Destination $zip -DisplayName "Downloading eget" -ErrorAction Stop
             
             Write-Host "Extracting..." -ForegroundColor Cyan
             Expand-Archive -Path $zip -DestinationPath $PSScriptRoot -Force
