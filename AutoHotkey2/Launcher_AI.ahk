@@ -1,24 +1,26 @@
 /*
 LAUNCHER. Shows a popup menu with the contents of one folder for quick launching.
+Items are listed with their icons: folders first, then files and shortcuts, each sorted alphabetically.
+Subfolders become submenus that are loaded only when you open them. The folder is re-read
+on every show, so changes appear at once. A shortcut (.lnk) to a folder, including
+\\server\share, opens in a new Total Commander tab if it is running, otherwise in Explorer.
 
-   /!\    set "Folder" in the settings below to your own folder with shortcuts.
 
 Show the menu:
   Win+Z (change with ShowHotkey)  |  left click on the tray icon  |  double-click on empty taskbar space
 
 In the menu:
-  Left click / Enter       run the item (folder: new tab in Total Commander's active panel, or Explorer)
+  Left click / Enter       run the item
   Shift + click / Enter    run as administrator
   Middle click             reveal the item (new tab in Total Commander with the cursor on it, or Explorer)
   Right click              show the item's Properties
-  Esc / click elsewhere    close the menu
 */
 
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
 ; ===== User settings =====
-Folder          := "D:\soft\.lnk"       ; folder with shortcuts
+Folder          := ExpandEnv("%AppData%\Microsoft\Windows\Start Menu\Programs") ; <------------------------- folder with shortcuts
 ShowHotkey      := "#z"                 ; hotkey to show the menu (# = Win)
 TaskbarDblClick := 1                    ; 1 = double-click on empty taskbar space shows the menu
 DarkMenu        := "auto"               ; "auto" = follow the Windows app theme, 1 = dark, 0 = light
@@ -27,11 +29,11 @@ MaxItems        := 50                  ; max menu entries, the rest is cut off (
 Debug           := 0                    ; 1 = message box with taskbar element info on every taskbar click (also copied to the clipboard)
 ; =========================
 
-curMenu  := ""
-curNames := []
-pending  := ""                          ; [index, "R"|"M"] set by the menu hook
+menus   := Map()                        ; HMENU -> {menu, dir, names, loaded} for the root menu and its submenus
+pending := ""                           ; [info, index, "R"|"M"] set by the menu hook
 
 hookCb := CallbackCreate(MenuMsgFilter, "F", 3)
+OnMessage(0x0117, InitPopup)            ; WM_INITMENUPOPUP: a submenu is about to open
 
 ; Dark/light popup menus via the undocumented uxtheme API (Windows 10 1903+), ignored if unavailable
 dark := DarkMenu
@@ -61,10 +63,37 @@ if TaskbarDblClick
     Hotkey("~LButton", TaskbarClick)
 
 ShowMenu() {
-    global curMenu, curNames, pending, Folder, hookCb
-    dir := RTrim(Folder, "\")
+    global menus, pending, Folder, hookCb
+    menus := Map()
+    root := {menu: Menu(), dir: RTrim(Folder, "\"), names: [], loaded: false}
+    FillMenu(root)
 
-    ; Re-read the folder on every show: top-level files and folders, no hidden
+    pending := ""
+    hHook := DllCall("SetWindowsHookExW", "int", -1, "ptr", hookCb, "ptr", 0
+        , "uint", DllCall("GetCurrentThreadId"), "ptr")    ; WH_MSGFILTER
+    try {
+        CoordMode("Menu", "Screen")
+        ClampToWorkArea(&x, &y)
+        root.menu.Show(x, y)
+    } finally
+        DllCall("UnhookWindowsHookEx", "ptr", hHook)
+
+    if pending {
+        info := pending[1]
+        path := info.dir "\" info.names[pending[2] + 1]
+        if pending[3] = "R"
+            ShowProperties(path)
+        else
+            Reveal(path)
+    }
+}
+
+; Reads info.dir and fills info.menu. Real subfolders get a submenu that is filled only when it opens.
+FillMenu(info) {
+    global menus, MaxItems
+    info.loaded := true
+    dir := info.dir, m := info.menu
+
     dirs := "", files := ""
     Loop Files, dir "\*", "FD" {
         if InStr(A_LoopFileAttrib, "H")
@@ -85,19 +114,25 @@ ShowMenu() {
     total := names.Length
     if MaxItems > 0 && total > MaxItems
         names.RemoveAt(MaxItems + 1, total - MaxItems)
-    curNames := names
+    info.names := names
 
-    m := Menu()
-    if curNames.Length = 0 {
-        m.Add("(folder is empty)", (*) => 0)
-        m.Disable("(folder is empty)")
+    if names.Length = 0 {
+        m.Add("(empty)", (*) => 0)
+        m.Disable("(empty)")
     } else {
-        for name in curNames {
+        for name in names {
+            full := dir "\" name
             label := StrReplace(name, "&", "&&")
-            m.Add(label, RunItem.Bind(name))
-            SetItemIcon(m, label, dir "\" name)
+            if InStr(FileExist(full), "D") {
+                sub := Menu()
+                sub.Add("...", (*) => 0)        ; placeholder, removed by InitPopup
+                menus[sub.Handle] := {menu: sub, dir: full, names: [], loaded: false}
+                m.Add(label, sub)
+            } else
+                m.Add(label, RunItem.Bind(full))
+            SetItemIcon(m, label, full)
         }
-        more := total - curNames.Length
+        more := total - names.Length
         if more > 0 {
             moreLabel := "(+" more " more not shown)"
             m.Add()
@@ -105,25 +140,19 @@ ShowMenu() {
             m.Disable(moreLabel)
         }
     }
+    menus[m.Handle] := info
+}
 
-    curMenu := m
-    pending := ""
-    hHook := DllCall("SetWindowsHookExW", "int", -1, "ptr", hookCb, "ptr", 0
-        , "uint", DllCall("GetCurrentThreadId"), "ptr")    ; WH_MSGFILTER
-    try {
-        CoordMode("Menu", "Screen")
-        ClampToWorkArea(&x, &y)
-        m.Show(x, y)
-    } finally
-        DllCall("UnhookWindowsHookEx", "ptr", hHook)
-
-    if pending {
-        path := dir "\" curNames[pending[1] + 1]
-        if pending[2] = "R"
-            ShowProperties(path)
-        else
-            Reveal(path)
-    }
+; Fills a submenu right before it is shown
+InitPopup(wParam, lParam, msg, hwnd) {
+    global menus
+    if !menus.Has(wParam)
+        return
+    info := menus[wParam]
+    if info.loaded
+        return
+    FillMenu(info)
+    info.menu.Delete("...")             ; removed last, so the menu is never empty
 }
 
 ; Cursor position, moved out of the taskbar to the nearest point of the monitor's work area
@@ -143,17 +172,18 @@ ClampToWorkArea(&x, &y) {
 
 ; Catches RMB/MMB inside the popup menu (native menus only report LMB)
 MenuMsgFilter(code, wParam, lParam) {
-    global pending, curMenu, curNames
+    global pending, menus
     if code = 2 {                       ; MSGF_MENU
         msg := NumGet(lParam, A_PtrSize, "uint")
         if msg = 0x0205 || msg = 0x0208 {   ; WM_RBUTTONUP / WM_MBUTTONUP
-            pt  := NumGet(lParam, 4 * A_PtrSize + 4, "int64")
-            idx := DllCall("MenuItemFromPoint", "ptr", A_ScriptHwnd, "ptr", curMenu.Handle
-                , "int64", pt, "int")
-            if idx >= 0 && idx < curNames.Length {
-                pending := [idx, msg = 0x0205 ? "R" : "M"]
-                DllCall("EndMenu")
-                return 1
+            pt := NumGet(lParam, 4 * A_PtrSize + 4, "int64")
+            for hMenu, info in menus {      ; the root menu or any opened submenu
+                idx := DllCall("MenuItemFromPoint", "ptr", A_ScriptHwnd, "ptr", hMenu, "int64", pt, "int")
+                if idx >= 0 && idx < info.names.Length {
+                    pending := [info, idx, msg = 0x0205 ? "R" : "M"]
+                    DllCall("EndMenu")
+                    return 1
+                }
             }
         }
     }
@@ -231,17 +261,20 @@ UIAString(el, idx) {
 }
 
 ; LMB / Enter (Shift held = run as admin)
-RunItem(name, *) {
-    global Folder
-    RunPath(RTrim(Folder, "\") "\" name, GetKeyState("Shift"))
+RunItem(path, *) {
+    RunPath(path, GetKeyState("Shift"))
 }
 
 RunPath(path, admin := false) {
     if !FileExist(path)
         return
-    if DirExist(path) {
-        OpenFolder(path)
-        return
+    if RegExMatch(path, "i)\.lnk$") {       ; shortcut to a folder (also \\server\share): TC tab or Explorer
+        target := ""
+        try FileGetShortcut(path, &target)
+        if target != "" && DirExist(target) {
+            OpenFolder(target)
+            return
+        }
     }
     try Run((admin ? "*RunAs " : "") '"' path '"')
 }
