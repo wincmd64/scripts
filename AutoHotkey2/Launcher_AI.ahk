@@ -6,7 +6,7 @@ on every show, so changes appear at once. A shortcut (.lnk) to a folder, includi
 \\server\share, opens in a new Total Commander tab if it is running, otherwise in Explorer.
 
 Show the menu:
-  Win+Z (change with ShowHotkey)  |  left click on the tray icon  |  double-click on empty taskbar space
+  Win+Z (change with ShowHotkey)  |  double-click on empty taskbar space
 
 In the menu:
   Left click / Enter       run the item
@@ -49,11 +49,6 @@ try {
     DllCall(DllCall("GetProcAddress", "ptr", ux, "ptr", 135, "ptr"), "int", dark ? 2 : 3)   ; SetPreferredAppMode
     DllCall(DllCall("GetProcAddress", "ptr", ux, "ptr", 136, "ptr"))                        ; FlushMenuThemes
 }
-
-; Left click on the tray icon shows the menu
-A_TrayMenu.Insert("1&", "Show menu", (*) => ShowMenu())
-A_TrayMenu.Default := "Show menu"
-A_TrayMenu.ClickCount := 1
 
 try
     Hotkey(ShowHotkey, (*) => ShowMenu())
