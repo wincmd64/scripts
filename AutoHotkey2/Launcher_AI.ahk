@@ -5,7 +5,6 @@ Subfolders become submenus that are loaded only when you open them. The folder i
 on every show, so changes appear at once. A shortcut (.lnk) to a folder, including
 \\server\share, opens in a new Total Commander tab if it is running, otherwise in Explorer.
 
-
 Show the menu:
   Win+Z (change with ShowHotkey)  |  left click on the tray icon  |  double-click on empty taskbar space
 
@@ -28,6 +27,10 @@ TrayIcon        := RegExReplace(A_ScriptFullPath, "\.\w+$", ".ico")   ; "" = def
 MaxItems        := 50                  ; max menu entries, the rest is cut off (0 = no limit)
 Debug           := 0                    ; 1 = message box with taskbar element info on every taskbar click (also copied to the clipboard)
 ; =========================
+
+; The folder can also come from the command line; %Vars% are expanded, so "%AppData%\..." works too
+if A_Args.Length
+    Folder := ExpandEnv(A_Args[1])
 
 menus   := Map()                        ; HMENU -> {menu, dir, names, loaded} for the root menu and its submenus
 pending := ""                           ; [info, index, "R"|"M"] set by the menu hook
