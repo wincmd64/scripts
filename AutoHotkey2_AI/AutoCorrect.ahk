@@ -22,11 +22,10 @@
 global ScriptDir := ""
 SplitPath(A_LineFile, , &ScriptDir)
 
-; Dictionary file. Get AS_dict.txt from:
-; https://gitea.com/BladeMight/Mahou/releases/download/latest-commit/AS_Dict.zip
+; Dictionary file. Get AS_dict.txt from: https://gitea.com/BladeMight/Mahou/releases/download/latest-commit/AS_Dict.zip
 global DictPath := ScriptDir "\AS_dict.txt"
 
-; Sound played on a successful replacement. Silently skipped if missing.
+; Sound played on a successful replacement. Silently skipped if missing. Get switch.wav from: https://pixeldrain.com/u/VURSv53s
 global SwitchSoundPath := ScriptDir "\switch.wav"
 
 ; Cache file: a faster-to-parse copy of AS_dict.txt (one line per entry
