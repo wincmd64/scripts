@@ -24,7 +24,9 @@ CapsLock:: {
     
     A_Clipboard := ""
     Send "#{Space}^c"
-    if !ClipWait(0.1) {
+    ClipWait 0.1
+    if A_Clipboard = "" {
+        A_Clipboard := ""
         Send "+{Home}^c"
         ClipWait 0.3
     }
