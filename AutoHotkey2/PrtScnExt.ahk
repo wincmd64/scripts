@@ -10,7 +10,7 @@ Enhances PrintScreen functionality
 #SingleInstance Force
 
 ; USER EDITOR PATH:
-global UserEditorPath := "D:\soft\IrfanView\i_view64.exe"
+global UserEditorPath := "i_view64.exe"
 
 ; Overlays:
 GroupAdd "SnipOverlay", "ahk_exe ScreenClippingHost.exe" ; Windows 10

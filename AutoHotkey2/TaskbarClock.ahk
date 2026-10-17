@@ -1,4 +1,5 @@
-; TASKBAR CLOCK. Drawn on top of the taskbar as click-through overlay.
+; TASKBAR CLOCK. Drawn on the taskbar as a click-through layered child window
+; (falls back to a topmost overlay if the window cannot be attached).
 
 #Requires AutoHotkey v2.0
 #SingleInstance Force
@@ -34,11 +35,6 @@ si := Buffer(24, 0)
 NumPut("UInt", 1, si)
 DllCall("gdiplus\GdiplusStartup", "ptr*", &gdipToken := 0, "ptr", si, "ptr", 0)
 
-; Layered, click-through (E0x20), no-activate (E0x08000000), topmost window without a frame
-clockGui := Gui("+AlwaysOnTop -Caption +ToolWindow -DPIScale +E0x80000 +E0x20 +E0x08000000")
-clockGui.Show("NA x-32000 y-32000 w1 h1")
-hwnd := clockGui.Hwnd
-
 ; Whole-window opacity goes into the blend function (AC_SRC_ALPHA keeps per-pixel alpha too)
 blend := Buffer(4, 0)
 NumPut("UChar", 0, "UChar", 0, "UChar", Round(Opacity * 255 / 100), "UChar", 1, blend)
@@ -48,6 +44,11 @@ szBuf := Buffer(8, 0)
 
 ; Drawing surface state
 Clk := {hdc: 0, hbm: 0, obm: 0, gfx: 0, pen: 0, penThin: 0, penSec: 0, tb: 0, size: 0, dpi: 0, key: "", shown: true}
+attached := false                       ; true while the clock is a child window of the taskbar
+attachFailed := false                   ; true after attaching did not work: stay in overlay mode
+clockGui := ""
+hwnd := 0
+CreateWindow()
 
 OnExit(Cleanup)
 Tick()
@@ -66,6 +67,8 @@ Tick() {
         SetShown(false)
         return
     }
+    if !attachFailed && (Clk.tb != tb || !DllCall("IsWindow", "ptr", hwnd))
+        AttachWindow(tb)                ; first start, Explorer restart or a different taskbar
     Clk.tb := tb                        ; remembered for the fast z-order check
     try WinGetPos(&tx, &ty, &tw, &th, tb)
     catch {
@@ -98,6 +101,13 @@ Tick() {
     x := cx - size // 2 + Round(OffsetX * dpi / 96)
     y := cy - size // 2 + Round(OffsetY * dpi / 96)
 
+    if attached {                       ; a child window is positioned in the taskbar's client coordinates
+        pt := Buffer(8, 0)
+        NumPut("Int", x, "Int", y, pt)
+        DllCall("ScreenToClient", "ptr", tb, "ptr", pt)
+        x := NumGet(pt, 0, "int"), y := NumGet(pt, 4, "int")
+    }
+
     SetShown(true)
     t   := A_Now                        ; YYYYMMDDHH24MISS, read once so all hands agree
     key := SubStr(t, 9, ShowSeconds ? 6 : 4) "|" x "," y
@@ -106,17 +116,24 @@ Tick() {
         Render(x, y, t)
     }
 
-    ; The taskbar is topmost too and can climb above the clock after a click, so re-raise it
-    DllCall("SetWindowPos", "ptr", hwnd, "ptr", -1, "int", 0, "int", 0, "int", 0, "int", 0
-        , "uint", 0x13)                 ; SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
+    if attached {
+        ; Child window: only the taskbar's own children can cover the clock, keep it above them
+        if DllCall("GetWindow", "ptr", hwnd, "uint", 3, "ptr")       ; GW_HWNDPREV: a sibling is above us
+            DllCall("SetWindowPos", "ptr", hwnd, "ptr", 0, "int", 0, "int", 0, "int", 0, "int", 0
+                , "uint", 0x13)         ; HWND_TOP, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
+    } else {
+        ; Fallback overlay: the taskbar is topmost too and can climb above the clock after a click
+        DllCall("SetWindowPos", "ptr", hwnd, "ptr", -1, "int", 0, "int", 0, "int", 0, "int", 0
+            , "uint", 0x13)             ; SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
+    }
 }
 
-; Windows 11 raises the taskbar above the clock when it is clicked, so the clock vanishes until the next Tick.
+; Fallback overlay mode only: the taskbar can be raised above the clock when it is clicked.
 ; This cheap check runs often: it only looks whether the taskbar is above the clock in the z-order
 ; and raises the clock again at once, without activating it.
 KeepOnTop() {
     tb := Clk.tb
-    if !tb || !Clk.shown
+    if attached || !tb || !Clk.shown     ; a child window needs no z-order fight
         return
     h := hwnd, n := 0
     while (h := DllCall("GetWindow", "ptr", h, "uint", 3, "ptr")) && n++ < 64 {     ; GW_HWNDPREV: window above
@@ -154,10 +171,20 @@ Render(x, y, t) {
     if ShowSeconds
         Hand(g, Clk.penSec, c, s * 6, 0, R * 0.85)                   ; second hand
 
-    NumPut("Int", x, "Int", y, ptDst)
+    if attached {
+        ; x, y are client coordinates of the taskbar; move the child window explicitly
+        DllCall("SetWindowPos", "ptr", hwnd, "ptr", 0, "int", x, "int", y, "int", size, "int", size
+            , "uint", 0x14)             ; SWP_NOZORDER | SWP_NOACTIVATE
+        pDst := 0
+    } else {
+        NumPut("Int", x, "Int", y, ptDst)
+        pDst := ptDst
+    }
     NumPut("Int", size, "Int", size, szBuf)
-    DllCall("UpdateLayeredWindow", "ptr", hwnd, "ptr", 0, "ptr", ptDst, "ptr", szBuf
+    ok := DllCall("UpdateLayeredWindow", "ptr", hwnd, "ptr", 0, "ptr", pDst, "ptr", szBuf
         , "ptr", Clk.hdc, "ptr", ptSrc, "uint", 0, "ptr", blend, "uint", 2)   ; ULW_ALPHA
+    if !ok && attached
+        GiveUpAttach()                  ; a layered child window is not supported here: use the overlay mode
 }
 
 ; Line from radius r1 to r2 at the given angle (degrees, 0 = 12 o'clock, clockwise)
@@ -211,6 +238,47 @@ DestroySurface() {
     DllCall("DeleteObject", "ptr", Clk.hbm)
     DllCall("DeleteDC", "ptr", Clk.hdc)
     Clk.hdc := 0, Clk.size := 0, Clk.dpi := 0
+}
+
+; Creates the layered, click-through, no-activate window (a plain topmost popup at first)
+CreateWindow() {
+    global clockGui, hwnd, attached
+    clockGui := Gui("+AlwaysOnTop -Caption +ToolWindow -DPIScale +E0x80000 +E0x20 +E0x08000000")
+    clockGui.Show("NA x-32000 y-32000 w1 h1")
+    hwnd := clockGui.Hwnd
+    attached := false
+    Clk.shown := true
+    Clk.key := ""
+}
+
+; Attaching did not work: replace the window with a plain topmost popup and do not try again
+GiveUpAttach() {
+    global attachFailed
+    attachFailed := true
+    try clockGui.Destroy()
+    CreateWindow()
+}
+
+; Makes the clock window a child of the taskbar, so it is part of the taskbar and cannot end up below it
+; If attaching fails, the window is recreated as a plain topmost popup and the re-raise logic is used.
+AttachWindow(tb) {
+    global attached
+    if !DllCall("IsWindow", "ptr", hwnd)            ; the old window died together with the old taskbar
+        CreateWindow()
+    DllCall("SetParent", "ptr", hwnd, "ptr", tb, "ptr")
+    ; GetParent would return the owner for a WS_POPUP window, GetAncestor(GA_PARENT) the real parent
+    if DllCall("GetAncestor", "ptr", hwnd, "uint", 1, "ptr") != tb {
+        GiveUpAttach()
+        return
+    }
+    st := DllCall("GetWindowLongPtrW", "ptr", hwnd, "int", -16, "ptr")     ; GWL_STYLE
+    st := (st & ~0x80000000) | 0x40000000 | 0x10000000                     ; drop WS_POPUP, add WS_CHILD | WS_VISIBLE
+    DllCall("SetWindowLongPtrW", "ptr", hwnd, "int", -16, "ptr", st)
+    DllCall("SetWindowPos", "ptr", hwnd, "ptr", 0, "int", 0, "int", 0, "int", 0, "int", 0
+        , "uint", 0x73)                 ; HWND_TOP, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_FRAMECHANGED | SWP_SHOWWINDOW
+    attached := true
+    Clk.shown := true
+    Clk.key := ""
 }
 
 SetShown(visible) {
@@ -284,12 +352,16 @@ RectCenter(rc, &cx, &cy) {
 
 ; HWND of the taskbar to attach to: the main one (Shell_TrayWnd) or a secondary one (Shell_SecondaryTrayWnd)
 FindTaskbar() {
-    main := WinExist("ahk_class Shell_TrayWnd")
+    ; FindWindow ignores visibility: while the Start menu is open, WinExist() may not see the taskbar at all
+    main := DllCall("FindWindowW", "wstr", "Shell_TrayWnd", "ptr", 0, "ptr")
     if MonitorNum <= 0
         return main
+    prevHidden := A_DetectHiddenWindows
+    DetectHiddenWindows(true)
     list := WinGetList("ahk_class Shell_TrayWnd")
     for h in WinGetList("ahk_class Shell_SecondaryTrayWnd")
         list.Push(h)
+    DetectHiddenWindows(prevHidden)
     for h in list {
         try {
             WinGetPos(&x, &y, &w, &hh, h)
@@ -353,6 +425,7 @@ CheckChime() {
 Cleanup(*) {
     Critical                            ; nobody interrupts the cleanup, in particular the Tick timer
     SetTimer(CheckChime, 0)
+    SetTimer(KeepOnTop, 0)
     SetTimer(Tick, 0)                   ; Tick must not touch GDI+ objects while / after they are destroyed
     DllCall("ShowWindow", "ptr", hwnd, "int", 0)
     DestroySurface()
