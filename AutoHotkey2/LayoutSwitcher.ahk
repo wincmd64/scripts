@@ -46,11 +46,11 @@ A_MenuMaskKey := "vkE8"    ; unassigned key for masking Alt/Win release (default
     }
 }
 
+; ===================================================
+
 #HotIf CapsConvert
 CapsLock:: ConvertText()
 #HotIf
-
-; ===================================================
 
 ; Get installed keyboard layouts once at startup
 installedLayouts := GetInstalledLayoutsWithNames()
@@ -220,6 +220,7 @@ BuildMap(src, dst) {
 ; Convert the selection (or the line up to the caret) between the base and a foreign layout,
 ; paste it back and switch the layout.
 ConvertText() {
+    global foreign
     static cache := Map()
 
     cur := CurrentLayout()
@@ -227,6 +228,8 @@ ConvertText() {
     other := toBase ? cur : ForeignLayout()
     if !other
         return
+    if toBase
+        foreign := other                ; remember the layout we are leaving
     SwitchLayout(toBase ? CapsBase : other)
     Flash()
 
@@ -240,38 +243,39 @@ ConvertText() {
     second2en := cache[other][2]
 
     backup := ClipboardAll()
-
-    A_Clipboard := ""
-    Send "^c"
-    ClipWait 0.15
-    if A_Clipboard = "" {
+    try {
         A_Clipboard := ""
-        Send "+{Home}^c"
-        ClipWait 0.5
-    }
-
-    if A_Clipboard != "" {
-        result := ""
-        mode := "en"
-        Loop Parse A_Clipboard {
-            c2nd := en2second.Get(A_LoopField, "")
-            cEN  := second2en.Get(A_LoopField, "")
-            if cEN && c2nd {
-                result .= mode = "en" ? cEN : c2nd
-            } else if cEN {
-                result .= cEN
-                mode := "en"
-            } else if c2nd {
-                result .= c2nd
-                mode := "second"
-            } else {
-                result .= A_LoopField
-            }
+        Send "^c"
+        ClipWait 0.15
+        if A_Clipboard = "" {
+            A_Clipboard := ""
+            Send "+{Home}^c"
+            ClipWait 0.5
         }
-        A_Clipboard := result
-        Send "^v"
-        Sleep 100
-    }
 
-    A_Clipboard := backup
+        if A_Clipboard != "" {
+            result := ""
+            mode := "en"
+            Loop Parse A_Clipboard {
+                c2nd := en2second.Get(A_LoopField, "")
+                cEN  := second2en.Get(A_LoopField, "")
+                if cEN && c2nd {
+                    result .= mode = "en" ? cEN : c2nd
+                } else if cEN {
+                    result .= cEN
+                    mode := "en"
+                } else if c2nd {
+                    result .= c2nd
+                    mode := "second"
+                } else {
+                    result .= A_LoopField
+                }
+            }
+            A_Clipboard := result
+            Send "^v"
+            Sleep 100
+        }
+    } finally {
+        A_Clipboard := backup           ; restored even if something above throws
+    }
 }
