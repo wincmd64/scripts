@@ -37,10 +37,13 @@ CapsBase    := 0x04090409   ; base layout for CapsConvert (English): text is con
     }
 }
 
-~RAlt::
-RAlt & RCtrl::{
-    SwitchLayout(0x04220422)
-    Flash("Yellow", "Blue")
+A_MenuMaskKey := "vkE8"    ; unassigned key for masking Alt/Win release (default is Ctrl)
+~RAlt:: Send("{Blind}{vkE8}")    ; lone Alt release must not open the app's menu bar
+~RAlt Up:: {
+    if (A_PriorKey = "RAlt") {
+        SwitchLayout(0x04220422)
+        Flash("Yellow", "Blue")
+    }
 }
 
 #HotIf CapsConvert

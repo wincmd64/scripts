@@ -47,12 +47,13 @@ ptDst := Buffer(8, 0)
 szBuf := Buffer(8, 0)
 
 ; Drawing surface state
-Clk := {hdc: 0, hbm: 0, obm: 0, gfx: 0, pen: 0, penThin: 0, penSec: 0, size: 0, dpi: 0, key: "", shown: true}
+Clk := {hdc: 0, hbm: 0, obm: 0, gfx: 0, pen: 0, penThin: 0, penSec: 0, tb: 0, size: 0, dpi: 0, key: "", shown: true}
 
 OnExit(Cleanup)
 Tick()
 if HourlyChime
     SetTimer(CheckChime, 1000)
+SetTimer(KeepOnTop, 10)                 ; effective resolution ~15 ms
 SetTimer(Tick, 250)                     ; fast enough to keep the clock above the taskbar and to catch each new second
 
 Tick() {
@@ -65,6 +66,7 @@ Tick() {
         SetShown(false)
         return
     }
+    Clk.tb := tb                        ; remembered for the fast z-order check
     try WinGetPos(&tx, &ty, &tw, &th, tb)
     catch {
         SetShown(false)
@@ -107,6 +109,23 @@ Tick() {
     ; The taskbar is topmost too and can climb above the clock after a click, so re-raise it
     DllCall("SetWindowPos", "ptr", hwnd, "ptr", -1, "int", 0, "int", 0, "int", 0, "int", 0
         , "uint", 0x13)                 ; SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
+}
+
+; Windows 11 raises the taskbar above the clock when it is clicked, so the clock vanishes until the next Tick.
+; This cheap check runs often: it only looks whether the taskbar is above the clock in the z-order
+; and raises the clock again at once, without activating it.
+KeepOnTop() {
+    tb := Clk.tb
+    if !tb || !Clk.shown
+        return
+    h := hwnd, n := 0
+    while (h := DllCall("GetWindow", "ptr", h, "uint", 3, "ptr")) && n++ < 64 {     ; GW_HWNDPREV: window above
+        if h = tb {
+            DllCall("SetWindowPos", "ptr", hwnd, "ptr", -1, "int", 0, "int", 0, "int", 0, "int", 0
+                , "uint", 0x13)         ; SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
+            return
+        }
+    }
 }
 
 ; Draws the clock into the DIB and pushes it to the layered window
