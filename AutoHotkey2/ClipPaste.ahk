@@ -12,17 +12,14 @@ text clipboard data as "<timestamp>_clip.txt".
 Also, Win+F1 / Win+F2 - open Windows Terminal (cmd  / powershell)
 */
 
-TC_QUERY := 1074 ; WM_USER+50 - query data from Total Commander
-TC_EXEC  := 1075 ; WM_USER+51 - execute a Total Commander internal command
-
-; === Settings ===
+; Settings
 HOTKEY_PASTE      := "^+v"  ; Ctrl+Shift+V - paste clipboard as a new file
 HOTKEY_CMD        := "#F1"  ; Win+F1 - open cmd in the current path
 HOTKEY_POWERSHELL := "#F2"  ; Win+F2 - open PowerShell in the current path
 
+TC_QUERY := 1074 ; WM_USER+50 - query data from Total Commander
+TC_EXEC  := 1075 ; WM_USER+51 - execute a Total Commander internal command
 
-; Hotkeys created via the Hotkey() function need their context set via the
-; HotIf() *function* (not the #HotIf *directive*)
 SupportedAppActive(*) {
     return WinActive("ahk_class TTOTAL_CMD")
         || WinActive("ahk_class CabinetWClass")
@@ -31,9 +28,13 @@ SupportedAppActive(*) {
 }
 
 HotIf(SupportedAppActive)
-Hotkey(HOTKEY_PASTE, PasteClipboard)
-Hotkey(HOTKEY_CMD, (*) => RunTerminal("cmd"))
-Hotkey(HOTKEY_POWERSHELL, (*) => RunTerminal("powershell"))
+; an empty string in Settings disables that hotkey
+if (HOTKEY_PASTE != "")
+    Hotkey(HOTKEY_PASTE, PasteClipboard)
+if (HOTKEY_CMD != "")
+    Hotkey(HOTKEY_CMD, (*) => RunTerminal("cmd"))
+if (HOTKEY_POWERSHELL != "")
+    Hotkey(HOTKEY_POWERSHELL, (*) => RunTerminal("powershell"))
 HotIf() ; reset context to unconditional for anything defined after this point
 
 PasteClipboard(*) {
