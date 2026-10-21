@@ -30,7 +30,6 @@ reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\
 :: ExecutionPolicy
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol" /v "MUIVerb" /d "Execution Policy" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol" /v "Icon" /d "powershell.exe" /f
-reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol" /v "Position" /d "Bottom" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol" /v "SubCommands" /f
 
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol\shell\01get" /v "MUIVerb" /d "Get Current" /f
