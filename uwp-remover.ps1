@@ -1,4 +1,4 @@
-# Uninstall some built-in UWP apps. Tested on Win 11 25H2
+# UWP apps uninstaller
 
 $app2delete = @(
      # Get list of installed apps: Get-AppxPackage | Select Name, PackageFullName
@@ -23,18 +23,23 @@ $app2delete = @(
     "Microsoft.Xbox.TCUI"
 )
 
-foreach ($app in $app2delete) {
+# Removable apps of the current user; apps from $app2delete go first and are marked "preset"
+$installed = Get-AppxPackage |
+    Where-Object { -not $_.IsFramework -and -not $_.NonRemovable } |
+    Select-Object Name, Version,
+        @{ n = "Preset"; e = { if ($app2delete -contains $_.Name) { "preset" } } },
+        PackageFullName |
+    Sort-Object @{ e = { $_.Preset -ne "preset" } }, Name
+
+$selected = $installed | Out-GridView -Title "Select apps to remove (tip: type 'preset' in the filter, Ctrl+A, OK)" -PassThru
+if (-not $selected) { return } # Window closed or Cancel pressed
+
+foreach ($app in $selected) {
     try {
-        $package = Get-AppxPackage $app -ErrorAction Stop
-        if ($package) {
-            Remove-AppxPackage $package -ErrorAction Stop
-            Write-Output "$app - deleted"
-        } else {
-            Write-Warning "$app - not found"
-        }
+        Remove-AppxPackage $app.PackageFullName -ErrorAction Stop
+        Write-Output "$($app.Name) - deleted"
     } catch {
-        Write-Warning "$app - error deleting"
+        Write-Warning "$($app.Name) - error deleting"
     }
 }
-
 pause
