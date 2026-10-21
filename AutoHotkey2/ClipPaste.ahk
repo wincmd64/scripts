@@ -101,7 +101,7 @@ SelectInTC(fileName) {
     initialCount := SendMessage(TC_QUERY, countWParam, 0, , tcHwnd)
 
     Loop 20 { ; wait until the panel actually sees the new file (max ~2 sec)
-        PostMessage(TC_EXEC, 2009, 0, , tcHwnd) ; cm_RereadSource
+        PostMessage(TC_EXEC, 540, 0, , tcHwnd) ; cm_RereadSource
         Sleep(100)
         if (SendMessage(TC_QUERY, countWParam, 0, , tcHwnd) > initialCount)
             break
