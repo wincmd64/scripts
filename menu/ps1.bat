@@ -7,7 +7,6 @@
 if /i "%1"=="/u" goto undo
 
 :: Run bypass
-
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun" /v "MUIVerb" /d "Run bypass" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun" /v "Icon" /d "powershell.exe" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun" /v "SubCommands" /f
@@ -29,7 +28,6 @@ reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun\shell\04p\command" /ve /d "powershell.exe -NoP -C \"Add-Type -AssemblyName Microsoft.VisualBasic; $a = [Microsoft.VisualBasic.Interaction]::InputBox('Enter arguments for ' + [System.IO.Path]::GetFileName('%%1'), 'PowerShell Launcher'); if($a -ne $null) { Start-Process powershell.exe -ArgumentList '-NoExit -Ep Bypass -File \\\"%%1\\\"', $a }\"" /f
 
 :: ExecutionPolicy
-
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol" /v "MUIVerb" /d "Execution Policy" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol" /v "Icon" /d "powershell.exe" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol" /v "Position" /d "Bottom" /f
@@ -47,7 +45,10 @@ reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexec
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol\shell\03set" /v "Icon" /d "powershell.exe" /f
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol\shell\03set\command" /ve /d "powershell.exe -NoP -C \"Set-ExecutionPolicy Restricted -Scope CurrentUser; Write-Host `n' Set as default: ' -NoNewline; Get-ExecutionPolicy ^| Write-host -ForegroundColor Red; Write-Host; pause\"" /f
 
-color A & timeout 1 & exit
+:: Add icon to the system "Run with PowerShell" item
+reg add "HKLM\SOFTWARE\Classes\SystemFileAssociations\.ps1\Shell\Windows.PowerShell.Run" /v Icon /d \"%%systemroot%%\System32\WindowsPowerShell\v1.0\powershell.exe\" /f && (color A & timeout 2) || (echo. & pause)
+
+exit
 
 :undo
 reg delete "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSrun" /f
