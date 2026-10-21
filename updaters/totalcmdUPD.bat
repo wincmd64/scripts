@@ -87,6 +87,10 @@ if not exist "%DOWNLOADS%\totalcmd" md "%DOWNLOADS%\totalcmd"
 tar -xf "%temp%\%file%" -C "%DOWNLOADS%\totalcmd" 2>nul
 curl.exe "https://raw.githubusercontent.com/wincmd64/blog/refs/heads/main/wincmd.ini" -#O --output-dir "%DOWNLOADS%\totalcmd"
 if errorlevel 1 (color C & echo. & echo  ERROR: config download failed. & echo. & pause & exit)
+pushd "%DOWNLOADS%\totalcmd"
+copy /y "e\TOTALCMD.CHM" .
+del *unin* NO.BAR UNRAR64.DLL WCMICONS.DLL TcUsbRun.exe CGLPT64.SYS *.MANIFEST KEYBOARD.TXT FILTER64\SoundTouchDLL_License.txt
+rd /s /q "d" & rd /s /q "e"
 echo. & echo  DONE. & timeout 2
 if exist "%COMMANDER_EXE%" ("%COMMANDER_EXE%" /O /S /A /R="%DOWNLOADS%\totalcmd\TOTALCMD64.EXE") else (explorer /select,"%DOWNLOADS%\totalcmd\TOTALCMD64.EXE")
 exit
