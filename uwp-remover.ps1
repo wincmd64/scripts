@@ -34,6 +34,21 @@ $installed = Get-AppxPackage |
 $selected = $installed | Out-GridView -Title "Select apps to remove (tip: type 'preset' in the filter, Ctrl+A, OK)" -PassThru
 if (-not $selected) { return } # Window closed or Cancel pressed
 
+# Optional restore point (needs admin rights)
+if ((Read-Host "Create a restore point before removing? (y/n)") -eq "y") {
+    try {
+        $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+        if (-not $isAdmin) { throw "administrator rights are required" }
+        Enable-ComputerRestore -Drive "$env:SystemDrive\" -ErrorAction Stop
+        vssadmin Resize ShadowStorage "/For=$env:SystemDrive" "/On=$env:SystemDrive" "/MaxSize=5%" | Out-Null
+        Checkpoint-Computer -Description $MyInvocation.MyCommand.Name -ErrorAction Stop
+        Write-Output "Restore point created"
+    } catch {
+        Write-Warning "Restore point failed: $($_.Exception.Message)"
+        if ((Read-Host "Continue without it? (y/n)") -ne "y") { return }
+    }
+}
+
 foreach ($app in $selected) {
     try {
         Remove-AppxPackage $app.PackageFullName -ErrorAction Stop
