@@ -17,9 +17,10 @@ WindowOpacity := 92      ; result window opacity, 0-100 (100 = fully opaque)
 ; Set to "" or "none" to disable it.
 Hotkey1 := "#SC029" ; Win + ~
 
-; Double-tap trigger: "Shift", "Ctrl", "Alt", or "" / "none" to disable it.
+; Double-tap trigger: "Shift", "Ctrl", "Alt" or "Win" (both sides), a single side
+; such as "LShift", "RCtrl", "RAlt" or "RWin", or "" / "none" to disable it.
 ; Both Hotkey1 and DoubleTapKey work independently and can be active at the same time.
-DoubleTapKey    := "shift"
+DoubleTapKey    := "Shift"
 DoubleTapWindow := 300   ; max ms between two taps of DoubleTapKey to count as a double-tap
 
 Theme := "system" ; "system", "dark", or "light" — "system" reads the current
@@ -62,8 +63,17 @@ if !(Hotkey1 = "" || StrLower(Hotkey1) = "none")
     Hotkey(Hotkey1, TranslateHotkeyHandler)
 
 if !(DoubleTapKey = "" || StrLower(DoubleTapKey) = "none") {
-    Hotkey("~L" DoubleTapKey " up", DoubleTapHandler)
-    Hotkey("~R" DoubleTapKey " up", DoubleTapHandler)
+    ; "Shift"/"Ctrl"/"Alt"/"Win" listen on both sides; a side-specific
+    ; name like "LShift" or "RWin" listens on that one key only
+    if !RegExMatch(DoubleTapKey, "i)^([LR]?)(Shift|Ctrl|Control|Alt|Win)$", &dk) {
+        MsgBox("DoubleTapKey must be Shift, Ctrl, Alt or Win, optionally prefixed "
+            . "with L or R (e.g. RWin). Got: " DoubleTapKey)
+    } else if (dk[1] != "") {
+        Hotkey("~" DoubleTapKey " up", DoubleTapHandler)
+    } else {
+        Hotkey("~L" DoubleTapKey " up", DoubleTapHandler)
+        Hotkey("~R" DoubleTapKey " up", DoubleTapHandler)
+    }
 }
 
 ; detects two taps of DoubleTapKey within DoubleTapWindow ms and triggers translation
