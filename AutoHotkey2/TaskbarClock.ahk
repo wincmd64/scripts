@@ -17,7 +17,8 @@ MonitorNum       := 0           ; 0 = main taskbar, N = taskbar on monitor N
 CenterOnStart    := 0           ; 1 = put the clock in the middle of the Start button, 0 = middle of the taskbar
 OffsetX          := 0           ; shift from that center point, px at 100% scale
 OffsetY          := 0
-HideInFullscreen := 1           ; 1 = hide while a fullscreen app / game is running
+HideInFullscreen := 1           ; 1 = hide while a fullscreen app / game is running or the screen is locked
+Debug            := 0           ; 1 = write TaskbarClock.log next to this file (for troubleshooting)
 HourlyChime      := 0           ; 1 = play a sound at the start of every hour
 ChimeFromHour    := 8           ; chime only from this hour (0..23) ...
 ChimeToHour      := 21          ; ... to this hour, inclusive
@@ -54,6 +55,12 @@ OnExit(Cleanup)
 Tick()
 if HourlyChime
     SetTimer(CheckChime, 1000)
+if Debug {
+    SplitPath(A_LineFile, , &logDir)    ; A_ScriptDir would be the main script's folder when this file is #Included
+    logFile := logDir "\TaskbarClock.log"
+    try FileDelete(logFile)
+    SetTimer(DebugLog, 100)
+}
 SetTimer(KeepOnTop, 10)                 ; effective resolution ~15 ms
 SetTimer(Tick, 250)                     ; fast enough to keep the clock above the taskbar and to catch each new second
 
@@ -396,14 +403,30 @@ GetDpi(hw) {
     return dpi ? dpi : A_ScreenDPI
 }
 
-; True while a fullscreen app, a D3D game or a presentation is running
+; True while the clock should be hidden: a fullscreen app, a D3D game, a presentation, or a locked screen
 IsFullscreen() {
     st := 0
     try {
         DllCall("shell32\SHQueryUserNotificationState", "int*", &st)
-        return st = 2 || st = 3 || st = 4   ; QUNS_BUSY, QUNS_RUNNING_D3D_FULL_SCREEN, QUNS_PRESENTATION_MODE
+        return st >= 1 && st <= 4           ; QUNS_NOT_PRESENT (locked / screen saver), QUNS_BUSY, QUNS_RUNNING_D3D_FULL_SCREEN, QUNS_PRESENTATION_MODE
     }
     return false
+}
+
+; Troubleshooting only (Debug := 1): appends a line to TaskbarClock.log whenever the state changes
+DebugLog() {
+    static last := ""
+    fs := 0
+    DllCall("shell32\SHQueryUserNotificationState", "int*", &fs)
+    fg := DllCall("GetForegroundWindow", "ptr")
+    cls := "", proc := ""
+    try cls := WinGetClass(fg)
+    try proc := WinGetProcessName(fg)
+    st := "shown=" Clk.shown " vis=" DllCall("IsWindowVisible", "ptr", hwnd) " att=" attached " fs=" fs " fg=" cls "|" proc
+    if st != last {
+        last := st
+        FileAppend(A_Hour ":" A_Min ":" A_Sec "." A_MSec "  " st "`n", logFile)
+    }
 }
 
 ; Plays the chime once at the start of each hour, within the configured hours
