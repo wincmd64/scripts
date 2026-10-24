@@ -20,7 +20,7 @@ Hotkey1 := "#SC029" ; Win + ~
 ; Double-tap trigger: "Shift", "Ctrl", "Alt" or "Win" (both sides), a single side
 ; such as "LShift", "RCtrl", "RAlt" or "RWin", or "" / "none" to disable it.
 ; Both Hotkey1 and DoubleTapKey work independently and can be active at the same time.
-DoubleTapKey    := "Shift"
+DoubleTapKey    := "RShift"
 DoubleTapWindow := 300   ; max ms between two taps of DoubleTapKey to count as a double-tap
 
 Theme := "system" ; "system", "dark", or "light" — "system" reads the current
