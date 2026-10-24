@@ -43,6 +43,10 @@ BD_fontSize := 10
 ; Возраст, Дней до ДР, Юбилей). 0 = auto-size that column
 BD_colWidths := [0, 0, 0, 0, 0, 0]
 
+; Initial sort: column number 1..6, negative = descending, 0 = order of the file.
+; A click on a column header changes it: ascending -> descending -> order of the file
+BD_sort := 0
+
 ; A jubilee is every Nth birthday: 10 -> 30, 40, 50...; 5 -> 25, 30, 35...
 BD_jubileeStep := 10
 
@@ -105,6 +109,9 @@ BD_hBold := 0           ; bold font handle (column headers)
 BD_winPos := ""         ; window position/size, remembered for the whole session
 BD_rowDays := []        ; days to birthday for every table row (used for coloring)
 BD_rowJub := []         ; true if the jubilee of the row is "this year" / "next year"
+BD_rows := []           ; rows as read from the file (before sorting)
+BD_sortCol := (IsInteger(BD_sort) && Abs(BD_sort) <= 6) ? Abs(BD_sort) : 0   ; 0 = file order
+BD_sortDesc := (IsInteger(BD_sort) && BD_sort < 0)
 
 ; Run directly (not included) -> just open the window
 if (A_LineFile = A_ScriptFullPath)
@@ -132,9 +139,11 @@ BD_Show(*) {
 
     ; The 7th column is an empty zero-width helper: it keeps the real last column
     ; from being stretched to the control width during auto-size
-    BD_lv := BD_gui.Add("ListView", "r15 w600 Grid",
-        [BD_T("name"), BD_T("birth"), BD_T("zodiac"), BD_T("age"), BD_T("days"), BD_T("jubilee"), ""])
+    titles := BD_ColTitles()
+    titles.Push("")
+    BD_lv := BD_gui.Add("ListView", "r15 w600 Grid", titles)
     BD_lv.ModifyCol(7, 0)
+    BD_lv.OnEvent("ColClick", BD_ColClick)
     BD_lv.OnNotify(-12, BD_CustomDraw)  ; NM_CUSTOMDRAW: row colors
 
     bw := Round(BD_fontSize * 8 * A_ScreenDPI / 96)
@@ -212,30 +221,114 @@ BD_Refresh(*) {
     }
 }
 
+BD_ColTitles() {
+    return [BD_T("name"), BD_T("birth"), BD_T("zodiac"), BD_T("age"), BD_T("days"), BD_T("jubilee")]
+}
+
+; Takes freshly read rows, remembers them and shows the table
 BD_FillList(rows) {
-    global BD_lv, BD_colWidths, BD_rowDays, BD_rowJub
+    global BD_rows
+    BD_rows := rows
+    BD_Render(true)
+}
+
+; Fills the table from BD_rows using the current sort; fit = also re-size the columns
+BD_Render(fit) {
+    global BD_lv, BD_rowDays, BD_rowJub
     BD_rowDays := []
     BD_rowJub := []
     BD_lv.Opt("-Redraw")
     BD_lv.Delete()
-    for r in rows {
+    for r in BD_SortedRows() {
         BD_lv.Add("", r[1], r[2], r[3], r[4], r[5], r[6])
         BD_rowDays.Push(r[7])           ; raw number of days, for coloring
         BD_rowJub.Push(r[8])
     }
+    if fit
+        BD_FitColumns()
+    BD_MarkSort()
+    BD_lv.Opt("+Redraw")
+}
 
-    ; Column widths: fixed from the settings, or auto-size (header + content + small padding)
+; Column widths: fixed from the settings, or auto-size (header + content + small padding).
+; The header is measured together with the sort arrow, so the arrow always fits.
+BD_FitColumns() {
+    global BD_lv, BD_colWidths
+    titles := BD_ColTitles()
     pad := Round(12 * A_ScreenDPI / 96)
     loop 6 {
         w := (BD_colWidths.Has(A_Index) && IsInteger(BD_colWidths[A_Index])) ? BD_colWidths[A_Index] : 0
         if (w > 0) {
             BD_lv.ModifyCol(A_Index, w)
         } else {
+            BD_lv.ModifyCol(A_Index, , titles[A_Index] " " Chr(0x25BC))
             BD_lv.ModifyCol(A_Index, "AutoHdr")
             BD_lv.ModifyCol(A_Index, SendMessage(0x101D, A_Index - 1, 0, BD_lv) + pad)
         }
     }
-    BD_lv.Opt("+Redraw")
+}
+
+; Shows an arrow in the header of the sorted column
+BD_MarkSort() {
+    global BD_lv, BD_sortCol, BD_sortDesc
+    titles := BD_ColTitles()
+    loop 6 {
+        mark := (A_Index = BD_sortCol) ? " " Chr(BD_sortDesc ? 0x25BC : 0x25B2) : ""
+        BD_lv.ModifyCol(A_Index, , titles[A_Index] mark)
+    }
+}
+
+; Header click: ascending -> descending -> order of the file
+BD_ColClick(ctrl, col) {
+    global BD_sortCol, BD_sortDesc
+    if (col > 6)
+        return
+    if (BD_sortCol != col) {
+        BD_sortCol := col
+        BD_sortDesc := false
+    } else if !BD_sortDesc {
+        BD_sortDesc := true
+    } else {
+        BD_sortCol := 0
+        BD_sortDesc := false
+    }
+    BD_Render(false)
+}
+
+; Returns BD_rows sorted by the current column (a stable insertion sort)
+BD_SortedRows() {
+    global BD_rows, BD_sortCol
+    if (BD_sortCol < 1)
+        return BD_rows
+    out := BD_rows.Clone()
+    loop out.Length - 1 {
+        i := A_Index + 1
+        item := out[i]
+        j := i - 1
+        while (j >= 1 && BD_CompareRows(out[j], item) > 0) {
+            out[j + 1] := out[j]
+            j--
+        }
+        out[j + 1] := item
+    }
+    return out
+}
+
+; Compares two rows by the sorted column (ties: by days to birthday)
+BD_CompareRows(a, b) {
+    global BD_sortCol, BD_sortDesc
+    ; Row element used as the sort key for each column:
+    ; name, birth date (YYYYMMDD), zodiac (calendar order), age, days to birthday, jubilee (years ahead)
+    static keys := [1, 9, 10, 4, 7, 11]
+    k := keys[BD_sortCol]
+    x := a[k], y := b[k]
+    if (k = 1)
+        c := StrCompare(x, y, "Locale")
+    else
+        c := (x < y) ? -1 : (x > y) ? 1 : 0
+    if (c != 0)
+        return BD_sortDesc ? -c : c
+    return (a[7] < b[7]) ? -1 : (a[7] > b[7]) ? 1 : 0
 }
 
 BD_Close(*) {
@@ -308,7 +401,8 @@ BD_RgbToBgr(c) {
 }
 
 ; Reads the data file and returns an array of rows:
-; [name, birth date, zodiac sign, age, days to birthday (text), jubilee, days (number), jubilee soon (bool)]
+; [name, birth date, zodiac sign, age, days to birthday (text), jubilee,
+;  days (number), jubilee soon (bool), birth date (YYYYMMDD), zodiac index, years to jubilee]
 BD_Load(path) {
     if !FileExist(path) {
         MsgBox(BD_T("notFound") "`n" path, BD_T("title"), "Icon!")
@@ -369,11 +463,13 @@ BD_BuildRow(name, d, today) {
     ; Jubilee: the nearest birthday whose age is a multiple of BD_jubileeStep
     jubilee := ""
     jubSoon := false                        ; jubilee is this year or next year
+    jubK := 9999                            ; years until the jubilee (for sorting)
     nextAge := nextY - d["y"]               ; age at the upcoming birthday
     if (BD_jubileeStep > 0 && nextAge > 0) {
         birthdaysToGo := Mod(BD_jubileeStep - Mod(nextAge, BD_jubileeStep), BD_jubileeStep)
         k := birthdaysToGo + (nextY - curY) ; calendar years from now: 0 = this year
         jubSoon := (k = 1) || (k = 0 && daysLeft > 0)
+        jubK := k
         if (k = 0)
             jubilee := (daysLeft = 0) ? BD_T("today") : BD_T("thisYear")
         else if (k = 1)
@@ -382,8 +478,12 @@ BD_BuildRow(name, d, today) {
             jubilee := BD_YearsAhead(k)
     }
 
+    zodiacIdx := BD_ZodiacIdx(bMD)
+    birthKey := Integer(Format("{:04}{:02}{:02}", d["y"], d["m"], d["d"]))     ; for sorting
+
     return [name, Format("{:02}.{:02}.{:04}", d["d"], d["m"], d["y"]),
-            BD_Zodiac(bMD), age, (daysLeft = 0) ? BD_T("today") : daysLeft, jubilee, daysLeft, jubSoon]
+            BD_T("signs")[zodiacIdx], age, (daysLeft = 0) ? BD_T("today") : daysLeft, jubilee,
+            daysLeft, jubSoon, birthKey, zodiacIdx, jubK]
 }
 
 ; Returns the birthday date (YYYYMMDD) in the given year
@@ -400,15 +500,14 @@ BD_DaysInMonth(y, m) {
     return (m = 4 || m = 6 || m = 9 || m = 11) ? 30 : 31
 }
 
-; Zodiac sign by "MMDD" string (same boundaries as in the xlsx).
-; Sign names come from the translation table: Capricorn, Aquarius, ... Sagittarius
-BD_Zodiac(md) {
+; Zodiac sign index (1 = Capricorn ... 12 = Sagittarius) by "MMDD" string.
+; Boundaries are the same as in the xlsx; names come from the translation table.
+BD_ZodiacIdx(md) {
     static limits := ["0121", "0220", "0321", "0421", "0522", "0622",
                       "0723", "0823", "0924", "1024", "1123", "1222"]
-    signs := BD_T("signs")
     for i, limit in limits {
         if (md < limit)
-            return signs[i]
+            return i
     }
-    return signs[1]                     ; Dec 22 - Dec 31 -> Capricorn again
+    return 1                            ; Dec 22 - Dec 31 -> Capricorn again
 }
