@@ -131,7 +131,7 @@ $Apps = @(
                 sleep 1
                 return
             }
-            eget.exe dl --file "qbittorrent.exe" --asset "x64,setup,exe,^asc,^lt20" "sourceforge:qbittorrent/qbittorrent-win32"
+            eget.exe dl --quiet --file "qbittorrent.exe" --asset "x64,setup,exe,^asc,^_lt,^rc,^beta" "sourceforge:qbittorrent/qbittorrent-win32"
             # portable
             if (-not (Test-Path "profile")) { New-Item -ItemType Directory -Name "profile" | Out-Null }
         }
