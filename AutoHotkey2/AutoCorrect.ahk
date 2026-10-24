@@ -342,10 +342,17 @@ global AutoCorrectEnabled := true
 if (ToggleHotkey != "")
     Hotkey(ToggleHotkey, ToggleAutoCorrect)
 
-; Mouse clicks move the caret / switch windows -> forget the word buffer and undo state
-Hotkey("~LButton", ResetOnMouse)
-Hotkey("~RButton", ResetOnMouse)
-Hotkey("~MButton", ResetOnMouse)
+; Mouse clicks move the caret / switch windows -> forget the word buffer and undo state.
+global MouseWasDown := false
+SetTimer(PollMouseButtons, 30)
+
+PollMouseButtons() {
+    global MouseWasDown
+    down := GetKeyState("LButton") || GetKeyState("RButton") || GetKeyState("MButton")
+    if (down && !MouseWasDown)
+        ResetOnMouse()
+    MouseWasDown := down
+}
 
 ; Details of the last replacement, filled in by TryReplace()
 global LastTrigger := ""
