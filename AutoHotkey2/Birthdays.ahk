@@ -36,6 +36,9 @@ BD_csvPath := RegExReplace(A_LineFile, "[^\\]+$") "birthdays.csv"
 ; Interface language, including zodiac signs: "ru" or "en"
 BD_lang := "ru"
 
+; Theme: "system" (follow the Windows app theme), "dark" or "light"
+BD_theme := "system"
+
 ; Font size (pt) for the whole Birthdays window
 BD_fontSize := 10
 
@@ -47,6 +50,10 @@ BD_colWidths := [0, 0, 0, 0, 0, 0]
 ; A click on a column header changes it: ascending -> descending -> order of the file
 BD_sort := 0
 
+; Key that refreshes the table while the Birthdays window is active.
+; Any AutoHotkey key name, e.g. "F5" or "^r" (Ctrl+R); empty = no key
+BD_refreshKey := "F5"
+
 ; A jubilee is every Nth birthday: 10 -> 30, 40, 50...; 5 -> 25, 30, 35...
 BD_jubileeStep := 10
 
@@ -54,6 +61,9 @@ BD_jubileeStep := 10
 BD_colorToday := 0xFF0000   ; birthday is today
 BD_soonDays   := 7          ; highlight birthdays that are 1..BD_soonDays days away
 BD_colorSoon  := 0x0000FF   ; color for those "soon" birthdays and for a jubilee "this year" / "next year"
+; The same two colors for the dark theme (lighter, to stay readable on a dark background)
+BD_colorTodayDark := 0xFF5555
+BD_colorSoonDark  := 0x5C9DFF
 ; ==================================================================
 
 ; ------------------------- Translations ---------------------------
@@ -112,6 +122,11 @@ BD_rowJub := []         ; true if the jubilee of the row is "this year" / "next 
 BD_rows := []           ; rows as read from the file (before sorting)
 BD_sortCol := (IsInteger(BD_sort) && Abs(BD_sort) <= 6) ? Abs(BD_sort) : 0   ; 0 = file order
 BD_sortDesc := (IsInteger(BD_sort) && BD_sort < 0)
+BD_dark := false        ; the dark theme is used for the current window
+BD_hdr := []            ; dark theme: Text controls that replace the native column header
+BD_hdrFill := ""        ; dark theme: header filler on the right of the last column
+BD_hdrH := 0            ; dark theme: header height in pixels
+BD_appModeForced := false   ; true after the process was switched to the dark app mode
 
 ; Run directly (not included) -> just open the window
 if (A_LineFile = A_ScriptFullPath)
@@ -121,6 +136,7 @@ if (A_LineFile = A_ScriptFullPath)
 ; Used as a menu callback, hence the (*) parameters.
 BD_Show(*) {
     global BD_gui, BD_lv, BD_btnEdit, BD_btnRefresh, BD_btnOk, BD_winPos, BD_csvPath, BD_fontSize
+    global BD_dark, BD_hdr, BD_hdrFill, BD_hdrH
 
     if IsObject(BD_gui) {
         BD_gui.Restore()
@@ -132,16 +148,40 @@ BD_Show(*) {
     if !IsObject(rows)
         return
 
+    BD_dark := BD_IsDark()
+
     ; Resizable, but without the maximize button.
     ; Title = full path to the file + number of records (header not counted)
     BD_gui := Gui("+Resize -MaximizeBox", BD_Title(rows))
-    BD_gui.SetFont("s" BD_fontSize)
+    fontOpts := "s" BD_fontSize
+    if BD_dark {
+        fontOpts .= " cE6E6E6"
+        BD_gui.BackColor := "1E1E1E"
+    }
+    BD_gui.SetFont(fontOpts)
 
     ; The 7th column is an empty zero-width helper: it keeps the real last column
     ; from being stretched to the control width during auto-size
     titles := BD_ColTitles()
     titles.Push("")
-    BD_lv := BD_gui.Add("ListView", "r15 w600 Grid", titles)
+
+    BD_hdr := []
+    if BD_dark {
+        ; The native header ignores custom text colors under the dark theme (black on dark),
+        ; so it is hidden (-Hdr) and a row of clickable Text controls is drawn instead.
+        ; They are placed above the table by BD_PlaceHeader().
+        BD_hdrH := Round(BD_fontSize * 2.4 * A_ScreenDPI / 96)
+        for i, title in BD_ColTitles() {
+            cell := BD_gui.Add("Text", "x0 y0 w50 h" BD_hdrH " +0x200 +0x100 Background2D2D2D cE6E6E6", "")
+            cell.SetFont("s" BD_fontSize " bold cE6E6E6")
+            cell.OnEvent("Click", BD_HdrClick.Bind(i))
+            BD_hdr.Push(cell)
+        }
+        BD_hdrFill := BD_gui.Add("Text", "x0 y0 w20 h" BD_hdrH " Background2D2D2D", "")
+    }
+
+    lvOpts := BD_dark ? "r15 w600 -E0x200 -Hdr Background262626 cE6E6E6" : "r15 w600 Grid"
+    BD_lv := BD_gui.Add("ListView", lvOpts, titles)
     BD_lv.ModifyCol(7, 0)
     BD_lv.OnEvent("ColClick", BD_ColClick)
     BD_lv.OnNotify(-12, BD_CustomDraw)  ; NM_CUSTOMDRAW: row colors
@@ -158,11 +198,17 @@ BD_Show(*) {
     BD_gui.OnEvent("Escape", BD_Close)
     BD_gui.OnEvent("Close", BD_Close)
     BD_gui.OnEvent("Size", (g, minMax, w, h) => (minMax = -1) ? "" : BD_Layout(w, h))
+    BD_BindRefreshKey()
 
-    BD_CreateBoldFont()
-    ; Bold column headers
-    hHeader := SendMessage(0x101F, 0, 0, BD_lv)         ; LVM_GETHEADER
-    SendMessage(0x30, BD_hBold, 1, hHeader)             ; WM_SETFONT
+    if BD_dark {
+        BD_ApplyDarkMode()
+    } else {
+        BD_ResetAppMode()
+        BD_CreateBoldFont()
+        ; Bold column headers
+        hHeader := SendMessage(0x101F, 0, 0, BD_lv)     ; LVM_GETHEADER
+        SendMessage(0x30, BD_hBold, 1, hHeader)         ; WM_SETFONT
+    }
     BD_FillList(rows)
 
     if IsObject(BD_winPos) {
@@ -180,7 +226,7 @@ BD_Show(*) {
         BD_lv.GetPos(, , &lw, &lh)
         BD_btnOk.GetPos(, , , &bh)
         cw := lw + 2 * BD_gui.MarginX
-        ch := lh + 3 * BD_gui.MarginY + bh
+        ch := lh + 3 * BD_gui.MarginY + bh + (BD_dark ? BD_hdrH : 0)
         showOpts := "w" cw " h" ch
     }
 
@@ -193,16 +239,54 @@ BD_Title(rows) {
     return BD_csvPath " (" rows.Length ")"
 }
 
-; Places the table and the buttons: Edit in the bottom left corner,
-; Refresh and OK in the bottom right corner
+; Places the table and the buttons: Edit and Refresh in the bottom left corner,
+; OK in the bottom right corner
 BD_Layout(w, h) {
-    global BD_gui, BD_lv, BD_btnEdit, BD_btnRefresh, BD_btnOk
+    global BD_gui, BD_lv, BD_btnEdit, BD_btnRefresh, BD_btnOk, BD_dark, BD_hdrH
     mx := BD_gui.MarginX, my := BD_gui.MarginY
+    hh := BD_dark ? BD_hdrH : 0         ; dark theme: room for the fake header above the table
     BD_btnOk.GetPos(, , &bw, &bh)
-    BD_lv.Move(mx, my, Max(w - 2 * mx, 100), Max(h - 3 * my - bh, 50))
+    BD_lv.Move(mx, my + hh, Max(w - 2 * mx, 100), Max(h - 3 * my - bh - hh, 50))
+    BD_btnEdit.GetPos(, , &ew)
     BD_btnEdit.Move(mx, h - my - bh)
+    BD_btnRefresh.Move(mx + ew + mx, h - my - bh)
     BD_btnOk.Move(w - mx - bw, h - my - bh)
-    BD_btnRefresh.Move(w - 2 * mx - 2 * bw, h - my - bh)
+    if BD_dark
+        BD_PlaceHeader()
+}
+
+; Dark theme: puts the header cells right above the table columns
+BD_PlaceHeader() {
+    global BD_lv, BD_hdr, BD_hdrFill, BD_hdrH
+    BD_lv.GetPos(&lx, &ly, &lw)
+    x := lx
+    for i, cell in BD_hdr {
+        colW := SendMessage(0x101D, i - 1, 0, BD_lv)    ; LVM_GETCOLUMNWIDTH
+        cell.Move(x, ly - BD_hdrH, Max(colW - 1, 1), BD_hdrH)   ; 1 px narrower leaves a thin divider
+        x += colW
+    }
+    BD_hdrFill.Move(x, ly - BD_hdrH, Max(lx + lw - x, 1), BD_hdrH)
+}
+
+; Dark theme: a click on a header cell sorts like a click on a native header
+BD_HdrClick(col, *) {
+    BD_ColClick("", col)
+}
+
+; Refresh hotkey: works only while the Birthdays window is active
+BD_BindRefreshKey() {
+    global BD_refreshKey
+    key := Trim(BD_refreshKey)
+    if (key = "")
+        return
+    HotIf(BD_WindowActive)
+    try Hotkey(key, BD_Refresh, "On")   ; an invalid key name is ignored
+    HotIf()
+}
+
+BD_WindowActive(*) {
+    global BD_gui
+    return IsObject(BD_gui) && WinActive("ahk_id " BD_gui.Hwnd)
 }
 
 ; Opens the data file in Notepad
@@ -217,6 +301,8 @@ BD_Refresh(*) {
     rows := BD_Load(BD_csvPath)
     if IsObject(rows) {                 ; on error keep the old content
         BD_FillList(rows)
+        if BD_dark
+            BD_PlaceHeader()            ; column widths may have changed
         BD_gui.Title := BD_Title(rows)
     }
 }
@@ -253,13 +339,19 @@ BD_Render(fit) {
 ; Column widths: fixed from the settings, or auto-size (header + content + small padding).
 ; The header is measured together with the sort arrow, so the arrow always fits.
 BD_FitColumns() {
-    global BD_lv, BD_colWidths
+    global BD_lv, BD_colWidths, BD_dark, BD_hdr
     titles := BD_ColTitles()
     pad := Round(12 * A_ScreenDPI / 96)
     loop 6 {
         w := (BD_colWidths.Has(A_Index) && IsInteger(BD_colWidths[A_Index])) ? BD_colWidths[A_Index] : 0
         if (w > 0) {
             BD_lv.ModifyCol(A_Index, w)
+        } else if BD_dark {
+            ; There is no native header to measure: use the content width and the width of the header cell text
+            BD_lv.ModifyCol(A_Index, "Auto")
+            contentW := SendMessage(0x101D, A_Index - 1, 0, BD_lv)
+            headerW := BD_TextWidth(BD_hdr[A_Index], " " titles[A_Index] " " Chr(0x25BC))
+            BD_lv.ModifyCol(A_Index, Max(contentW, headerW) + pad)
         } else {
             BD_lv.ModifyCol(A_Index, , titles[A_Index] " " Chr(0x25BC))
             BD_lv.ModifyCol(A_Index, "AutoHdr")
@@ -268,13 +360,27 @@ BD_FitColumns() {
     }
 }
 
+; Width in pixels of a text in the font of the given control
+BD_TextWidth(ctrl, text) {
+    hdc := DllCall("GetDC", "Ptr", ctrl.Hwnd, "Ptr")
+    hOld := DllCall("SelectObject", "Ptr", hdc, "Ptr", SendMessage(0x31, 0, 0, ctrl), "Ptr")   ; WM_GETFONT
+    size := Buffer(8, 0)
+    DllCall("GetTextExtentPoint32W", "Ptr", hdc, "Str", text, "Int", StrLen(text), "Ptr", size)
+    DllCall("SelectObject", "Ptr", hdc, "Ptr", hOld)
+    DllCall("ReleaseDC", "Ptr", ctrl.Hwnd, "Ptr", hdc)
+    return NumGet(size, 0, "Int")
+}
+
 ; Shows an arrow in the header of the sorted column
 BD_MarkSort() {
-    global BD_lv, BD_sortCol, BD_sortDesc
+    global BD_lv, BD_sortCol, BD_sortDesc, BD_dark, BD_hdr
     titles := BD_ColTitles()
     loop 6 {
         mark := (A_Index = BD_sortCol) ? " " Chr(BD_sortDesc ? 0x25BC : 0x25B2) : ""
-        BD_lv.ModifyCol(A_Index, , titles[A_Index] mark)
+        if BD_dark
+            BD_hdr[A_Index].Text := " " titles[A_Index] mark
+        else
+            BD_lv.ModifyCol(A_Index, , titles[A_Index] mark)
     }
 }
 
@@ -331,6 +437,54 @@ BD_CompareRows(a, b) {
     return (a[7] < b[7]) ? -1 : (a[7] > b[7]) ? 1 : 0
 }
 
+; Resolves the BD_theme setting: true = dark. "system" reads the Windows app theme from the registry
+BD_IsDark() {
+    t := StrLower(Trim(BD_theme))
+    if (t = "dark")
+        return true
+    if (t = "light")
+        return false
+    try {
+        return RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme") = 0
+    } catch {
+        return false                    ; no such value -> light
+    }
+}
+
+; Dark title bar and dark-themed native controls (best effort, Windows 10 1903+)
+BD_ApplyDarkMode() {
+    global BD_gui, BD_lv, BD_btnEdit, BD_btnRefresh, BD_btnOk
+    buf := Buffer(4, 0)
+    NumPut("Int", 1, buf)
+    ; DWMWA_USE_IMMERSIVE_DARK_MODE is 20 on recent builds, 19 on older Windows 10
+    if DllCall("dwmapi\DwmSetWindowAttribute", "Ptr", BD_gui.Hwnd, "Int", 20, "Ptr", buf, "Int", 4) != 0
+        DllCall("dwmapi\DwmSetWindowAttribute", "Ptr", BD_gui.Hwnd, "Int", 19, "Ptr", buf, "Int", 4)
+    BD_SetAppMode(2)                    ; 2 = ForceDark
+    for ctrl in [BD_lv, BD_btnEdit, BD_btnRefresh, BD_btnOk]
+        DllCall("uxtheme\SetWindowTheme", "Ptr", ctrl.Hwnd, "Str", "DarkMode_Explorer", "Ptr", 0)
+}
+
+; The dark app mode is process-wide (it also affects the menus of the script that includes this file),
+; so it is switched back when a later opening uses the light theme
+BD_ResetAppMode() {
+    global BD_appModeForced
+    if BD_appModeForced
+        BD_SetAppMode(0)                ; 0 = Default
+}
+
+; uxtheme ordinal 135 = SetPreferredAppMode (0 = Default, 2 = ForceDark)
+BD_SetAppMode(mode) {
+    global BD_appModeForced
+    try {
+        hUx := DllCall("GetModuleHandle", "Str", "uxtheme", "Ptr")
+        fn := DllCall("GetProcAddress", "Ptr", hUx, "Ptr", 135, "Ptr")
+        if fn {
+            DllCall(fn, "Int", mode)
+            BD_appModeForced := (mode = 2)
+        }
+    }
+}
+
 BD_Close(*) {
     global BD_gui, BD_hBold, BD_winPos
     ; Remember position and size (client area) for the next opening
@@ -381,14 +535,17 @@ BD_CustomDraw(ctrl, lParam) {
     clrOffset := (A_PtrSize = 8) ? 80 : 48
     subItem := NumGet(lParam, clrOffset + 8, "Int")     ; 0-based column
 
+    colorToday := BD_dark ? BD_colorTodayDark : BD_colorToday
+    colorSoon := BD_dark ? BD_colorSoonDark : BD_colorSoon
+
     color := ""
     if (days = 0) {
-        color := BD_colorToday
+        color := colorToday
     } else {
         if (days <= BD_soonDays)
-            color := BD_colorSoon
+            color := colorSoon
         if (subItem = 5 && BD_rowJub.Has(row) && BD_rowJub[row])
-            color := BD_colorSoon
+            color := colorSoon
     }
     if (color != "")
         NumPut("UInt", BD_RgbToBgr(color), lParam, clrOffset)
