@@ -18,13 +18,7 @@ reg add "HKCU\Software\Classes\Directory\shell\OpenTC\command" /ve /d "%COMMANDE
 reg add "HKCU\Software\Classes\*\shell\OpenTC" /v "MUIVerb" /d "Open in Total Commander" /f
 reg add "HKCU\Software\Classes\*\shell\OpenTC" /v "Icon" /d "%COMMANDER_EXE%" /f
 reg add "HKCU\Software\Classes\*\shell\OpenTC\command" /ve /d "%COMMANDER_EXE% /O /S /T /A /L=\"%%1\"" /f
-:: desktop
-reg add "HKCU\Software\Classes\DesktopBackground\shell\OpenTC" /v "MUIVerb" /d "Total Commander" /f
-reg add "HKCU\Software\Classes\DesktopBackground\shell\OpenTC" /v "Icon" /d "%COMMANDER_EXE%" /f
-reg add "HKCU\Software\Classes\DesktopBackground\shell\OpenTC" /v "Position" /d "Bottom" /f
-reg add "HKCU\Software\Classes\DesktopBackground\shell\OpenTC\command" /ve /d "%COMMANDER_EXE% /O 0" /f && (color A & timeout 2 & exit) || (echo. & pause & exit)
 
 :undo
 reg delete "HKCU\Software\Classes\Directory\shell\OpenTC" /f
-reg delete "HKCU\Software\Classes\*\shell\OpenTC" /f
-reg delete "HKCU\Software\Classes\DesktopBackground\shell\OpenTC" /f && (color A & timeout 2) || (echo. & pause)
+reg delete "HKCU\Software\Classes\*\shell\OpenTC" /f && (color A & timeout 2) || (echo. & pause)
