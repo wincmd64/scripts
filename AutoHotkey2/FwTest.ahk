@@ -9,13 +9,14 @@
 
 ; ---------------- Test list (edit freely) ----------------
 ; Only checks that a per-program firewall rule can actually affect.
+; info: true - shown in the list (marked "i") but not counted in the verdict.
 ; type: tcp | udpdns | http   (dns and icmp are still implemented below,
 ; but they go through system services, so a per-program rule never sees them)
 Tests := [
     {type: "tcp",    proto: "TCP",   name: "TCP connect (Cloudflare)", target: "1.1.1.1", port: 443},
     {type: "tcp",    proto: "TCP",   name: "TCP connect (Google)",     target: "8.8.8.8", port: 443},
-    {type: "udpdns", proto: "UDP",   name: "UDP DNS query",            target: "1.1.1.1", port: 53},
-    {type: "http",   proto: "HTTPS", name: "HTTPS request (WinHTTP)",  target: "https://www.google.com/generate_204"}
+    {type: "http",   proto: "HTTPS", name: "HTTPS request (WinHTTP)",  target: "https://www.google.com/generate_204"},
+    {type: "udpdns", proto: "UDP",   name: "UDP DNS query",            target: "1.1.1.1", port: 53, info: true}
 ]
 
 Theme := "system" ; "system", "dark", or "light" - "system" reads the current
@@ -138,18 +139,37 @@ LvCustomDraw(ctrl, lParam) {
     return 0
 }
 
+; ---------------- Informational rows ----------------
+IsInfo(t) {
+    return t.HasProp("info") && t.info
+}
+
+; "i" for informational tests, otherwise the running number among counted tests
+RowLabel(i) {
+    if IsInfo(Tests[i])
+        return "i"
+    n := 0
+    Loop i {
+        if !IsInfo(Tests[A_Index])
+            n++
+    }
+    return n
+}
+
 ; ---------------- Row details (double click) ----------------
 LvDoubleClick(ctrl, row) {
     if (row < 1 || row > Tests.Length)
         return
     t := Tests[row]
     st := lv.GetText(row, 5)
-    txt := "#" row "  " t.name "`n"
+    txt := "Test " RowLabel(row) ": " t.name "`n"
     txt .= "Target: " TargetText(t) "`n"
     txt .= "Result: " st "  (" lv.GetText(row, 6) " ms)`n"
     txt .= "Details: " lv.GetText(row, 7) "`n`n"
     txt .= "What was tested:`n" TestInfo(t) "`n`n"
     txt .= "What this result means:`n" ExplainResult(st)
+    if IsInfo(t)
+        txt .= "`n`nThis test is informational and is not counted in the verdict: UDP results also depend on the network (many networks filter outbound DNS to public servers)."
     MsgBox(txt, "FwTest - test details", "Iconi")
 }
 
@@ -197,7 +217,7 @@ StartRun() {
     detail.Text := ""
     lv.Delete()
     for t in Tests
-        lv.Add("", A_Index, t.name, t.proto, TargetText(t), "...", "", "")
+        lv.Add("", RowLabel(A_Index), t.name, t.proto, TargetText(t), "...", "", "")
     SetTimer(Step, -20)
 }
 
@@ -207,7 +227,7 @@ Step() {
     idx++
     t := Tests[idx]
     r := RunTest(t)
-    lv.Modify(idx, "", idx, t.name, t.proto, TargetText(t), r.st, r.ms, r.detail)
+    lv.Modify(idx, "", RowLabel(idx), t.name, t.proto, TargetText(t), r.st, r.ms, r.detail)
     if idx < Tests.Length
         SetTimer(Step, -10)
     else
@@ -215,12 +235,21 @@ Step() {
 }
 
 Finish() {
-    total := lv.GetCount()
+    total := 0
     open := 0
     blocked := 0
     timeouts := 0
-    Loop total {
+    infoNote := ""
+    infoFail := false
+    Loop lv.GetCount() {
         st := lv.GetText(A_Index, 5)
+        if IsInfo(Tests[A_Index]) {
+            infoNote .= (infoNote ? ", " : "") Tests[A_Index].name ": " st
+            if !(st = "OK" || st = "REFUSED")
+                infoFail := true
+            continue
+        }
+        total++
         if (st = "OK" || st = "REFUSED")
             open++
         else if (st = "BLOCKED")
@@ -242,7 +271,13 @@ Finish() {
     if (open = total) {
         verdict := "NOT BLOCKED"
         clr := ClrGreen
-        info := "All " total " connection attempts went through"
+        if infoFail {
+            info := "All " total " connection attempts went through"
+        } else {
+            ; everything passed, including informational tests: no counts, no note
+            info := "All connection attempts went through"
+            infoNote := ""
+        }
     } else if (open = 0 && blocked > 0) {
         verdict := "BLOCKED"
         clr := ClrRed
@@ -256,6 +291,8 @@ Finish() {
         clr := "cD08000"
         info := open " of " total " went through: " parts
     }
+    if infoNote
+        info .= "  (not counted: " infoNote ")"
     status.SetFont(clr)
     status.Text := verdict
     detail.Text := info
