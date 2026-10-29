@@ -1,5 +1,4 @@
 ; TASKBAR CLOCK. Drawn on the taskbar as a click-through layered child window
-; (falls back to a topmost overlay if the window cannot be attached).
 
 #Requires AutoHotkey v2.0
 #SingleInstance Force
@@ -45,8 +44,6 @@ szBuf := Buffer(8, 0)
 
 ; Drawing surface state
 Clk := {hdc: 0, hbm: 0, obm: 0, gfx: 0, pen: 0, penThin: 0, penSec: 0, tb: 0, size: 0, dpi: 0, key: "", shown: true}
-attached := false                       ; true while the clock is a child window of the taskbar
-attachFailed := false                   ; true after attaching did not work: stay in overlay mode
 clockGui := ""
 hwnd := 0
 CreateWindow()
@@ -61,7 +58,15 @@ if Debug {
     try FileDelete(logFile)
     SetTimer(DebugLog, 100)
 }
-SetTimer(KeepOnTop, 10)                 ; effective resolution ~15 ms
+; Keeping the clock above the taskbar: the taskbar is topmost too and rises above the clock when it is
+; clicked or the Start menu opens. Out-of-context WinEvent hooks only notify us (nothing is injected into
+; Explorer, Explorer never waits for us), so the clock is raised right after the event.
+hookProc := CallbackCreate(WinEventProc, , 7)
+hookFg   := DllCall("SetWinEventHook", "uint", 0x0003, "uint", 0x0003, "ptr", 0, "ptr", hookProc
+    , "uint", 0, "uint", 0, "uint", 0, "ptr")       ; EVENT_SYSTEM_FOREGROUND, WINEVENT_OUTOFCONTEXT
+hookZ    := DllCall("SetWinEventHook", "uint", 0x8004, "uint", 0x8004, "ptr", 0, "ptr", hookProc
+    , "uint", 0, "uint", 0, "uint", 0, "ptr")       ; EVENT_OBJECT_REORDER (best effort)
+SetTimer(Raise, 100)                    ; safety net for z-order changes that raise no event
 SetTimer(Tick, 250)                     ; fast enough to keep the clock above the taskbar and to catch each new second
 
 Tick() {
@@ -74,8 +79,6 @@ Tick() {
         SetShown(false)
         return
     }
-    if !attachFailed && (Clk.tb != tb || !DllCall("IsWindow", "ptr", hwnd))
-        AttachWindow(tb)                ; first start, Explorer restart or a different taskbar
     Clk.tb := tb                        ; remembered for the fast z-order check
     try WinGetPos(&tx, &ty, &tw, &th, tb)
     catch {
@@ -108,13 +111,6 @@ Tick() {
     x := cx - size // 2 + Round(OffsetX * dpi / 96)
     y := cy - size // 2 + Round(OffsetY * dpi / 96)
 
-    if attached {                       ; a child window is positioned in the taskbar's client coordinates
-        pt := Buffer(8, 0)
-        NumPut("Int", x, "Int", y, pt)
-        DllCall("ScreenToClient", "ptr", tb, "ptr", pt)
-        x := NumGet(pt, 0, "int"), y := NumGet(pt, 4, "int")
-    }
-
     SetShown(true)
     t   := A_Now                        ; YYYYMMDDHH24MISS, read once so all hands agree
     key := SubStr(t, 9, ShowSeconds ? 6 : 4) "|" x "," y
@@ -123,24 +119,15 @@ Tick() {
         Render(x, y, t)
     }
 
-    if attached {
-        ; Child window: only the taskbar's own children can cover the clock, keep it above them
-        if DllCall("GetWindow", "ptr", hwnd, "uint", 3, "ptr")       ; GW_HWNDPREV: a sibling is above us
-            DllCall("SetWindowPos", "ptr", hwnd, "ptr", 0, "int", 0, "int", 0, "int", 0, "int", 0
-                , "uint", 0x13)         ; HWND_TOP, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
-    } else {
-        ; Fallback overlay: the taskbar is topmost too and can climb above the clock after a click
-        DllCall("SetWindowPos", "ptr", hwnd, "ptr", -1, "int", 0, "int", 0, "int", 0, "int", 0
-            , "uint", 0x13)             ; SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
-    }
+    Raise()
 }
 
-; Fallback overlay mode only: the taskbar can be raised above the clock when it is clicked.
-; This cheap check runs often: it only looks whether the taskbar is above the clock in the z-order
-; and raises the clock again at once, without activating it.
-KeepOnTop() {
+; Raises the clock above the taskbar if the taskbar is above it in the z-order (without activating it).
+; Cheap: it only walks the z-order upwards from the clock window.
+; Called from the WinEvent hooks, from a one-shot timer shortly after them and from a slow safety timer.
+Raise() {
     tb := Clk.tb
-    if attached || !tb || !Clk.shown     ; a child window needs no z-order fight
+    if !tb || !Clk.shown
         return
     h := hwnd, n := 0
     while (h := DllCall("GetWindow", "ptr", h, "uint", 3, "ptr")) && n++ < 64 {     ; GW_HWNDPREV: window above
@@ -150,6 +137,18 @@ KeepOnTop() {
             return
         }
     }
+}
+
+; WinEvent callback: the foreground window changed (taskbar clicked, Start menu opened) or a window was reordered
+WinEventProc(hHook, event, hwndEv, idObject, idChild, idThread, evTime) {
+    if event = 0x8004 && idObject != 0      ; REORDER of a child object, not of a window
+        return
+    Raise()
+    SetTimer(RaiseSoon, -30)            ; the taskbar may finish raising itself just after the event
+}
+
+RaiseSoon() {
+    Raise()
 }
 
 ; Draws the clock into the DIB and pushes it to the layered window
@@ -178,20 +177,10 @@ Render(x, y, t) {
     if ShowSeconds
         Hand(g, Clk.penSec, c, s * 6, 0, R * 0.85)                   ; second hand
 
-    if attached {
-        ; x, y are client coordinates of the taskbar; move the child window explicitly
-        DllCall("SetWindowPos", "ptr", hwnd, "ptr", 0, "int", x, "int", y, "int", size, "int", size
-            , "uint", 0x14)             ; SWP_NOZORDER | SWP_NOACTIVATE
-        pDst := 0
-    } else {
-        NumPut("Int", x, "Int", y, ptDst)
-        pDst := ptDst
-    }
+    NumPut("Int", x, "Int", y, ptDst)
     NumPut("Int", size, "Int", size, szBuf)
-    ok := DllCall("UpdateLayeredWindow", "ptr", hwnd, "ptr", 0, "ptr", pDst, "ptr", szBuf
+    DllCall("UpdateLayeredWindow", "ptr", hwnd, "ptr", 0, "ptr", ptDst, "ptr", szBuf
         , "ptr", Clk.hdc, "ptr", ptSrc, "uint", 0, "ptr", blend, "uint", 2)   ; ULW_ALPHA
-    if !ok && attached
-        GiveUpAttach()                  ; a layered child window is not supported here: use the overlay mode
 }
 
 ; Line from radius r1 to r2 at the given angle (degrees, 0 = 12 o'clock, clockwise)
@@ -247,43 +236,12 @@ DestroySurface() {
     Clk.hdc := 0, Clk.size := 0, Clk.dpi := 0
 }
 
-; Creates the layered, click-through, no-activate window (a plain topmost popup at first)
+; Creates the layered, click-through, no-activate topmost window
 CreateWindow() {
-    global clockGui, hwnd, attached
+    global clockGui, hwnd
     clockGui := Gui("+AlwaysOnTop -Caption +ToolWindow -DPIScale +E0x80000 +E0x20 +E0x08000000")
     clockGui.Show("NA x-32000 y-32000 w1 h1")
     hwnd := clockGui.Hwnd
-    attached := false
-    Clk.shown := true
-    Clk.key := ""
-}
-
-; Attaching did not work: replace the window with a plain topmost popup and do not try again
-GiveUpAttach() {
-    global attachFailed
-    attachFailed := true
-    try clockGui.Destroy()
-    CreateWindow()
-}
-
-; Makes the clock window a child of the taskbar, so it is part of the taskbar and cannot end up below it
-; If attaching fails, the window is recreated as a plain topmost popup and the re-raise logic is used.
-AttachWindow(tb) {
-    global attached
-    if !DllCall("IsWindow", "ptr", hwnd)            ; the old window died together with the old taskbar
-        CreateWindow()
-    DllCall("SetParent", "ptr", hwnd, "ptr", tb, "ptr")
-    ; GetParent would return the owner for a WS_POPUP window, GetAncestor(GA_PARENT) the real parent
-    if DllCall("GetAncestor", "ptr", hwnd, "uint", 1, "ptr") != tb {
-        GiveUpAttach()
-        return
-    }
-    st := DllCall("GetWindowLongPtrW", "ptr", hwnd, "int", -16, "ptr")     ; GWL_STYLE
-    st := (st & ~0x80000000) | 0x40000000 | 0x10000000                     ; drop WS_POPUP, add WS_CHILD | WS_VISIBLE
-    DllCall("SetWindowLongPtrW", "ptr", hwnd, "int", -16, "ptr", st)
-    DllCall("SetWindowPos", "ptr", hwnd, "ptr", 0, "int", 0, "int", 0, "int", 0, "int", 0
-        , "uint", 0x73)                 ; HWND_TOP, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_FRAMECHANGED | SWP_SHOWWINDOW
-    attached := true
     Clk.shown := true
     Clk.key := ""
 }
@@ -357,7 +315,7 @@ RectCenter(rc, &cx, &cy) {
     return true
 }
 
-; HWND of the taskbar to attach to: the main one (Shell_TrayWnd) or a secondary one (Shell_SecondaryTrayWnd)
+; HWND of the taskbar the clock is drawn over: the main one (Shell_TrayWnd) or a secondary one (Shell_SecondaryTrayWnd)
 FindTaskbar() {
     ; FindWindow ignores visibility: while the Start menu is open, WinExist() may not see the taskbar at all
     main := DllCall("FindWindowW", "wstr", "Shell_TrayWnd", "ptr", 0, "ptr")
@@ -422,7 +380,7 @@ DebugLog() {
     cls := "", proc := ""
     try cls := WinGetClass(fg)
     try proc := WinGetProcessName(fg)
-    st := "shown=" Clk.shown " vis=" DllCall("IsWindowVisible", "ptr", hwnd) " att=" attached " fs=" fs " fg=" cls "|" proc
+    st := "shown=" Clk.shown " vis=" DllCall("IsWindowVisible", "ptr", hwnd) " fs=" fs " fg=" cls "|" proc " above=[" AboveList() "]"
     if st != last {
         last := st
         FileAppend(A_Hour ":" A_Min ":" A_Sec "." A_MSec "  " st "`n", logFile)
@@ -448,10 +406,27 @@ CheckChime() {
 Cleanup(*) {
     Critical                            ; nobody interrupts the cleanup, in particular the Tick timer
     SetTimer(CheckChime, 0)
-    SetTimer(KeepOnTop, 0)
+    SetTimer(Raise, 0)
+    DllCall("UnhookWinEvent", "ptr", hookFg)
+    DllCall("UnhookWinEvent", "ptr", hookZ)
+    CallbackFree(hookProc)
     SetTimer(Tick, 0)                   ; Tick must not touch GDI+ objects while / after they are destroyed
     DllCall("ShowWindow", "ptr", hwnd, "int", 0)
     DestroySurface()
     ; GdiplusShutdown is intentionally not called: the process is exiting anyway, the OS frees GDI+,
     ; and calling it on Reload / Exit crashed with 0xC0000005
+}
+
+; Troubleshooting only: visible windows that are above the clock in the z-order (nearest first, at most 12 checked)
+AboveList() {
+    out := "", h := hwnd, n := 0
+    while (h := DllCall("GetWindow", "ptr", h, "uint", 3, "ptr")) && n++ < 12 {     ; GW_HWNDPREV: window above
+        if !DllCall("IsWindowVisible", "ptr", h)
+            continue
+        cls := "", proc := ""
+        try cls := WinGetClass(h)
+        try proc := WinGetProcessName(h)
+        out .= (out = "" ? "" : ", ") cls "|" proc
+    }
+    return out
 }
