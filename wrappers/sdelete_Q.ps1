@@ -1,5 +1,5 @@
 <#
-    Wrapper for SDelete x64 - secure delete utility
+    Wrapper for SDelete - secure delete utility
     
     [USAGE]
     TotalCmd button:  powershell -NoP -EP Bypass -File sdelete_Q.ps1 -List %UL %Y
@@ -26,14 +26,16 @@ param(
 $ErrorActionPreference = 'Stop'
 
 # ______________________SETTINGS______________________
-$app       = ''    # full path to sdelete64.exe, empty = next to this script
+$app       = ''    # full path to sdelete exe, empty = next to this script (sdelete64.exe on x64, sdelete.exe on x86)
 $logFile   = Join-Path $env:TEMP 'sdelete.log'
 $maxShown  = 5
 # protected paths: skipped together with everything inside; FULL paths only, wildcards * ? allowed
 $protected = @($env:SystemRoot, $env:ProgramFiles, ${env:ProgramFiles(x86)}) | Where-Object { $_ }
 # ____________________________________________________
 
-if (-not $app) { $app = Join-Path $PSScriptRoot 'sdelete64.exe' }
+# the OS bitness decides, not the process one: a 32-bit PowerShell on x64 Windows still gets sdelete64.exe
+$exe = if ([Environment]::Is64BitOperatingSystem) { 'sdelete64.exe' } else { 'sdelete.exe' }
+if (-not $app) { $app = Join-Path $PSScriptRoot $exe }
 $files = 0; $dirs = 0; $notFound = 0; $failed = 0
 
 # functions must be defined before they are called
@@ -122,14 +124,14 @@ if ($Shortcut) {
     Write-Host `n"Shortcut 'Secure Delete.lnk' created."; sleep 2; exit
 }
 
-# sdelete64.exe not found: offer to download it next to the script
+# sdelete exe not found: offer to download it next to the script
 if (-not (Test-Path -LiteralPath $app)) {
-    $answer = Read-Host `n"sdelete64.exe not found. Download to '$(Split-Path $app)'? [Y/N]"
+    $answer = Read-Host `n"$exe not found. Download to '$(Split-Path $app)'? [Y/N]"
     if ($answer -notmatch '^[yY]') { exit 1 }
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12   # Windows PowerShell 5.1 defaults to older TLS
     $ProgressPreference = 'SilentlyContinue'                                          # the progress bar makes Invoke-WebRequest very slow in 5.1
     for ($try = 1; $try -le 3 -and -not (Test-Path -LiteralPath $app); $try++) {
-        try { Invoke-WebRequest 'https://live.sysinternals.com/sdelete64.exe' -OutFile $app -UseBasicParsing }
+        try { Invoke-WebRequest "https://live.sysinternals.com/$exe" -OutFile $app -UseBasicParsing }
         catch { Write-Host `n"Download failed: $($_.Exception.Message)" -ForegroundColor Yellow; sleep 5 }
     }
     if (-not (Test-Path -LiteralPath $app)) { Read-Host `n'Download failed. Press Enter'; exit 1 }
