@@ -188,8 +188,11 @@ if ($skipped.Count) { $log.WriteLine("`nSkipped (protected):"); $skipped | ForEa
 $i = 0
 foreach ($p in $todo) {
     $i++; $prefix = "[$i/$($todo.Count)]"
-    $log.WriteLine("`n=== $prefix $p ===")
+    # TC gives folders as "dir\": sdelete may take that as a mask for the folder CONTENTS (nothing found for an empty folder);
+    # pass the path without the trailing backslash (but keep "C:\")
+    $target = if ($p.Length -gt 3) { $p.TrimEnd('\') } else { $p }
+    $log.WriteLine("`n=== $prefix sdelete -s `"$target`" ===")
     Show-Status "$prefix $p"
-    Invoke-SDelete $prefix @('-s', $p)
+    Invoke-SDelete $prefix @('-s', $target)
 }
 Complete-Run $todo.Count
