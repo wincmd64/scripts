@@ -55,7 +55,7 @@
 ***
 Тестер исходящих соединений: проверяет, блокирует ли фаервол трафик самой программы.
 
-ВАЖНО: скомпилируйте скрипт в `.exe` и [заблокируйте](https://github.com/wincmd64/scripts/blob/main/menu/firewall.bat) именно его, а не `AutoHotkey64.exe`.
+ВАЖНО: скомпилируйте скрипт в [.exe](https://github.com/AutoHotkey/Ahk2Exe) и [заблокируйте](https://github.com/wincmd64/scripts/blob/main/menu/firewall.bat) именно его, а не `AutoHotkey64.exe`.
 
 Проверки идут из одного процесса: TCP-подключение по IP (Cloudflare и Google) и HTTPS-запрос через WinHTTP. UDP DNS-запрос показывается справочно (`i`) и в итог не входит. Двойной клик по строке объясняет, что именно проверялось.
 
