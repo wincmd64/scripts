@@ -7,16 +7,14 @@
 @echo off
 setlocal
 
-:: [SETTINGS]
-set "name=Betterbird"
-set "app=betterbird.exe"
+:: Betterbird dir
 set "dir=%~dp0"
 cd /d "%dir%"
 
 :: get local ver
 if exist "core\application.ini" (for /f "tokens=2 delims==" %%v in ('findstr /i "^Version=" "core\application.ini"') do (set "current_version=%%v"))
 
-if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
+if not defined current_version (echo. & echo  Download Betterbird to "%dir%" ? & echo. & pause
 ) else (echo. & echo  Current version: %current_version% & echo  Checking for updates...)
 
 :: getting URL, filename and latest_ver
@@ -31,17 +29,16 @@ if defined current_version (
     echo. & echo  Update? & echo. 
     pause
     :check_task
-    tasklist /fi "imagename eq %app%" | find /i "%app%" >nul
-    if not errorlevel 1 (echo. & echo  [!] %name% is running. Please close it to continue. & echo. & pause & goto check_task)
+    tasklist /fi "imagename eq betterbird.exe" | find /i "betterbird.exe" >nul
+    if not errorlevel 1 (echo. & echo  [!] Betterbird is running. Please close it to continue. & echo. & pause & goto check_task)
 )
 
-:: download and unpack
+:: download, unpack and launch
 :download
 echo. & echo  Downloading: %filename%
 curl.exe -fRL# "%url%" -o "%temp%\%filename%"
 if errorlevel 1 (echo. & echo  Download failed. Retrying in 5 seconds... & echo. & timeout 5 & goto download)
 echo. & echo  Extracting ...
 tar -xf "%temp%\%filename%" 2>nul
-if errorlevel 1 (color C & echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo  DOWNLOADED. Now launching... & echo.)
-start "" BetterbirdLauncher.exe
-timeout 3 & exit
+if errorlevel 1 (color C & echo. & echo  Error: extraction failed. & echo. & pause) else (color A & echo. & echo  DOWNLOADED. Now launching... & start "" BetterbirdLauncher.exe)
+timeout 3
