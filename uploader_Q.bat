@@ -17,6 +17,10 @@ chcp 65001 >nul
 set "PD_KEY_FILE=%AppData%\pixeldrain"
 set "PIXELDRAIN_KEY="
 if exist "%PD_KEY_FILE%" set /p PIXELDRAIN_KEY=<"%PD_KEY_FILE%"
+::   User imgbb API Key
+set "IB_KEY_FILE=%AppData%\imgbb"
+set "IMGBB_KEY="
+if exist "%IB_KEY_FILE%" set /p IMGBB_KEY=<"%IB_KEY_FILE%"
 ::   Archivate by default: 0 = no
 set "zip=0"
 :: ========================================
@@ -41,10 +45,11 @@ echo  [1] litterbox.catbox.moe -- 1 GB, 3 days
 echo  [2] x0.at -- 1 GB, 3 days min
 echo  [3] transfer.whalebone.io -- 250 MB, 7 days
 if not defined PIXELDRAIN_KEY (echo  %ESC%[90m[4] pixeldrain.com -- 10 GB, 60 days -- API Key missing%ESC%[0m) else (echo  [4] pixeldrain.com -- 10 GB, 60 days)
+if not defined IMGBB_KEY (echo  %ESC%[90m[5] imgbb.com -- 32 MB image -- API Key missing%ESC%[0m) else (echo  [5] imgbb.com -- 32 MB image)
 echo.
 if defined ZP (if "%zip%"=="1" (echo  [0] Archivate: zip) else (echo  [0] Archivate: off)) else (echo  %ESC%[90m[0] Archivate: 7z.exe missing%ESC%[0m)
 echo.
-CHOICE /C 12340 /M "Your choice?:" >nul 2>&1
+CHOICE /C 123450 /M "Your choice?:" >nul 2>&1
 if %errorlevel% equ 1 set "service=litterbox"
 if %errorlevel% equ 2 set "service=x0"
 if %errorlevel% equ 3 set "service=whalebone"
@@ -53,6 +58,10 @@ if %errorlevel% equ 4 (
     set "service=pixeldrain"
 )
 if %errorlevel% equ 5 (
+    if not defined IMGBB_KEY (echo. & echo  Error: imgbb key missing! & echo. & pause & goto menu)
+    set "service=imgbb"
+)
+if %errorlevel% equ 6 (
     if defined ZP (if "%zip%"=="1" (set "zip=0") else (set "zip=1"))
     goto menu
 )
@@ -91,6 +100,8 @@ if /i "%service%"=="litterbox" (
     for /f "delims=" %%i in ('curl -# --upload-file "%~1" https://transfer.whalebone.io') do set "LNK=%%i"
 ) else if /i "%service%"=="pixeldrain" (
     for /f "delims=" %%i in ('curl -u :%PIXELDRAIN_KEY% -#T "%~1" https://pixeldrain.com/api/file/ ^| powershell -NoP -C "($input | ConvertFrom-Json).id"') do set "LNK=https://pixeldrain.com/u/%%i"
+) else if /i "%service%"=="imgbb" (
+    for /f "delims=" %%i in ('curl -# -F "image=@%~1" "https://api.imgbb.com/1/upload?key=%IMGBB_KEY%" ^| powershell -NoP -C "($input | ConvertFrom-Json).data.url"') do set "LNK=%%i"
 )
 
 if defined LNK (
