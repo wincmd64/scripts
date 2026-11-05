@@ -262,17 +262,17 @@ BuildCache(cachePath) {
 global Exceptions := Map()      ; triggers that must never be replaced
 global ExceptionApps := Map()   ; lower-cased process names where AutoCorrect is off
 global ListStamps := Map()      ; path -> "modified|size" at the time of the last load
-RefreshLists()
+AC_RefreshLists()
 
 ; Re-reads the exception files if they were created, edited or deleted since
 ; the last load, so manual edits take effect without restarting the script.
-RefreshLists() {
+AC_RefreshLists() {
     global Exceptions, ExceptionApps, ExceptionsPath, ExceptionsAppsPath
-    ReloadIfChanged(ExceptionsPath, Exceptions, false)
-    ReloadIfChanged(ExceptionsAppsPath, ExceptionApps, true)
+    AC_ReloadIfChanged(ExceptionsPath, Exceptions, false)
+    AC_ReloadIfChanged(ExceptionsAppsPath, ExceptionApps, true)
 }
 
-ReloadIfChanged(path, target, lowerCase) {
+AC_ReloadIfChanged(path, target, lowerCase) {
     global ListStamps
     stamp := ""  ; "" = file does not exist
     if FileExist(path) {
@@ -281,11 +281,11 @@ ReloadIfChanged(path, target, lowerCase) {
     if (ListStamps.Has(path) && ListStamps[path] = stamp)
         return
     ListStamps[path] := stamp
-    LoadList(path, target, lowerCase)
+    AC_LoadList(path, target, lowerCase)
 }
 
 ; Reads a one-entry-per-line file ("#" comments, blank lines ignored) into a Map.
-LoadList(path, target, lowerCase) {
+AC_LoadList(path, target, lowerCase) {
     target.Clear()
     if !FileExist(path)
         return
@@ -300,7 +300,7 @@ LoadList(path, target, lowerCase) {
 }
 
 ; Appends an entry to a list file and activates it immediately.
-AppendToList(path, target, entry, lowerCase) {
+AC_AppendToList(path, target, entry, lowerCase) {
     key := lowerCase ? StrLower(entry) : entry
     if (entry = "" || target.Has(key))
         return true
@@ -331,7 +331,11 @@ if (loadedFromSource && Dict.Count > 0) {
 ; ---------------------------------------------------------------
 ; Input interception
 ; ---------------------------------------------------------------
-IH := InputHook("V")     ; visible / non-blocking
+; "L0" is essential: by default an InputHook collects typed text and ends itself
+; (EndReason "Max") once 1023 characters have accumulated - after that AutoCorrect
+; silently stops until the script is restarted. L0 turns the text collection and the
+; length limit off; OnChar / OnKeyDown still work.
+IH := InputHook("V L0")   ; visible / non-blocking, no length limit
 IH.KeyOpt("{All}", "N")  ; notify for all keys, block nothing
 IH.OnChar := OnCharTyped
 IH.OnKeyDown := OnKeyDownRaw
@@ -343,15 +347,22 @@ if (ToggleHotkey != "")
     Hotkey(ToggleHotkey, ToggleAutoCorrect)
 
 ; Mouse clicks move the caret / switch windows -> forget the word buffer and undo state.
+; Deliberately polled instead of using Hotkey("~LButton", ...): a hotkey on the same
+; key defined by another script (e.g. Launcher.ahk) would replace or be replaced by it.
 global MouseWasDown := false
-SetTimer(PollMouseButtons, 30)
+SetTimer(AC_PollMouseButtons, 30)
 
-PollMouseButtons() {
+AC_PollMouseButtons() {
     global MouseWasDown
     down := GetKeyState("LButton") || GetKeyState("RButton") || GetKeyState("MButton")
     if (down && !MouseWasDown)
-        ResetOnMouse()
+        AC_ResetOnMouse()
     MouseWasDown := down
+}
+
+; Real key state straight from the OS, independent of AutoHotkey's own bookkeeping
+AC_KeyDownOS(vk) {
+    return DllCall("GetAsyncKeyState", "int", vk, "short") & 0x8000
 }
 
 ; Details of the last replacement, filled in by TryReplace()
@@ -369,7 +380,7 @@ if (ShowLastReplacementHotkey != "")
 ShowLastReplacement(*) {
     global LastTrigger, LastReplacementText, LastTime, LastWindow, LastProcess, LastUndoneFrom, LastReplGui
     global Exceptions, ExceptionApps
-    RefreshLists()
+    AC_RefreshLists()
 
     if IsObject(LastReplGui) {
         try LastReplGui.Destroy()
@@ -397,14 +408,14 @@ ShowLastReplacement(*) {
         triggerListed := Exceptions.Has(LastTrigger)
         btnAdd := g.AddButton("xm w170", triggerListed ? "Already in exceptions" : "Add to exceptions")
         btnAdd.Enabled := !triggerListed
-        btnAdd.OnEvent("Click", AddLastToExceptions.Bind(btnAdd))
+        btnAdd.OnEvent("Click", AC_AddLastToExceptions.Bind(btnAdd))
 
         appListed := (LastProcess = "") || ExceptionApps.Has(StrLower(LastProcess))
         appCaption := LastProcess = "" ? "Disable in this app"
             : (appListed ? LastProcess " is disabled" : "Disable in " LastProcess)
         btnApp := g.AddButton("x+10 yp w230", appCaption)
         btnApp.Enabled := !appListed
-        btnApp.OnEvent("Click", AddLastAppToExceptions.Bind(btnApp))
+        btnApp.OnEvent("Click", AC_AddLastAppToExceptions.Bind(btnApp))
 
         btnOk := g.AddButton("xm+470 yp w100 Default", "OK")  ; right edge = right edge of the text column
     }
@@ -416,9 +427,9 @@ ShowLastReplacement(*) {
     g.Show()
 }
 
-AddLastToExceptions(btn, *) {
+AC_AddLastToExceptions(btn, *) {
     global LastTrigger, Exceptions, ExceptionsPath
-    if AppendToList(ExceptionsPath, Exceptions, LastTrigger, false) {
+    if AC_AppendToList(ExceptionsPath, Exceptions, LastTrigger, false) {
         btn.Text := "Added"
         btn.Enabled := false
     } else {
@@ -426,9 +437,9 @@ AddLastToExceptions(btn, *) {
     }
 }
 
-AddLastAppToExceptions(btn, *) {
+AC_AddLastAppToExceptions(btn, *) {
     global LastProcess, ExceptionApps, ExceptionsAppsPath
-    if AppendToList(ExceptionsAppsPath, ExceptionApps, LastProcess, true) {
+    if AC_AppendToList(ExceptionsAppsPath, ExceptionApps, LastProcess, true) {
         btn.Text := LastProcess " is disabled"
         btn.Enabled := false
     } else {
@@ -493,7 +504,7 @@ OnKeyDownRaw(ih, vk, sc) {
     ; Shortcuts (Ctrl+V, Ctrl+Backspace, Alt+Tab, Win+...) edit text or switch
     ; windows in ways we can't track -> the word buffer no longer matches the
     ; text before the caret.
-    if (!IsModifierVK(vk) && IsShortcutHeld()) {
+    if (!AC_IsModifierVK(vk) && AC_IsShortcutHeld()) {
         WordBuf := ""
         UndoTick := 0
         return
@@ -503,7 +514,7 @@ OnKeyDownRaw(ih, vk, sc) {
         if (UndoTick && A_TickCount - UndoTick <= UndoWindowMs) {
             ; The real Backspace is still on its way to the app (non-blocking
             ; hook), so do the actual work a few ms later, after it landed.
-            SetTimer(UndoReplacement_Do.Bind(UndoOriginal, UndoReplacement), -15)
+            SetTimer(AC_UndoReplacement_Do.Bind(UndoOriginal, UndoReplacement), -15)
         }
         UndoTick := 0
         if (WordBuf != "")
@@ -519,26 +530,28 @@ OnKeyDownRaw(ih, vk, sc) {
 
     ; Any non-modifier key moves/changes the text in a way we can't track
     ; -> drop the undo state.
-    if !IsModifierVK(vk)
+    if !AC_IsModifierVK(vk)
         UndoTick := 0
 }
 
 ; True while Ctrl / Alt / Win is held. RAlt is skipped on purpose: AltGr
 ; (reported as Ctrl+RAlt) types letters on some layouts.
-IsShortcutHeld() {
-    if GetKeyState("RAlt")
+AC_IsShortcutHeld() {
+    ; OS state is used instead of GetKeyState(): AutoHotkey's own state can get stuck
+    ; (e.g. after Win+L) and would then silently disable AutoCorrect.
+    if AC_KeyDownOS(0xA5)  ; RAlt: AltGr types letters on some layouts
         return false
-    return GetKeyState("Ctrl") || GetKeyState("Alt") || GetKeyState("LWin") || GetKeyState("RWin")
+    return AC_KeyDownOS(0x11) || AC_KeyDownOS(0x12) || AC_KeyDownOS(0x5B) || AC_KeyDownOS(0x5C)
 }
 
-IsModifierVK(vk) {
+AC_IsModifierVK(vk) {
     return vk = 0x10 || vk = 0x11 || vk = 0x12 || vk = 0x5B || vk = 0x5C
         || (vk >= 0xA0 && vk <= 0xA5)
 }
 
 ; Reverts the last replacement. At this point the user's Backspace has
 ; already deleted the boundary char, so only the replacement is left on screen.
-UndoReplacement_Do(original, replacement) {
+AC_UndoReplacement_Do(original, replacement) {
     global WordBuf, LastUndoneFrom, SwitchSoundPath
     WordBuf := ""
     Send("{BackSpace " StrLen(replacement) "}")
@@ -552,7 +565,7 @@ UndoReplacement_Do(original, replacement) {
 
 ; A mouse click moves the caret -> neither the typed word nor the replacement
 ; is right before it anymore
-ResetOnMouse(*) {
+AC_ResetOnMouse(*) {
     global UndoTick, WordBuf
     UndoTick := 0
     WordBuf := ""
@@ -566,7 +579,7 @@ TryReplace(boundaryChar) {
     if (WordBuf = "")
         return
     if Dict.Has(WordBuf) {
-        RefreshLists()  ; only on a dictionary hit, so normal typing stays cheap
+        AC_RefreshLists()  ; only on a dictionary hit, so normal typing stays cheap
         if Exceptions.Has(WordBuf)
             return
         proc := ""
