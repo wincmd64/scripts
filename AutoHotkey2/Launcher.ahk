@@ -13,6 +13,7 @@ In the menu:
   Shift + click / Enter    run as administrator
   Middle click             reveal the item (new tab in Total Commander with the cursor on it, or Explorer)
   Right click              show the item's Properties
+  Delete                   move to recycle bin
 */
 
 #Requires AutoHotkey v2.0
@@ -79,10 +80,11 @@ ShowMenu() {
     if pending {
         info := pending[1]
         path := info.dir "\" info.names[pending[2] + 1]
-        if pending[3] = "R"
-            ShowProperties(path)
-        else
-            Reveal(path)
+        switch pending[3] {
+            case "R": ShowProperties(path)
+            case "D": DeleteItem(path)
+            default:  Reveal(path)
+        }
     }
 }
 
@@ -168,11 +170,18 @@ ClampToWorkArea(&x, &y) {
     }
 }
 
-; Catches RMB/MMB inside the popup menu (native menus only report LMB)
+; Catches RMB/MMB/Delete inside the popup menu (native menus only report LMB)
 MenuMsgFilter(code, wParam, lParam) {
     global pending, menus
     if code = 2 {                       ; MSGF_MENU
         msg := NumGet(lParam, A_PtrSize, "uint")
+        if msg = 0x0100 && NumGet(lParam, 2 * A_PtrSize, "uptr") = 0x2E {   ; WM_KEYDOWN, VK_DELETE
+            if hot := HotItem() {
+                pending := [hot[1], hot[2], "D"]
+                DllCall("EndMenu")
+                return 1
+            }
+        }
         if msg = 0x0205 || msg = 0x0208 {   ; WM_RBUTTONUP / WM_MBUTTONUP
             pt := NumGet(lParam, 4 * A_PtrSize + 4, "int64")
             for hMenu, info in menus {      ; the root menu or any opened submenu
@@ -186,6 +195,23 @@ MenuMsgFilter(code, wParam, lParam) {
         }
     }
     return DllCall("CallNextHookEx", "ptr", 0, "int", code, "ptr", wParam, "ptr", lParam, "ptr")
+}
+
+; Returns [info, index] of the highlighted item (mouse hover or keyboard), preferring the deepest
+; submenu: a parent folder item stays highlighted while its submenu is open
+HotItem() {
+    global menus
+    best := ""
+    for hMenu, info in menus {
+        Loop info.names.Length {
+            st := DllCall("GetMenuState", "ptr", hMenu, "uint", A_Index - 1, "uint", 0x400, "uint")   ; MF_BYPOSITION
+            if st = 0xFFFFFFFF || !(st & 0x80)      ; error / not MF_HILITE
+                continue
+            if !best || StrLen(info.dir) > StrLen(best[1].dir)
+                best := [info, A_Index - 1]
+        }
+    }
+    return best
 }
 
 ; Double-click detection on empty taskbar space
@@ -298,6 +324,13 @@ OpenFolder(path) {
 
 ShowProperties(path) {
     try Run('properties "' path '"')
+}
+
+; Same confirmation dialog and Recycle Bin behavior as the Explorer context menu "Delete".
+; For a .lnk only the shortcut is deleted, not its target.
+DeleteItem(path) {
+    SplitPath(path, &name, &dir)
+    try ComObject("Shell.Application").Namespace(dir).ParseName(name).InvokeVerb("delete")
 }
 
 Reveal(path) {
