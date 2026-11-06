@@ -44,17 +44,11 @@ global ExceptionsPath := ScriptDir "\AS_exceptions.txt"
 ; last-replacement window.
 global ExceptionsAppsPath := ScriptDir "\AS_exceptions_apps.txt"
 
-; Characters treated as part of a word - same idea as en/second in
-; CapsConvert.ahk, but combined (RU+UA) since this only affects which
-; letters keep a word buffering, not which layout is active.
-global LatinLetters := "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm"
-global CyrillicLetters := "ЙЦУКЕНГШЩЗХЪЇФЫІВАПРОЛДЖЭЄЯЧСМИТЬБЮЁҐйцукенгшщзхъїфыівапролджэєячсмитьбюёґ" ; RU+UA combined
-global WordCharsPattern := "[" LatinLetters CyrillicLetters "'’\-]"
-
-; Language names (as returned by Windows for LOCALE_SENGLANGUAGE) that use
-; the Cyrillic alphabet - used to auto-detect which installed keyboard
-; layout to switch to. Extend if you have other Cyrillic layouts installed.
-global CyrillicLanguageNames := ["Russian", "Ukrainian"]
+; Ukrainian keyboard layout support: 1 = on, 0 = off (Ukrainian is ignored completely).
+; Limited and one-way: AS_dict.txt only knows English <-> Russian, so with 1 only
+; ENGLISH typed in the UKRAINIAN layout is corrected (e.g. "ефіу" -> "test").
+; Ukrainian words typed in the English layout are NOT recognized.
+global UkrainianLayout := 1
 
 ; Hotkey to toggle AutoCorrect on/off (shows a tooltip near the cursor for 2 sec)
 ; Set to "" to disable the hotkey entirely.
@@ -72,6 +66,14 @@ global UndoWindowMs := 2000
 
 ; ---------------- END SETTINGS ----------------
 
+; Characters treated as part of a word. The Ukrainian-only letters are included
+; only when UkrainianLayout is on.
+global LatinLetters := "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm"
+global CyrillicLetters := "ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮЁйцукенгшщзхъфывапролджэячсмитьбюё"
+if UkrainianLayout
+    CyrillicLetters .= "ЇІЄҐїієґ"
+global WordCharsPattern := "[" LatinLetters CyrillicLetters "'’\-]"
+
 global Dict := Map()
 global WordBuf := ""
 global BufHwnd := 0  ; window the current WordBuf was typed in
@@ -80,6 +82,7 @@ global BufHwnd := 0  ; window the current WordBuf was typed in
 global UndoTick := 0
 global UndoOriginal := ""
 global UndoReplacement := ""
+global UndoLayout := 0   ; HKL that was active before the replacement
 
 ; ---------------------------------------------------------------
 ; Keyboard layout discovery - which installed HKL to switch to per script
@@ -110,17 +113,13 @@ AC_GetInstalledLayoutsWithNames() {
 ; Picks one installed HKL per alphabet ("latin"/"cyrillic"), based on the
 ; language name reported for each layout.
 BuildScriptLayoutMap(layouts) {
-    global CyrillicLanguageNames
     result := Map()
     for hkl, name in layouts {
-        isCyrillic := false
-        for langName in CyrillicLanguageNames {
-            if InStr(name, langName) {
-                isCyrillic := true
-                break
-            }
-        }
-        key := isCyrillic ? "cyrillic" : "latin"
+        ; Ukrainian is never a switch target (it is only ever corrected towards
+        ; English), and must not be mistaken for the English layout either.
+        if InStr(name, "Ukrainian")
+            continue
+        key := InStr(name, "Russian") ? "cyrillic" : "latin"
         if !result.Has(key)
             result[key] := hkl
     }
@@ -319,8 +318,36 @@ AC_AppendToList(path, target, entry, lowerCase) {
     return true
 }
 
+; Adds Ukrainian-layout twins of the "English typed in a Cyrillic layout" triggers.
+; Existing entries are never overwritten.
+AC_AddUkrainianVariants() {
+    global Dict
+    extra := Map()
+    for trigger, repl in Dict {
+        if !RegExMatch(trigger, "[ЫЪЭыъэ]")
+            continue
+        if RegExMatch(repl, "[А-Яа-яЁёІіЇїЄєҐґ]")  ; Cyrillic result = Russian typo fix, not for UA
+            continue
+        ; The Ukrainian layout has i, yi and ye on the keys where the Russian one has
+        ; y, hard sign and e-oborotnoe (s, ], '). g-upturn sits on the backslash key,
+        ; so Russian yo is deliberately not mapped.
+        twin := StrReplace(trigger, "ы", "і", true)
+        twin := StrReplace(twin, "Ы", "І", true)
+        twin := StrReplace(twin, "ъ", "ї", true)
+        twin := StrReplace(twin, "Ъ", "Ї", true)
+        twin := StrReplace(twin, "э", "є", true)
+        twin := StrReplace(twin, "Э", "Є", true)
+        if (twin != trigger && !Dict.Has(twin))
+            extra[twin] := repl
+    }
+    for trigger, repl in extra
+        Dict[trigger] := repl
+}
+
 startTick := A_TickCount
 loadedFromSource := LoadDictionary(DictPath)
+if (UkrainianLayout && Dict.Count > 0)
+    AC_AddUkrainianVariants()
 loadMs := A_TickCount - startTick
 
 if (loadedFromSource && Dict.Count > 0) {
@@ -460,9 +487,14 @@ ToggleAutoCorrect(*) {
 ; Keyboard layout switching
 ; ---------------------------------------------------------------
 DetectScript(text) {
-    if RegExMatch(text, "[А-Яа-яЁёІіЇїЄє]")
-        return "cyrillic"
-    return "latin"
+    global CyrillicLetters
+    return RegExMatch(text, "[" CyrillicLetters "]") ? "cyrillic" : "latin"
+}
+
+; HKL of the keyboard layout currently active in the foreground window
+AC_CurrentLayout() {
+    tid := DllCall("GetWindowThreadProcessId", "Ptr", WinExist("A"), "Ptr", 0, "UInt")
+    return DllCall("GetKeyboardLayout", "UInt", tid, "Ptr")
 }
 
 SwitchInputLanguage(scriptKey) {
@@ -514,7 +546,7 @@ OnKeyDownRaw(ih, vk, sc) {
         if (UndoTick && A_TickCount - UndoTick <= UndoWindowMs) {
             ; The real Backspace is still on its way to the app (non-blocking
             ; hook), so do the actual work a few ms later, after it landed.
-            SetTimer(AC_UndoReplacement_Do.Bind(UndoOriginal, UndoReplacement), -15)
+            SetTimer(AC_UndoReplacement_Do.Bind(UndoOriginal, UndoReplacement, UndoLayout), -15)
         }
         UndoTick := 0
         if (WordBuf != "")
@@ -551,12 +583,15 @@ AC_IsModifierVK(vk) {
 
 ; Reverts the last replacement. At this point the user's Backspace has
 ; already deleted the boundary char, so only the replacement is left on screen.
-AC_UndoReplacement_Do(original, replacement) {
+AC_UndoReplacement_Do(original, replacement, layout) {
     global WordBuf, LastUndoneFrom, SwitchSoundPath
     WordBuf := ""
     Send("{BackSpace " StrLen(replacement) "}")
     SendText(original)
-    SwitchInputLanguage(DetectScript(original))
+    if layout  ; back to the layout the user was typing in (RU or UA), not a guess
+        PostMessage(0x0050, 0, layout, , 0xFFFF)  ; WM_INPUTLANGCHANGEREQUEST, broadcast
+    else
+        SwitchInputLanguage(DetectScript(original))
     LastUndoneFrom := original
 
     if FileExist(SwitchSoundPath)
@@ -573,7 +608,7 @@ AC_ResetOnMouse(*) {
 
 TryReplace(boundaryChar) {
     global WordBuf, Dict, SwitchSoundPath
-    global UndoTick, UndoOriginal, UndoReplacement, UndoWindowMs
+    global UndoTick, UndoOriginal, UndoReplacement, UndoLayout, UndoWindowMs
     global Exceptions, ExceptionApps
     global LastTrigger, LastReplacementText, LastTime, LastWindow, LastProcess, LastUndoneFrom
     if (WordBuf = "")
@@ -587,6 +622,7 @@ TryReplace(boundaryChar) {
         if (proc != "" && ExceptionApps.Has(StrLower(proc)))
             return
         replacement := Dict[WordBuf]
+        layoutBefore := AC_CurrentLayout()
         ; Erase the word + the boundary char already on screen, then retype both.
         Send("{BackSpace " (StrLen(WordBuf) + 1) "}")
         SendText(replacement)
@@ -597,6 +633,7 @@ TryReplace(boundaryChar) {
         if (UndoWindowMs > 0) {
             UndoOriginal := WordBuf
             UndoReplacement := replacement
+            UndoLayout := layoutBefore
             UndoTick := A_TickCount
         }
         if FileExist(SwitchSoundPath)
