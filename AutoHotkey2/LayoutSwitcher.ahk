@@ -1,8 +1,11 @@
 ﻿/*
 Keyboard Layout Switcher
 
-First, run LayoutSwitcher.ahk with -layouts and note the codes of your layouts.
-Then, put them into SwitchLayout() below.
+Layouts are given by language: "en", "ru", "uk" (ISO 639 code) or the English name
+("English", "Russian", "Ukrainian"). The first installed layout of that language is
+used, so variants such as Ukrainian (Enhanced) just work - no codes to look up.
+Only to pick one specific layout among several of the same language, run
+LayoutSwitcher.ahk with -layouts and pass its full code (e.g. 0x04090409) instead.
 Optional, add label with the language code: Flash(textColor, bgColor, ms)
 
 Default:
@@ -19,11 +22,11 @@ Default:
 ; ===================================================
 
 CapsConvert := 1            ; 1 = CapsLock converts text typed in the wrong layout, 0 = normal CapsLock
-CapsBase    := 0x04090409   ; base layout for CapsConvert (English): text is converted to/from it
+CapsBase    := "en"         ; base layout for CapsConvert: text is converted to/from it
 
 ~LControl Up:: {
     if (A_PriorKey = "LControl") {
-        SwitchLayout(0x04090409)
+        SwitchLayout("en")
         Flash("White", "2E9E4F")
         ;SoundBeep(600, 90), SoundBeep(800, 90)
     }
@@ -31,7 +34,7 @@ CapsBase    := 0x04090409   ; base layout for CapsConvert (English): text is con
 
 ~RControl Up:: {
     if (A_PriorKey = "RControl") {
-        SwitchLayout(0x04190419)
+        SwitchLayout("ru")
         Flash("White", "D03A3A")
         ;SoundBeep(800, 90), SoundBeep(600, 90)
     }
@@ -41,7 +44,7 @@ A_MenuMaskKey := "vkE8"    ; unassigned key for masking Alt/Win release (default
 ~RAlt:: Send("{Blind}{vkE8}")    ; lone Alt release must not open the app's menu bar
 ~RAlt Up:: {
     if (A_PriorKey = "RAlt") {
-        SwitchLayout(0x04220422)
+        SwitchLayout("uk")
         Flash("Yellow", "Blue")
     }
 }
@@ -147,15 +150,43 @@ GetInstalledLayoutsWithNames() {
     return layouts
 }
 
+; Locale info string for a language ID ("" on failure)
+LangInfo(langID, type) {
+    buf := Buffer(128)
+    return DllCall("GetLocaleInfo", "UInt", langID, "UInt", type, "Ptr", buf, "Int", 64) ? StrGet(buf) : ""
+}
+
+; Installed layout for "en" / "ru" / "uk" / "English" / ... : the first one of that language.
+; A number is taken as a layout code: the exact layout if installed, otherwise the first
+; layout of the same language (low word).
+ResolveLayout(id) {
+    if IsNumber(id) {
+        if installedLayouts.Has(id)
+            return id
+        for hkl in installedLayouts
+            if (hkl & 0xFFFF) = (id & 0xFFFF)
+                return hkl
+        return 0
+    }
+    for hkl in installedLayouts {
+        lang := hkl & 0xFFFF
+        if (StrLower(id) = StrLower(LangInfo(lang, 0x59))           ; LOCALE_SISO639LANGNAME
+            || StrLower(id) = StrLower(LangInfo(lang, 0x1001)))     ; LOCALE_SENGLISHLANGUAGENAME
+            return hkl
+    }
+    return 0
+}
+
 ; Function to switch keyboard layout with validation
 SwitchLayout(layoutID) {
     global lastLayout, foreign
-    lastLayout := layoutID
-    if (installedLayouts.Has(layoutID)) {
-        if !IsBase(layoutID)
-            foreign := layoutID         ; remembered for CapsConvert
+    hkl := ResolveLayout(layoutID)
+    lastLayout := hkl ? hkl : layoutID
+    if (hkl) {
+        if !IsBase(hkl)
+            foreign := hkl              ; remembered for CapsConvert
         ; Send WM_INPUTLANGCHANGEREQUEST message to change layout
-        PostMessage(0x50, 0, layoutID, , 0xFFFF)
+        PostMessage(0x50, 0, hkl, , 0xFFFF)
     } else {
         ; Play error sound if layout is not installed
         SoundBeep(750, 500)
@@ -167,7 +198,7 @@ SwitchLayout(layoutID) {
 ; ===================================================
 
 ; Is this layout the base one (compared by language, not by full handle)?
-IsBase(hkl) => (hkl & 0xFFFF) = (CapsBase & 0xFFFF)
+IsBase(hkl) => (hkl & 0xFFFF) = (ResolveLayout(CapsBase) & 0xFFFF)
 
 ; Keyboard layout of the active window
 CurrentLayout() {
@@ -223,6 +254,9 @@ ConvertText() {
     global foreign
     static cache := Map()
 
+    base := ResolveLayout(CapsBase)     ; real layout handle for the base language
+    if !base
+        return
     cur := CurrentLayout()
     toBase := !IsBase(cur)              ; typed in a foreign layout -> to base; typed in base -> to the foreign one
     other := toBase ? cur : ForeignLayout()
@@ -238,7 +272,7 @@ ConvertText() {
         return
 
     if !cache.Has(other)
-        cache[other] := [BuildMap(CapsBase, other), BuildMap(other, CapsBase)]
+        cache[other] := [BuildMap(base, other), BuildMap(other, base)]
     en2second := cache[other][1]
     second2en := cache[other][2]
 
