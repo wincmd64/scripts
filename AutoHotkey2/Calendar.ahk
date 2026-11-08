@@ -84,6 +84,8 @@ cal_colorPastDark := 0x4A4D52
 cal_i18n := Map()
 cal_i18n["ru"] := Map(
     "title", "Календарь", "today", "Сегодня",
+    "menuView", "Вид", "refresh", "Обновить", "darkTheme", "Тёмная тема", "weekNumbers", "Номера недель",
+    "dimPast", "Серые прошедшие месяцы", "edit", "Редактировать файл",
     "zodiac", "Знак зодиака", "turns", "Исполнится", "turnsNow", "Исполняется", "turned", "Исполнилось",
     "todayWord", "сегодня", "inWord", "через", "daysWord", "дн.",
     "dateFmt", "{1}, {2} {3} {4} г.",
@@ -99,6 +101,8 @@ cal_i18n["ru"] := Map(
               "Рак", "Лев", "Дева", "Весы", "Скорпион", "Стрелец"])
 cal_i18n["uk"] := Map(
     "title", "Календар", "today", "Сьогодні",
+    "menuView", "Вигляд", "refresh", "Оновити", "darkTheme", "Темна тема", "weekNumbers", "Номери тижнів",
+    "dimPast", "Сірі минулі місяці", "edit", "Редагувати файл",
     "zodiac", "Знак зодіаку", "turns", "Виповниться", "turnsNow", "Виповнюється", "turned", "Виповнилось",
     "todayWord", "сьогодні", "inWord", "через", "daysWord", "дн.",
     "dateFmt", "{1}, {2} {3} {4} р.",
@@ -114,6 +118,8 @@ cal_i18n["uk"] := Map(
               "Рак", "Лев", "Діва", "Терези", "Скорпіон", "Стрілець"])
 cal_i18n["en"] := Map(
     "title", "Calendar", "today", "Today",
+    "menuView", "View", "refresh", "Refresh", "darkTheme", "Dark theme", "weekNumbers", "Week numbers",
+    "dimPast", "Gray past months", "edit", "Edit data file",
     "zodiac", "Zodiac sign", "turns", "Turns", "turnsNow", "Turns today", "turned", "Turned",
     "todayWord", "today", "inWord", "in", "daysWord", "days",
     "dateFmt", "{1}, {3} {2}, {4}",
@@ -227,9 +233,7 @@ cal_Build(year) {
     mx := Round(fs * 1.5 * sc)                  ; window margins
     my := Round(fs * 1.2 * sc)
     barH := Round(fs * 2.8 * sc)                ; height of the top bar (year and buttons)
-    btnW := Round(fs * 3.4 * sc)                ; width of the "previous" / "next" buttons
-    btnGap := Round(fs * 0.7 * sc)              ; space between those two buttons
-    todayW := Round(fs * 8 * sc)                ; width of the "Today" button
+    todayW := Round(fs * 8 * sc)                ; width of the "View" and "Today" buttons
     gridW := cols * blockW + (cols - 1) * gap
     winW := 2 * mx + gridW
     top := my + barH + my                       ; y of the first month row
@@ -248,17 +252,12 @@ cal_Build(year) {
     g.BackColor := Format("{:06X}", bgColor)
     g.SetFont("s" fs " c" Format("{:06X}", textColor), "Segoe UI")
 
-    ; ---- Top bar: [<] [>]   year   [Today] ----
-    btnPrev := g.Add("Button", Format("x{} y{} w{} h{}", mx, my, btnW, barH), Chr(0x25C4))
-    btnNext := g.Add("Button", Format("x{} y{} w{} h{}", mx + btnW + btnGap, my, btnW, barH), Chr(0x25BA))
-    btnPrev.SetFont("s" Round(fs * 1.2), "Segoe UI Symbol")
-    btnNext.SetFont("s" Round(fs * 1.2), "Segoe UI Symbol")
+    ; ---- Top bar: [View]   year   [Today] ----
+    btnView := g.Add("Button", Format("x{} y{} w{} h{}", mx, my, todayW, barH), cal_T("menuView") " " Chr(0x25BE))
     btnToday := g.Add("Button", Format("x{} y{} w{} h{}", winW - mx - todayW, my, todayW, barH), cal_T("today"))
-    side := Max(2 * btnW + btnGap, todayW)      ; same room on both sides keeps the year centered
-    yearLbl := g.Add("Text", Format("x{} y{} w{} h{} +0x200 Center", mx + side, my, gridW - 2 * side, barH), year)
+    yearLbl := g.Add("Text", Format("x{} y{} w{} h{} +0x200 Center", mx + todayW, my, gridW - 2 * todayW, barH), year)
     yearLbl.SetFont("s" Round(fs * 1.7) " bold c" Format("{:06X}", textColor), "Segoe UI")
-    btnPrev.OnEvent("Click", (*) => cal_Go(-1))
-    btnNext.OnEvent("Click", (*) => cal_Go(1))
+    btnView.OnEvent("Click", cal_ShowMenu)
     btnToday.OnEvent("Click", cal_GoToday)
 
     ; ---- 12 months ----
@@ -356,7 +355,7 @@ cal_Build(year) {
     }
 
     if cal_dark
-        cal_ApplyDarkMode(g, [btnPrev, btnNext, btnToday])
+        cal_ApplyDarkMode(g, [btnView, btnToday])
     else
         cal_ResetAppMode()
 
@@ -464,6 +463,55 @@ cal_TogglePast(*) {
     cal_Build(cal_year)
 }
 
+; Drops the "View" menu down from its button. Check marks show the current state
+cal_ShowMenu(ctrl, *) {
+    lblDark := cal_T("darkTheme")
+    lblWeeks := cal_T("weekNumbers")
+    lblPast := cal_MenuLabel("dimPast", cal_pastKey)
+
+    mn := Menu()
+    mn.Add(cal_MenuLabel("refresh", cal_refreshKey), cal_Refresh)
+    mn.Add()
+    mn.Add(lblDark, cal_ToggleDark)
+    mn.Add(lblWeeks, cal_ToggleWeeks)
+    mn.Add(lblPast, cal_TogglePast)
+    mn.Add()
+    mn.Add(cal_MenuLabel("edit", cal_editKey), cal_Edit)
+
+    if cal_dark                         ; checked only if the dark theme is really in use
+        mn.Check(lblDark)
+    if cal_weekNumbers
+        mn.Check(lblWeeks)
+    if cal_dimPast
+        mn.Check(lblPast)
+
+    CoordMode("Menu", "Client")
+    ctrl.GetPos(&x, &y, , &h)
+    mn.Show(x, y + h)                   ; right under the button
+}
+
+; Menu item text; the key (if any) is shown right-aligned, e.g. "Refresh    F5"
+cal_MenuLabel(key, hotkeyName) {
+    txt := cal_T(key)
+    if (Trim(hotkeyName) != "")
+        txt .= "`t" Trim(hotkeyName)
+    return txt
+}
+
+; Switches between the dark and the light theme (overrides "system" from now on)
+cal_ToggleDark(*) {
+    global cal_theme
+    cal_theme := cal_dark ? "light" : "dark"
+    cal_Build(cal_year)
+}
+
+; Shows / hides the ISO week numbers
+cal_ToggleWeeks(*) {
+    global cal_weekNumbers
+    cal_weekNumbers := !cal_weekNumbers
+    cal_Build(cal_year)
+}
+
 ; Window hotkeys: work only while the Calendar window is active
 cal_BindKeys() {
     global cal_keysBound
@@ -471,9 +519,9 @@ cal_BindKeys() {
         return
     cal_keysBound := true
     HotIf(cal_WindowActive)
-    for k in ["Left", "PgUp", "WheelUp"]
+    for k in ["Left", "PgUp"]
         try Hotkey(k, cal_Prev, "On")
-    for k in ["Right", "PgDn", "WheelDown"]
+    for k in ["Right", "PgDn"]
         try Hotkey(k, cal_Next, "On")
     try Hotkey("Home", cal_GoToday, "On")
     key := Trim(cal_refreshKey)
@@ -485,11 +533,22 @@ cal_BindKeys() {
     key := Trim(cal_pastKey)
     if (key != "")
         try Hotkey(key, cal_TogglePast, "On")
+    HotIf(cal_MouseInWindow)            ; the wheel works only with the mouse over the window
+    try Hotkey("WheelUp", cal_Prev, "On")
+    try Hotkey("WheelDown", cal_Next, "On")
     HotIf()
 }
 
 cal_WindowActive(*) {
     return IsObject(cal_gui) && WinActive("ahk_id " cal_gui.Hwnd)
+}
+
+; True while the mouse pointer is over the Calendar window
+cal_MouseInWindow(*) {
+    if !IsObject(cal_gui)
+        return false
+    MouseGetPos(, , &hwnd)
+    return hwnd = cal_gui.Hwnd
 }
 
 ; ---------------------------- Birthdays ---------------------------
