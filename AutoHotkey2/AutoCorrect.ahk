@@ -1,73 +1,66 @@
+/*
+    AutoCorrect: fixes text typed in the wrong keyboard layout (ghbdtn -> привет,
+    руддщ -> hello) and common typos, using Mahou's AS_dict.txt dictionary.
+
+    USAGE.
+      Just type. When a word is finished (space, Enter, punctuation) and it is in the
+      dictionary, it is replaced and the keyboard layout is switched to match.
+      Backspace right after a replacement reverts it.
+      Ctrl+Alt+Shift+F12   toggle AutoCorrect on/off
+      Ctrl+Alt+Shift+F11   details of the last replacement; its buttons add the trigger
+                           or the current app to the exceptions so it is left alone
+      Hotkeys, undo time and exception files are in SETTINGS below. If the dictionary
+      is missing, you are offered to download it.
+
+    HOW IT WORKS.
+      An InputHook watches typed characters and collects letters into a word buffer.
+      A non-letter ends the word: it is looked up in the dictionary and, unless
+      excepted, retyped as its replacement. Caret moves, clicks, shortcuts and window
+      changes reset the buffer, so a stale word is never replaced.
+*/
+
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-; ================================================================
-;  AutoCorrect (Mahou's "Autoreplace" feature, reimplemented in AHK v2)
-;
-;  AS_dict.txt format:
-;      ->trigger
-;      ====>replacement<====
-;
-;  Flow: InputHook passively watches typed characters. Letters go into a
-;  word buffer; at a word boundary (any non-letter char) the buffer is
-;  looked up in the dictionary and replaced if found.
-;
-;  Meant to be #Include-d from a main script, so all paths are resolved
-;  relative to THIS file, not A_ScriptDir (which points to the main script).
-; ================================================================
-
 ; ---------------- SETTINGS ----------------
+; (hotkeys: set to "" to disable)
 
 ; Folder this file lives in (works regardless of where it's #Include-d from)
 global ScriptDir := ""
 SplitPath(A_LineFile, , &ScriptDir)
 
-; Dictionary file. Get AS_dict.txt from: https://gitea.com/BladeMight/Mahou/releases/download/latest-commit/AS_Dict.zip
+; Dictionary: https://gitea.com/BladeMight/Mahou/releases/download/latest-commit/AS_Dict.zip
 global DictPath := ScriptDir "\AS_dict.txt"
 
-; Sound played on a successful replacement. Silently skipped if missing. Get switch.wav from: https://pixeldrain.com/u/VURSv53s
+; Played after a replacement (skipped if missing): https://pixeldrain.com/u/VURSv53s
 global SwitchSoundPath := ScriptDir "\switch.wav"
 
-; Cache file: a faster-to-parse copy of AS_dict.txt (one line per entry
-; instead of two, no ->/====>/<==== markers). Rebuilt automatically
-; whenever AS_dict.txt is newer than the cache.
+; Faster-to-parse copy of the dictionary, rebuilt when AS_dict.txt is newer
 global CachePath := ScriptDir "\AS_dict.cache"
 
-; Exceptions: triggers listed here (one per line, "#" starts a comment) are
-; never auto-replaced, even if they exist in AS_dict.txt. Lines get added
-; via the "Add to exceptions" button in the last-replacement window.
-global ExceptionsPath := ScriptDir "\AS_exceptions.txt"
-
-; App exceptions: process names (one per line, e.g. TOTALCMD64.EXE, case-
-; insensitive, "#" starts a comment) in which AutoCorrect never replaces
-; anything. Lines get added via the "Disable in ..." button in the
+; Triggers that are never replaced / processes (e.g. TOTALCMD64.EXE) where nothing is
+; replaced. One entry per line, "#" starts a comment. Both get filled by buttons in the
 ; last-replacement window.
+global ExceptionsPath := ScriptDir "\AS_exceptions.txt"
 global ExceptionsAppsPath := ScriptDir "\AS_exceptions_apps.txt"
 
-; Ukrainian keyboard layout support: 1 = on, 0 = off (Ukrainian is ignored completely).
-; Limited and one-way: AS_dict.txt only knows English <-> Russian, so with 1 only
-; ENGLISH typed in the UKRAINIAN layout is corrected (e.g. "ефіу" -> "test").
-; Ukrainian words typed in the English layout are NOT recognized.
+; 1 = also correct English typed in the Ukrainian layout (e.g. "ефіу" -> "test").
+; One-way only: the dictionary has no Ukrainian words. 0 = Ukrainian is ignored completely.
 global UkrainianLayout := 1
 
-; Hotkey to toggle AutoCorrect on/off (shows a tooltip near the cursor for 2 sec)
-; Set to "" to disable the hotkey entirely.
+; Toggle AutoCorrect on/off (tooltip near the cursor)
 global ToggleHotkey := "^!+F12" ; Ctrl+Alt+Shift+F12
 
-; Hotkey to show a window with details of the last replacement
-; Set to "" to disable.
+; Window with details of the last replacement
 global ShowLastReplacementHotkey := "^!+F11" ; Ctrl+Alt+Shift+F11
 
-; Undo window: if Backspace is the very first key pressed within this many
-; milliseconds after a replacement, the replacement is reverted to the
-; originally typed word (the boundary char is eaten by that Backspace, like
-; in Word's autocorrect). Set to 0 to disable.
+; Backspace as the first key within this many ms after a replacement reverts it
+; (the Backspace eats the boundary char, like Word's autocorrect). 0 = off.
 global UndoWindowMs := 2000
 
 ; ---------------- END SETTINGS ----------------
 
-; Characters treated as part of a word. The Ukrainian-only letters are included
-; only when UkrainianLayout is on.
+; Characters treated as part of a word (Ukrainian-only letters only if UkrainianLayout)
 global LatinLetters := "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm"
 global CyrillicLetters := "ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮЁйцукенгшщзхъфывапролджэячсмитьбюё"
 if UkrainianLayout
@@ -84,15 +77,11 @@ global UndoOriginal := ""
 global UndoReplacement := ""
 global UndoLayout := 0   ; HKL that was active before the replacement
 
-; ---------------------------------------------------------------
-; Keyboard layout discovery - which installed HKL to switch to per script
-; (this is about the actual OS layout, not the character set, so it still
-; needs to look at what's really installed rather than a static string)
-; ---------------------------------------------------------------
+; --- Keyboard layout discovery (which installed HKL to switch to) ---
 global AC_InstalledLayouts := AC_GetInstalledLayoutsWithNames()
 global ScriptLayoutIDs := BuildScriptLayoutMap(AC_InstalledLayouts)
 
-; HKL -> LOCALE_SENGLANGUAGE name, for every installed keyboard layout
+; HKL -> English language name, for every installed layout
 AC_GetInstalledLayoutsWithNames() {
     layouts := Map()
     count := DllCall("GetKeyboardLayoutList", "Int", 0, "Ptr", 0, "Int")
@@ -110,13 +99,11 @@ AC_GetInstalledLayoutsWithNames() {
     return layouts
 }
 
-; Picks one installed HKL per alphabet ("latin"/"cyrillic"), based on the
-; language name reported for each layout.
+; One installed HKL per alphabet ("latin" / "cyrillic")
 BuildScriptLayoutMap(layouts) {
     result := Map()
     for hkl, name in layouts {
-        ; Ukrainian is never a switch target (it is only ever corrected towards
-        ; English), and must not be mistaken for the English layout either.
+        ; Ukrainian is never a switch target, nor should it pass for English
         if InStr(name, "Ukrainian")
             continue
         key := InStr(name, "Russian") ? "cyrillic" : "latin"
@@ -126,9 +113,7 @@ BuildScriptLayoutMap(layouts) {
     return result
 }
 
-; ---------------------------------------------------------------
-; Dictionary loading
-; ---------------------------------------------------------------
+; --- Dictionary loading ---
 LoadDictionary(path) {
     global Dict, CachePath, ScriptDir
     Dict.Clear()
@@ -164,8 +149,7 @@ LoadDictionary(path) {
     }
 }
 
-; Downloads AS_Dict.zip and unpacks it next to the script, using the
-; Shell.Application COM object (no external processes/PowerShell needed).
+; Downloads and unpacks AS_Dict.zip via Shell.Application (no external tools)
 DownloadAndExtractDict() {
     global ScriptDir
     url := "https://gitea.com/BladeMight/Mahou/releases/download/latest-commit/AS_Dict.zip"
@@ -186,10 +170,10 @@ DownloadAndExtractDict() {
         if !zipFolder || !destFolder
             throw Error("Could not open the zip file or destination folder")
 
-        ; FOF_NOCONFIRMATION (16) + FOF_SILENT (4) - overwrite without prompts, no UI
+        ; FOF_NOCONFIRMATION (16) + FOF_SILENT (4)
         destFolder.CopyHere(zipFolder.Items, 4 | 16)
 
-        ; CopyHere is asynchronous - wait for AS_dict.txt to actually show up
+        ; CopyHere is asynchronous: wait for the file
         Loop 100 {
             if FileExist(ScriptDir "\AS_dict.txt")
                 break
@@ -255,16 +239,13 @@ BuildCache(cachePath) {
     }
 }
 
-; ---------------------------------------------------------------
-; Exceptions list
-; ---------------------------------------------------------------
+; --- Exceptions list ---
 global Exceptions := Map()      ; triggers that must never be replaced
 global ExceptionApps := Map()   ; lower-cased process names where AutoCorrect is off
 global ListStamps := Map()      ; path -> "modified|size" at the time of the last load
 AC_RefreshLists()
 
-; Re-reads the exception files if they were created, edited or deleted since
-; the last load, so manual edits take effect without restarting the script.
+; Reloads the exception files when they changed on disk (edits apply without restart)
 AC_RefreshLists() {
     global Exceptions, ExceptionApps, ExceptionsPath, ExceptionsAppsPath
     AC_ReloadIfChanged(ExceptionsPath, Exceptions, false)
@@ -283,7 +264,6 @@ AC_ReloadIfChanged(path, target, lowerCase) {
     AC_LoadList(path, target, lowerCase)
 }
 
-; Reads a one-entry-per-line file ("#" comments, blank lines ignored) into a Map.
 AC_LoadList(path, target, lowerCase) {
     target.Clear()
     if !FileExist(path)
@@ -298,7 +278,6 @@ AC_LoadList(path, target, lowerCase) {
     }
 }
 
-; Appends an entry to a list file and activates it immediately.
 AC_AppendToList(path, target, entry, lowerCase) {
     key := lowerCase ? StrLower(entry) : entry
     if (entry = "" || target.Has(key))
@@ -318,8 +297,8 @@ AC_AppendToList(path, target, entry, lowerCase) {
     return true
 }
 
-; Adds Ukrainian-layout twins of the "English typed in a Cyrillic layout" triggers.
-; Existing entries are never overwritten.
+; Adds Ukrainian-layout twins of "English typed in a Cyrillic layout" triggers
+; (never overwrites existing entries)
 AC_AddUkrainianVariants() {
     global Dict
     extra := Map()
@@ -328,9 +307,8 @@ AC_AddUkrainianVariants() {
             continue
         if RegExMatch(repl, "[А-Яа-яЁёІіЇїЄєҐґ]")  ; Cyrillic result = Russian typo fix, not for UA
             continue
-        ; The Ukrainian layout has i, yi and ye on the keys where the Russian one has
-        ; y, hard sign and e-oborotnoe (s, ], '). g-upturn sits on the backslash key,
-        ; so Russian yo is deliberately not mapped.
+        ; UA has і ї є on the keys where RU has ы ъ э (s ] '); ґ is on the backslash
+        ; key, so ё is deliberately not mapped
         twin := StrReplace(trigger, "ы", "і", true)
         twin := StrReplace(twin, "Ы", "І", true)
         twin := StrReplace(twin, "ъ", "ї", true)
@@ -355,13 +333,9 @@ if (loadedFromSource && Dict.Count > 0) {
     SetTimer(() => ToolTip(), -3000)
 }
 
-; ---------------------------------------------------------------
-; Input interception
-; ---------------------------------------------------------------
-; "L0" is essential: by default an InputHook collects typed text and ends itself
-; (EndReason "Max") once 1023 characters have accumulated - after that AutoCorrect
-; silently stops until the script is restarted. L0 turns the text collection and the
-; length limit off; OnChar / OnKeyDown still work.
+; --- Input interception ---
+; "L0" is essential: by default an InputHook ends itself after 1023 collected chars
+; (EndReason "Max") and AutoCorrect silently stops. OnChar / OnKeyDown still work.
 IH := InputHook("V L0")   ; visible / non-blocking, no length limit
 IH.KeyOpt("{All}", "N")  ; notify for all keys, block nothing
 IH.OnChar := OnCharTyped
@@ -373,11 +347,10 @@ global AutoCorrectEnabled := true
 if (ToggleHotkey != "")
     Hotkey(ToggleHotkey, ToggleAutoCorrect)
 
-; Mouse clicks move the caret / switch windows -> forget the word buffer and undo state.
-; Deliberately polled instead of using Hotkey("~LButton", ...): a hotkey on the same
-; key defined by another script (e.g. Launcher.ahk) would replace or be replaced by it.
+; A click moves the caret -> reset the buffer. Polled instead of Hotkey("~LButton"):
+; another script's hotkey on the same key (e.g. Launcher.ahk) would replace this one.
 global MouseWasDown := false
-SetTimer(AC_PollMouseButtons, 30)
+SetTimer(AC_PollMouseButtons, 50)
 
 AC_PollMouseButtons() {
     global MouseWasDown
@@ -387,7 +360,6 @@ AC_PollMouseButtons() {
     MouseWasDown := down
 }
 
-; Real key state straight from the OS, independent of AutoHotkey's own bookkeeping
 AC_KeyDownOS(vk) {
     return DllCall("GetAsyncKeyState", "int", vk, "short") & 0x8000
 }
@@ -414,7 +386,6 @@ ShowLastReplacement(*) {
         LastReplGui := ""
     }
 
-    ; Close button only in the title bar (no minimize / maximize)
     title := "AutoCorrect - last replacement" (LastTime != "" ? " - " LastTime : "")
     g := Gui("+AlwaysOnTop -MinimizeBox -MaximizeBox", title)
 
@@ -483,15 +454,12 @@ ToggleAutoCorrect(*) {
     SetTimer(() => ToolTip(), -2000)
 }
 
-; ---------------------------------------------------------------
-; Keyboard layout switching
-; ---------------------------------------------------------------
+; --- Keyboard layout switching ---
 DetectScript(text) {
     global CyrillicLetters
     return RegExMatch(text, "[" CyrillicLetters "]") ? "cyrillic" : "latin"
 }
 
-; HKL of the keyboard layout currently active in the foreground window
 AC_CurrentLayout() {
     tid := DllCall("GetWindowThreadProcessId", "Ptr", WinExist("A"), "Ptr", 0, "UInt")
     return DllCall("GetKeyboardLayout", "UInt", tid, "Ptr")
@@ -504,9 +472,7 @@ SwitchInputLanguage(scriptKey) {
     PostMessage(0x0050, 0, ScriptLayoutIDs[scriptKey], , 0xFFFF)  ; WM_INPUTLANGCHANGEREQUEST, broadcast
 }
 
-; ---------------------------------------------------------------
-; Core matching logic
-; ---------------------------------------------------------------
+; --- Core matching logic ---
 OnCharTyped(ih, char) {
     global WordBuf, WordCharsPattern, AutoCorrectEnabled, UndoTick, BufHwnd
     UndoTick := 0  ; any typed character makes the previous replacement non-undoable
@@ -524,8 +490,7 @@ OnCharTyped(ih, char) {
         WordBuf .= char
         return
     }
-    ; Boundary char is already on screen (non-blocking hook), so the
-    ; caret sits right after it - TryReplace() accounts for that.
+    ; The boundary char is already on screen; TryReplace() accounts for it
     TryReplace(char)
     WordBuf := ""
 }
@@ -533,9 +498,7 @@ OnCharTyped(ih, char) {
 OnKeyDownRaw(ih, vk, sc) {
     global WordBuf, UndoTick, UndoOriginal, UndoReplacement, UndoWindowMs
 
-    ; Shortcuts (Ctrl+V, Ctrl+Backspace, Alt+Tab, Win+...) edit text or switch
-    ; windows in ways we can't track -> the word buffer no longer matches the
-    ; text before the caret.
+    ; Shortcuts (Ctrl+V, Alt+Tab, Win+...) change text/focus untracked -> drop the buffer
     if (!AC_IsModifierVK(vk) && AC_IsShortcutHeld()) {
         WordBuf := ""
         UndoTick := 0
@@ -544,8 +507,7 @@ OnKeyDownRaw(ih, vk, sc) {
 
     if (vk = 0x08) {  ; VK_BACK - our own synthetic presses never reach here
         if (UndoTick && A_TickCount - UndoTick <= UndoWindowMs) {
-            ; The real Backspace is still on its way to the app (non-blocking
-            ; hook), so do the actual work a few ms later, after it landed.
+            ; the real Backspace hasn't reached the app yet: undo a few ms later
             SetTimer(AC_UndoReplacement_Do.Bind(UndoOriginal, UndoReplacement, UndoLayout), -15)
         }
         UndoTick := 0
@@ -554,24 +516,19 @@ OnKeyDownRaw(ih, vk, sc) {
         return
     }
 
-    ; Caret movement / non-typing edits: PgUp, PgDn, End, Home, arrows, Insert,
-    ; Delete, Esc. After these the caret is no longer right behind the typed
-    ; word, so pressing Space must not replace anything.
+    ; PgUp..Down, Insert, Delete, Esc: the caret is no longer right behind the typed word
     if ((vk >= 0x21 && vk <= 0x28) || vk = 0x2D || vk = 0x2E || vk = 0x1B)
         WordBuf := ""
 
-    ; Any non-modifier key moves/changes the text in a way we can't track
-    ; -> drop the undo state.
+    ; any other key invalidates undo
     if !AC_IsModifierVK(vk)
         UndoTick := 0
 }
 
-; True while Ctrl / Alt / Win is held. RAlt is skipped on purpose: AltGr
-; (reported as Ctrl+RAlt) types letters on some layouts.
+; Ctrl/Alt/Win held? Uses the OS state: AutoHotkey's own can get stuck (e.g. after
+; Win+L) and would silently disable AutoCorrect.
 AC_IsShortcutHeld() {
-    ; OS state is used instead of GetKeyState(): AutoHotkey's own state can get stuck
-    ; (e.g. after Win+L) and would then silently disable AutoCorrect.
-    if AC_KeyDownOS(0xA5)  ; RAlt: AltGr types letters on some layouts
+    if AC_KeyDownOS(0xA5)  ; RAlt = AltGr, which types letters on some layouts
         return false
     return AC_KeyDownOS(0x11) || AC_KeyDownOS(0x12) || AC_KeyDownOS(0x5B) || AC_KeyDownOS(0x5C)
 }
@@ -581,8 +538,7 @@ AC_IsModifierVK(vk) {
         || (vk >= 0xA0 && vk <= 0xA5)
 }
 
-; Reverts the last replacement. At this point the user's Backspace has
-; already deleted the boundary char, so only the replacement is left on screen.
+; The user's Backspace already removed the boundary char; only the replacement is left
 AC_UndoReplacement_Do(original, replacement, layout) {
     global WordBuf, LastUndoneFrom, SwitchSoundPath
     WordBuf := ""
@@ -598,8 +554,6 @@ AC_UndoReplacement_Do(original, replacement, layout) {
         SoundPlay(SwitchSoundPath)
 }
 
-; A mouse click moves the caret -> neither the typed word nor the replacement
-; is right before it anymore
 AC_ResetOnMouse(*) {
     global UndoTick, WordBuf
     UndoTick := 0
