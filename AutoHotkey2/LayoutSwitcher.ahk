@@ -276,7 +276,18 @@ ConvertText() {
     en2second := cache[other][1]
     second2en := cache[other][2]
 
-    backup := ClipboardAll()
+    ; the clipboard can be locked by another process for a moment (e.g. right after unlocking the screen)
+    backup := ""
+    Loop 5 {
+        try {
+            backup := ClipboardAll()
+            break
+        } catch {
+            Sleep 50
+        }
+    }
+    if !IsObject(backup)
+        return                          ; clipboard is busy - only the layout was switched
     try {
         A_Clipboard := ""
         Send "^c"
@@ -309,7 +320,10 @@ ConvertText() {
             Send "^v"
             Sleep 100
         }
+    } catch Error as e {
+        if !InStr(e.Message, "clipboard")
+            throw e                     ; swallow only "clipboard is busy" errors
     } finally {
-        A_Clipboard := backup           ; restored even if something above throws
+        try A_Clipboard := backup       ; restored even if something above throws; skipped if the clipboard is busy
     }
 }
