@@ -100,6 +100,11 @@ if ($AppName) {
 }
 if (-not $Selected) { return }
 
+# Is the current directory empty? Checked ONCE, before any install changes it
+$ignoredItems = @("eget.exe", "get.config.ps1", $MyInvocation.MyCommand.Name)
+$dirtyAtStart = [bool](Get-ChildItem -Path ".\" | Where-Object { $_.Name -notin $ignoredItems })
+$dirtyConfirmed = $false
+
 # Process selected applications
 foreach ($item in $Selected) {
     $app = $Apps | Where-Object { $_.Name -eq $item.App }
@@ -144,11 +149,8 @@ foreach ($item in $Selected) {
         if (-not $shouldUpdate) { continue }
 
     } else {
-        # INSTALLS in non-empty directory
-        $ignoredItems = @("eget.exe", "get.config.ps1", $MyInvocation.MyCommand.Name)
-        $dirtyItems = Get-ChildItem -Path ".\" | Where-Object { $_.Name -notin $ignoredItems }
-
-        if ($dirtyItems) {
+        # INSTALLS in non-empty directory: ask until the first confirmation, then stop asking
+        if ($dirtyAtStart -and -not $dirtyConfirmed) {
             Write-Host
             Write-Host "> Current directory is not empty. Proceed with $($app.Name)? [Enter=Yes / Esc=Skip]: " -NoNewline -ForegroundColor Yellow
 
@@ -168,12 +170,69 @@ foreach ($item in $Selected) {
             }
 
             if (-not $shouldProceed) { continue }
+            $dirtyConfirmed = $true
         }
     }
-    
-    Invoke-Command -ScriptBlock $app.Action
-    while ($LastExitCode -ne 0 -or -not $?) {
-        Write-Host; Write-Warning "Error occurred while processing $($app.Name)."; 
+
+    # Action statements run ONE BY ONE. The first statement that calls eget is the
+    # MAIN step: it and everything before it (prerequisites) must succeed.
+    # Statements after it are best-effort extras: their failures are ignored.
+    # They run inline (no function / no output capture) so eget's interactive prompts
+    # keep working; a child scope keeps the Action's variables away from this script's.
+    $statements = @($app.Action.Ast.EndBlock.Statements | Where-Object { $_ })
+    if (-not $statements) {
+        Write-Warning "Action is empty for $($app.Name)."
+        continue
+    }
+    # index of the main step (first statement with an eget call; fallback: the first statement)
+    $mainIdx = 0
+    for ($k = 0; $k -lt $statements.Count; $k++) {
+        $hit = $statements[$k].Find({
+            $args[0] -is [System.Management.Automation.Language.CommandAst] -and
+            $args[0].GetCommandName() -match '^eget(\.exe)?$'
+        }, $true)
+        if ($hit) { $mainIdx = $k; break }
+    }
+
+    while ($true) {
+        $state = @{ Ok = $true; Returned = $false }
+        & {
+            $__i = 0
+            foreach ($__st in $statements) {
+                $__i++
+                $global:LASTEXITCODE = 0
+                $__failed = $false
+                $__reached = $false
+                $__ok = $true
+                try {
+                    # Dot-sourced, so variables survive between statements of one Action.
+                    # The appended tail captures $? and proves the statement ran to its end
+                    # (a "return" inside the statement skips the tail).
+                    . ([scriptblock]::Create($__st.Extent.Text + "`n`$__ok = `$?; `$__reached = `$true"))
+                } catch {
+                    Write-Warning $_.Exception.Message
+                    $__failed = $true
+                }
+
+                # Action ended itself via "return": stop quietly, its own message is already shown
+                if (-not $__reached -and -not $__failed) { $state.Returned = $true; break }
+
+                if (-not $__ok -or $LASTEXITCODE -ne 0) { $__failed = $true }
+                if ($__failed) {
+                    if (($__i - 1) -le $mainIdx) { $state.Ok = $false; break }   # main step or prerequisite failed
+                    Write-Host "Optional step failed (ignored)" -ForegroundColor DarkGray
+                }
+            }
+        }
+
+        if ($state.Returned) { break }
+
+        if ($state.Ok) {
+            Write-Host "`n Successfully processed: $($app.Name)" -ForegroundColor Green
+            break
+        }
+
+        Write-Host; Write-Warning "Error occurred while processing $($app.Name)."
         Write-Host "`n> Retry? [Enter=Yes / Esc=Skip]: " -NoNewline -ForegroundColor Yellow
 
         $retry = $false
@@ -184,21 +243,24 @@ foreach ($item in $Selected) {
         }
 
         if (-not $retry) { break }
-        Invoke-Command -ScriptBlock $app.Action
-    }
-
-    if ($LastExitCode -eq 0 -and $?) {
-        Write-Host "`n Successfully processed: $($app.Name)" -ForegroundColor Green
     }
 }
 
-
-# Exiting
+# Exiting: Esc = exit now, any other key = pause (stay open until Esc)
 Write-Host `n
-for ($s = 3; $s -gt 0; $s--) {
-    Write-Host -NoNewline "`r Press any key to continue (or wait $s seconds)... " -BackgroundColor DarkGray
+$paused = $false
+for ($s = 3; $s -gt 0 -and -not $paused; $s--) {
+    Write-Host -NoNewline "`r Press Esc to exit, any other key to pause ($s)...   " -BackgroundColor DarkGray
     for ($j = 0; $j -lt 20; $j++) {
-        if ([Console]::KeyAvailable) { [Console]::ReadKey($true) | Out-Null; exit }
+        if ([Console]::KeyAvailable) {
+            if ([Console]::ReadKey($true).Key -eq 'Escape') { exit }
+            $paused = $true
+            break
+        }
         Start-Sleep -m 50
     }
+}
+if ($paused) {
+    Write-Host -NoNewline "`r Paused. Press Esc to exit...                          " -BackgroundColor DarkGray
+    while ([Console]::ReadKey($true).Key -ne 'Escape') { }
 }

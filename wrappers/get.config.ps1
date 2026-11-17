@@ -2,7 +2,7 @@
 # by github.com/wincmd64
 
 #   [Supported apps]
-# AnyDesk, AutoHotkey, CrystalDiskMark, Far Manager, fastfetch, FFmpeg, Geek Uninstaller,
+# AnyDesk, AutoHotkey, CrystalDiskMark, ExifTool, Far Manager, fastfetch, FFmpeg, Geek Uninstaller,
 # HTTP Downloader, KeePass, LAV Filters, LocalSend, MPC-HC, Notepad++, qBittorrent, Rufus,
 # SystemInformer, Ventoy, Victoria, WinDirStat, WinDjView Ext, WinMTR, UniExtract2
 
@@ -48,13 +48,24 @@ $Apps = @(
         }
     },
     [PSCustomObject]@{
+        ID          = "exiftool.exe"
+        Name        = "ExifTool + GUI"
+        Source      = "SourceForge"
+        Changelog   = "https://exiftool.org/history.html"
+        QueryTarget = "sourceforge:exiftool"
+        Action      = {
+            eget.exe dl --extract-all --strip-components 1 --asset "_64,zip" --rename "exiftool(-k).exe=exiftool.exe" "sourceforge:exiftool" --select-first
+            eget.exe dl --asset "ExifToolGUI.exe" FrankBijnen/ExifToolGui
+        }
+    },
+    [PSCustomObject]@{
         ID          = "WinDjView.exe"
         Name        = "WinDjView Extended"
         Source      = "SourceForge"
         Changelog   = "https://sourceforge.net/projects/windjviewextended/files/"
         QueryTarget = "sourceforge:windjviewextended"
         Action      = {
-            eget.exe dl --extract-all --asset "zip,^source" --strip-components 1 "sourceforge:windjviewextended" --quiet
+            eget.exe dl --extract-all --asset "zip,^source" --strip-components 1 "sourceforge:windjviewextended" --select-first
             if (-not (Test-Path ".\WinDjView.ini")) { New-Item -Path ".\WinDjView.ini" -ItemType File | Out-Null }
         }
     },
@@ -131,7 +142,7 @@ $Apps = @(
                 sleep 1
                 return
             }
-            eget.exe dl --quiet --file "qbittorrent.exe" --asset "x64,setup,exe,^asc,^_lt,^rc,^beta" "sourceforge:qbittorrent/qbittorrent-win32"
+            eget.exe dl --file "qbittorrent.exe" --asset "x64,setup,exe,^asc,^_lt,^rc,^beta" "sourceforge:qbittorrent/qbittorrent-win32" --select-first
             # portable
             if (-not (Test-Path "profile")) { New-Item -ItemType Directory -Name "profile" | Out-Null }
         }
