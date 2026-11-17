@@ -38,6 +38,22 @@ $Apps = @(
         }
     },
     [PSCustomObject]@{
+        ID          = "core\betterbird.exe"
+        Name        = "Betterbird"
+        Source      = "DirectURL"
+        Changelog   = "https://www.betterbird.eu/releasenotes/index.html"
+        QueryTarget = "https://www.betterbird.eu/downloads/get.php?os=win&lang=en-US&version=release&portable=true"
+        Action      = {
+            # the running exe can't be overwritten
+            while (Get-Process -Name betterbird -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith("$PWD\", [StringComparison]::OrdinalIgnoreCase) }) {
+                Write-Host "`n [!] Betterbird from this folder is running. Close it and press any key..." -ForegroundColor Yellow
+                [void][Console]::ReadKey($true)
+            }
+            $url = (Invoke-WebRequest 'https://www.betterbird.eu/downloads/getloc.php?os=win&lang=en-US&version=release&portable=true' -UseBasicParsing).Content.Trim()
+            eget.exe dl --extract-all $url
+        }
+    },
+    [PSCustomObject]@{
         ID          = "AutoHotkey64.exe"
         Name        = "AutoHotkey"
         Source      = "GitHub"
