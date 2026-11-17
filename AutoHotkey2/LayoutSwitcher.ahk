@@ -200,6 +200,18 @@ SwitchLayout(layoutID) {
 ; Is this layout the base one (compared by language, not by full handle)?
 IsBase(hkl) => (hkl & 0xFFFF) = (ResolveLayout(CapsBase) & 0xFFFF)
 
+; True if the active window is Notepad++ and its editor has nothing selected
+NoSelectionInScintilla() {
+    if !WinActive("ahk_exe notepad++.exe")
+        return false
+    try {
+        ctl := ControlGetFocus("A")
+        if ctl && WinGetClass(ctl) = "Scintilla"
+            return SendMessage(2650, 0, 0, ctl) != 0    ; SCI_GETSELECTIONEMPTY
+    }
+    return false
+}
+
 ; Keyboard layout of the active window
 CurrentLayout() {
     tid := DllCall("GetWindowThreadProcessId", "Ptr", WinExist("A"), "Ptr", 0, "UInt")
@@ -267,8 +279,9 @@ ConvertText() {
     SwitchLayout(toBase ? CapsBase : other)
     Flash()
 
-    ; consoles: Ctrl+C would interrupt the running command, so only the layout is switched
+    ; consoles / terminals: Ctrl+C would interrupt the running command, so only the layout is switched
     if WinActive("ahk_class ConsoleWindowClass") || WinActive("ahk_exe WindowsTerminal.exe")
+        || WinActive("ahk_exe MobaXterm.exe")
         return
 
     if !cache.Has(other)
@@ -290,12 +303,19 @@ ConvertText() {
         return                          ; clipboard is busy - only the layout was switched
     try {
         A_Clipboard := ""
-        Send "^c"
-        ClipWait 0.15
-        if A_Clipboard = "" {
-            A_Clipboard := ""
+        if NoSelectionInScintilla() {
+            ; Notepad++ copies the WHOLE line (with line break) on Ctrl+C without a selection,
+            ; so select up to the line start ourselves
             Send "+{Home}^c"
             ClipWait 0.5
+        } else {
+            Send "^c"
+            ClipWait 0.15
+            if A_Clipboard = "" {
+                A_Clipboard := ""
+                Send "+{Home}^c"
+                ClipWait 0.5
+            }
         }
 
         if A_Clipboard != "" {
