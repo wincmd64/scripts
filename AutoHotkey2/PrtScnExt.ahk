@@ -2,7 +2,7 @@
 Enhances PrintScreen functionality
 
     PrtScn:       Always launches native Snipping Tool (ignore OS settings)
-    Alt+PrtScn:   Snips and pastes the image into MS Paint
+    Shift+PrtScn:   Snips and pastes the image into MS Paint
     Ctrl+PrtScn:  Snips and pastes into a custom user editor (e.g., IrfanView)
 */
 
@@ -17,7 +17,7 @@ GroupAdd "SnipOverlay", "ahk_exe ScreenClippingHost.exe" ; Windows 10
 GroupAdd "SnipOverlay", "ahk_exe SnippingTool.exe"       ; Windows 11
 
 $PrintScreen::Run "ms-screenclip:"
-!PrintScreen::SnipAndPaste("mspaint.exe")
++PrintScreen::SnipAndPaste("mspaint.exe")
 ^PrintScreen::SnipAndPaste(UserEditorPath)
 
 
