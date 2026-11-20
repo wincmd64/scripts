@@ -65,7 +65,7 @@ global LatinLetters := "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm"
 global CyrillicLetters := "ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮЁйцукенгшщзхъфывапролджэячсмитьбюё"
 if UkrainianLayout
     CyrillicLetters .= "ЇІЄҐїієґ"
-global WordCharsPattern := "[" LatinLetters CyrillicLetters "'’\-]"
+global WordCharsPattern := "[" LatinLetters CyrillicLetters "0-9'’\-]" ; Digits count too, so words glued to digits (kb112, win10) are left alone OR "[" LatinLetters CyrillicLetters "'’\-]"
 
 global Dict := Map()
 global WordBuf := ""
@@ -475,6 +475,7 @@ SwitchInputLanguage(scriptKey) {
 ; --- Core matching logic ---
 OnCharTyped(ih, char) {
     global WordBuf, WordCharsPattern, AutoCorrectEnabled, UndoTick, BufHwnd
+    Critical("On")  ; callbacks must not interrupt each other (fast typing queues them instead)
     UndoTick := 0  ; any typed character makes the previous replacement non-undoable
     if !AutoCorrectEnabled
         return
@@ -497,6 +498,7 @@ OnCharTyped(ih, char) {
 
 OnKeyDownRaw(ih, vk, sc) {
     global WordBuf, UndoTick, UndoOriginal, UndoReplacement, UndoWindowMs
+    Critical("On")
 
     ; Shortcuts (Ctrl+V, Alt+Tab, Win+...) change text/focus untracked -> drop the buffer
     if (!AC_IsModifierVK(vk) && AC_IsShortcutHeld()) {
@@ -541,9 +543,9 @@ AC_IsModifierVK(vk) {
 ; The user's Backspace already removed the boundary char; only the replacement is left
 AC_UndoReplacement_Do(original, replacement, layout) {
     global WordBuf, LastUndoneFrom, SwitchSoundPath
+    Critical("On")
     WordBuf := ""
-    Send("{BackSpace " StrLen(replacement) "}")
-    SendText(original)
+    Send("{BackSpace " StrLen(replacement) "}{Text}" original)
     if layout  ; back to the layout the user was typing in (RU or UA), not a guess
         PostMessage(0x0050, 0, layout, , 0xFFFF)  ; WM_INPUTLANGCHANGEREQUEST, broadcast
     else
@@ -565,27 +567,27 @@ TryReplace(boundaryChar) {
     global UndoTick, UndoOriginal, UndoReplacement, UndoLayout, UndoWindowMs
     global Exceptions, ExceptionApps
     global LastTrigger, LastReplacementText, LastTime, LastWindow, LastProcess, LastUndoneFrom
-    if (WordBuf = "")
+    word := WordBuf
+    if (word = "")
         return
-    if Dict.Has(WordBuf) {
+    if Dict.Has(word) {
         AC_RefreshLists()  ; only on a dictionary hit, so normal typing stays cheap
-        if Exceptions.Has(WordBuf)
+        if Exceptions.Has(word)
             return
         proc := ""
         try proc := WinGetProcessName("A")
         if (proc != "" && ExceptionApps.Has(StrLower(proc)))
             return
-        replacement := Dict[WordBuf]
+        replacement := Dict[word]
         layoutBefore := AC_CurrentLayout()
-        ; Erase the word + the boundary char already on screen, then retype both.
-        Send("{BackSpace " (StrLen(WordBuf) + 1) "}")
-        SendText(replacement)
-        ResendBoundaryChar(boundaryChar)
+        ; Erase word + boundary char (already on screen), retype both. A single Send:
+        ; keys typed meanwhile are buffered and can't end up in the middle of it.
+        Send("{BackSpace " (StrLen(word) + 1) "}{Text}" replacement boundaryChar)
         SwitchInputLanguage(DetectScript(replacement))
 
         ; Remember what was typed so Backspace can revert it shortly after
         if (UndoWindowMs > 0) {
-            UndoOriginal := WordBuf
+            UndoOriginal := word
             UndoReplacement := replacement
             UndoLayout := layoutBefore
             UndoTick := A_TickCount
@@ -593,23 +595,12 @@ TryReplace(boundaryChar) {
         if FileExist(SwitchSoundPath)
             SoundPlay(SwitchSoundPath)
 
-        LastTrigger := WordBuf
+        LastTrigger := word
         LastReplacementText := replacement
         LastTime := FormatTime(, "HH:mm:ss")
         LastWindow := ""
         try LastWindow := WinGetTitle("A")
         LastProcess := proc
         LastUndoneFrom := ""
-    }
-}
-
-ResendBoundaryChar(char) {
-    switch char {
-        case "`n", "`r":
-            Send("{Enter}")
-        case "`t":
-            Send("{Tab}")
-        default:
-            SendText(char)
     }
 }
