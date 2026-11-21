@@ -14,6 +14,7 @@ Default:
     AltGr - Ukrainian
     CapsLock - convert selected text (or the line up to the caret) typed in the
                wrong layout, and switch the layout (see CapsConvert below)
+               * doesn't work on consoles
 */
 
 #Requires AutoHotkey v2.0

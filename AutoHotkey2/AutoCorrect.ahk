@@ -465,6 +465,55 @@ AC_CurrentLayout() {
     return DllCall("GetKeyboardLayout", "UInt", tid, "Ptr")
 }
 
+; --- Classic console windows (cmd, PowerShell in conhost) ---
+; The layout reported for these windows is wrong, so the hook's characters can't be
+; trusted. The word is read back from the console's screen buffer instead.
+AC_IsConsole() {
+    try return WinGetClass("A") = "ConsoleWindowClass"
+    return false
+}
+
+; Last word before the cursor on the console's current line ("" if none / on error).
+; Waits briefly until it is as long as the word the hook counted (the console may lag).
+AC_ConsoleWord(minLen) {
+    global WordCharsPattern
+    pid := 0
+    try pid := WinGetPID("A")
+    if !pid
+        return ""
+    if !DllCall("AttachConsole", "UInt", pid)
+        return ""
+    word := ""
+    h := DllCall("CreateFileW", "Str", "CONOUT$", "UInt", 0xC0000000, "UInt", 3
+        , "Ptr", 0, "UInt", 3, "UInt", 0, "Ptr", 0, "Ptr")   ; GENERIC_READ|WRITE, SHARE_READ|WRITE, OPEN_EXISTING
+    if (h != 0 && h != -1) {
+        info := Buffer(22, 0)                                 ; CONSOLE_SCREEN_BUFFER_INFO
+        Loop 6 {
+            word := ""
+            if !DllCall("GetConsoleScreenBufferInfo", "Ptr", h, "Ptr", info)
+                break
+            x := NumGet(info, 4, "Short"), y := NumGet(info, 6, "Short")   ; cursor column / row
+            if (x > 0) {
+                buf := Buffer(x * 2 + 2, 0)
+                n := 0
+                ; COORD is passed by value: column in the low word, row in the high word
+                if DllCall("ReadConsoleOutputCharacterW", "Ptr", h, "Ptr", buf, "UInt", x
+                    , "UInt", y << 16, "UInt*", &n) {
+                    text := RTrim(StrGet(buf, n, "UTF-16"), " ")   ; Space may or may not be echoed yet
+                    if RegExMatch(text, WordCharsPattern "+$", &m)
+                        word := m[0]
+                }
+            }
+            if (StrLen(word) >= minLen)
+                break
+            Sleep(15)
+        }
+        DllCall("CloseHandle", "Ptr", h)
+    }
+    DllCall("FreeConsole")
+    return StrLen(word) = minLen ? word : ""
+}
+
 SwitchInputLanguage(scriptKey) {
     global ScriptLayoutIDs
     if !ScriptLayoutIDs.Has(scriptKey)
@@ -485,6 +534,22 @@ OnCharTyped(ih, char) {
     if (hwnd != BufHwnd) {
         WordBuf := ""
         BufHwnd := hwnd
+    }
+
+    ; Consoles: the hook's characters are translated with a wrong layout, so they are only
+    ; counted; on Space the real word is read from the screen buffer
+    if AC_IsConsole() {
+        if RegExMatch(char, WordCharsPattern)
+            WordBuf .= char
+        else {
+            if (char = " " && WordBuf != "") {
+                realWord := AC_ConsoleWord(StrLen(WordBuf))
+                if (realWord != "")   ; never fall back to WordBuf: it was built with a wrong layout
+                    TryReplace(char, realWord)
+            }
+            WordBuf := ""
+        }
+        return
     }
 
     if RegExMatch(char, WordCharsPattern) {
@@ -562,12 +627,13 @@ AC_ResetOnMouse(*) {
     WordBuf := ""
 }
 
-TryReplace(boundaryChar) {
+TryReplace(boundaryChar, word := "") {
     global WordBuf, Dict, SwitchSoundPath
     global UndoTick, UndoOriginal, UndoReplacement, UndoLayout, UndoWindowMs
     global Exceptions, ExceptionApps
     global LastTrigger, LastReplacementText, LastTime, LastWindow, LastProcess, LastUndoneFrom
-    word := WordBuf
+    if (word = "")
+        word := WordBuf
     if (word = "")
         return
     if Dict.Has(word) {
@@ -579,7 +645,7 @@ TryReplace(boundaryChar) {
         if (proc != "" && ExceptionApps.Has(StrLower(proc)))
             return
         replacement := Dict[word]
-        layoutBefore := AC_CurrentLayout()
+        layoutBefore := AC_IsConsole() ? 0 : AC_CurrentLayout()   ; unknown in consoles
         ; Erase word + boundary char (already on screen), retype both. A single Send:
         ; keys typed meanwhile are buffered and can't end up in the middle of it.
         Send("{BackSpace " (StrLen(word) + 1) "}{Text}" replacement boundaryChar)
