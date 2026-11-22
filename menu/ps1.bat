@@ -45,12 +45,18 @@ reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexec
 reg add "HKCU\Software\Classes\SystemFileAssociations\.ps1\shell\wincmd64_PSexecpol\shell\03set\command" /ve /d "powershell.exe -NoP -C \"Set-ExecutionPolicy Restricted -Scope CurrentUser; Write-Host `n' Set as default: ' -NoNewline; Get-ExecutionPolicy ^| Write-host -ForegroundColor Red; Write-Host; pause\"" /f
 
 :: Add icon to the system "Run with PowerShell" item (needs admin).
-:: Only touch keys that already exist (Win10/11/Server differ).
-set "ok="
-reg query "HKLM\SOFTWARE\Classes\SystemFileAssociations\.ps1\Shell\Windows.PowerShell.Run" >nul 2>&1 && reg add "HKLM\SOFTWARE\Classes\SystemFileAssociations\.ps1\Shell\Windows.PowerShell.Run" /v Icon /d \"%%systemroot%%\System32\WindowsPowerShell\v1.0\powershell.exe\" /f >nul && set "ok=1"
-reg query "HKLM\SOFTWARE\Classes\Microsoft.PowerShellScript.1\Shell\0" >nul 2>&1 && reg add "HKLM\SOFTWARE\Classes\Microsoft.PowerShellScript.1\Shell\0" /v Icon /d \"%%systemroot%%\System32\WindowsPowerShell\v1.0\powershell.exe\" /f >nul && set "ok=1"
-if defined ok (color A & timeout 2) else (echo. & echo  Icon was not added: "Run with PowerShell" key not found or no admin rights. & pause)
-
+:: Key location differs between Win11/Win10/Server; only touch keys that already exist.
+set "ok=" & set "found="
+set "PSICON=%%systemroot%%\System32\WindowsPowerShell\v1.0\powershell.exe"
+for %%K in (
+  "HKLM\SOFTWARE\Classes\SystemFileAssociations\.ps1\Shell\Windows.PowerShell.Run"
+  "HKLM\SOFTWARE\Classes\SystemFileAssociations\.ps1\Shell\0"
+  "HKLM\SOFTWARE\Classes\Microsoft.PowerShellScript.1\Shell\0"
+) do reg query "%%~K" /reg:64 >nul 2>&1 && (
+  set "found=1"
+  reg add "%%~K" /v Icon /d "%PSICON%" /f /reg:64 >nul && set "ok=1"
+)
+if defined ok (color A & timeout 2) else if defined found (echo  Key found, but writing failed: run as administrator, or the key is protected. & pause) else (echo  "Run with PowerShell" key not found on this system. & pause)
 exit
 
 :undo
