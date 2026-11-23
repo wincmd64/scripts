@@ -1,14 +1,7 @@
 #Requires AutoHotkey v2.0
 
 /*
-Calendar. Optionally marks birthdays from a plain data file.
-
-USAGE
-  Direct Run or from another script:
-      Include the file in your main script:
-          #Include *i Calendar.ahk
-      and add a tray menu item:
-          try TrayAddTop("Calendar", %"cal_Show"%, "timedate.cpl")
+CALENDAR. Optionally marks birthdays from a plain data file.
 
 DATA FILE (birthdays, optional)
   Any plain text file in UTF-8 encoding; the extension does not matter (.csv, .txt, ...).
@@ -172,9 +165,15 @@ cal_people := []            ; birthdays as read from the file: Map(name, y, m, d
 cal_hot := []               ; hover areas of the birthday days in the current window: Map(x, y, w, h, tip)
 cal_tipIdx := 0             ; index in cal_hot of the shown tooltip (0 = none)
 
-; Run directly (not included) -> just open the window
-if (A_LineFile = A_ScriptFullPath)
+; Run directly -> just open the window. #Included -> add the tray menu item (on top)
+if (A_LineFile = A_ScriptFullPath) {
     cal_Show()
+} else {
+    try {
+        A_TrayMenu.Insert("1&", "Calendar", cal_Show)
+        A_TrayMenu.SetIcon("Calendar", "timedate.cpl", 1)
+    }
+}
 
 ; Opens the window (or brings it to front if it is already open).
 ; Used as a menu callback, hence the (*) parameters.

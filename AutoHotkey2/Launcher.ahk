@@ -24,7 +24,6 @@ Folder          := ExpandEnv("%AppData%\Microsoft\Windows\Start Menu\Programs") 
 ShowHotkey      := "#z"                 ; hotkey to show the menu (# = Win)
 TaskbarDblClick := 1                    ; 1 = double-click on empty taskbar space shows the menu
 DarkMenu        := "auto"               ; "auto" = follow the Windows app theme, 1 = dark, 0 = light
-TrayIcon        := RegExReplace(A_ScriptFullPath, "\.\w+$", ".ico")   ; "" = default AHK icon
 MaxItems        := 50                  ; max menu entries, the rest is cut off (0 = no limit)
 Debug           := 0                    ; 1 = message box with taskbar element info on every taskbar click (also copied to the clipboard)
 ; =========================
