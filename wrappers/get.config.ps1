@@ -3,7 +3,7 @@
 
 #   [Supported apps]
 # AnyDesk, AutoHotkey, CrystalDiskMark, ExifTool, Far Manager, fastfetch, FFmpeg, Geek Uninstaller,
-# HTTP Downloader, KeePass, LAV Filters, LocalSend, MPC-HC, Notepad++, qBittorrent, Rufus,
+# HTTP Downloader, KeePass, LAV Filters, LocalSend, MPC-HC, MobaXterm, Notepad++, qBittorrent, Rufus,
 # SystemInformer, Ventoy, Victoria, WinDirStat, WinDjView Ext, WinMTR, UniExtract2
 
 $Apps = @(
@@ -72,6 +72,20 @@ $Apps = @(
         Action      = {
             eget.exe dl --extract-all --strip-components 1 --asset "_64,zip" --rename "exiftool(-k).exe=exiftool.exe" "sourceforge:exiftool" --select-first
             eget.exe dl --asset "ExifToolGUI.exe" FrankBijnen/ExifToolGui
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "MobaXterm.exe"
+        Name        = "MobaXterm"
+        Source      = "DirectURL"
+        Changelog   = "https://ccc.mobatek.net/MobaXterm_Changelog.txt"
+        QueryTarget = "https://mobaxterm.mobatek.net/download-home-edition.html"
+        Action      = {
+            # the download page is HTML: take the current portable zip link (first match) from it
+            $page = (Invoke-WebRequest "https://mobaxterm.mobatek.net/download-home-edition.html" -UseBasicParsing).Content
+            $url = [regex]::Match($page, 'https://download\.mobatek\.net/\d+/MobaXterm_Portable_v[\d.]+\.zip').Value
+            if (-not $url) { throw "Portable zip link not found on the download page" }
+            eget.exe dl --extract-all --rename "MobaXterm_Personal_*.exe=MobaXterm.exe" $url
         }
     },
     [PSCustomObject]@{
