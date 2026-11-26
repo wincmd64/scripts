@@ -72,8 +72,11 @@ IsOverMinButton()
     if !hwnd
         return false
     root := DllCall("GetAncestor", "Ptr", hwnd, "UInt", 2, "Ptr")
-    if !(WinGetStyle(root) & 0x20000)  ; no WS_MINIMIZEBOX
-        return false
+    try style := WinGetStyle(root) ; The window may already be gone (e.g. a combo box drop-down closed by this click)
+    catch
+        Return 0
+    If !(style & 0x20000)
+        Return 0
 
     ; Caption button area (min+max+close) from DWM; Minimize is the left third
     wr := Buffer(16)

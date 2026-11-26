@@ -406,7 +406,6 @@ DebugLog() {
     }
 }
 
-; Plays the chime once at the start of each hour, within the configured hours
 ; Plays the chime chosen in the settings: a sound file or the time spoken aloud (the ">" buttons of the settings window test either kind)
 Chime(mode := -1) {
     static voice := ""                  ; kept alive: asynchronous speech stops if the object is released
