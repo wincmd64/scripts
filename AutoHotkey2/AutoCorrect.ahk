@@ -340,6 +340,7 @@ IH := InputHook("V L0")   ; visible / non-blocking, no length limit
 IH.KeyOpt("{All}", "N")  ; notify for all keys, block nothing
 IH.OnChar := OnCharTyped
 IH.OnKeyDown := OnKeyDownRaw
+IH.MinSendLevel := 1   ; ignore our own Send (level 0), so a replacement is never re-processed
 IH.Start()
 
 global AutoCorrectEnabled := true
