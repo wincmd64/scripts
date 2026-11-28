@@ -4,8 +4,18 @@
 [CmdletBinding()]
 param(
     [Parameter(Position=0, ValueFromPipeline=$true)]
-    [string]$AppName
+    [string]$AppName,
+
+    # Target directory (default: current one). Created if missing.
+    [Parameter(Position=1)]
+    [string]$Path
 )
+
+# Work in the target directory, if given
+if ($Path) {
+    if (-not (Test-Path -LiteralPath $Path)) { New-Item -ItemType Directory -Path $Path -Force | Out-Null }
+    Set-Location -LiteralPath $Path
+}
 
 # check for eGet
 if (Test-Path "$PSScriptRoot\eget.exe") { $env:PATH += ";$PSScriptRoot" }

@@ -4,7 +4,7 @@
 #   [Supported apps]
 # AnyDesk, AutoHotkey, CrystalDiskMark, ExifTool, Far Manager, fastfetch, FFmpeg, Geek Uninstaller,
 # HTTP Downloader, KeePass, LAV Filters, LocalSend, MPC-HC, MobaXterm, Notepad++, qBittorrent, Rufus,
-# SystemInformer, Ventoy, Victoria, WinDirStat, WinDjView Ext, WinMTR, UniExtract2
+# SystemInformer, Ventoy, Victoria, WinDirStat, WinDjView Ext, WinMerge, WinMTR, UniExtract2
 
 $Apps = @(
     [PSCustomObject]@{
@@ -276,6 +276,32 @@ $Apps = @(
         QueryTarget = "notepad-plus-plus/notepad-plus-plus"
         Action      = {
             eget.exe dl --extract-all --asset "portable.x64.7z" notepad-plus-plus/notepad-plus-plus
+        }
+    },
+    [PSCustomObject]@{
+        ID          = "WinMergeU.exe"
+        Name        = "WinMerge"
+        Source      = "GitHub"
+        Changelog   = "https://github.com/WinMerge/winmerge/releases"
+        QueryTarget = "WinMerge/winmerge"
+        Action      = {
+            eget.exe dl --extract-all --strip-components 1 --asset "x64-exe.zip" WinMerge/winmerge
+
+            $iniFile = ".\winmerge.ini"
+            if (-not (Test-Path $iniFile)) {
+                Write-Host "Creating winmerge.ini..." -ForegroundColor Cyan
+                $iniContent = @'
+[WinMerge]
+Settings/PredifferMode=1
+Settings/UnpackerMode=1
+Settings/CloseWithEsc=3
+Settings/SingleInstance=1
+Settings/ViewLineNumbers=1
+Settings/ViewZoom=750
+Backup/EnableFile=0
+'@
+                $iniContent | Out-File -FilePath $iniFile -Encoding ascii
+            }
         }
     },
     [PSCustomObject]@{
