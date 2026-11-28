@@ -2,7 +2,7 @@
 # by github.com/wincmd64
 
 #   [Supported apps]
-# AnyDesk, AutoHotkey, CrystalDiskMark, ExifTool, Far Manager, fastfetch, FFmpeg, Geek Uninstaller,
+# AnyDesk, CrystalDiskMark, ExifTool, Far Manager, fastfetch, FFmpeg, Geek Uninstaller,
 # HTTP Downloader, KeePass, LAV Filters, LocalSend, MPC-HC, MobaXterm, Notepad++, qBittorrent, Rufus,
 # SystemInformer, Ventoy, Victoria, WinDirStat, WinDjView Ext, WinMerge, WinMTR, UniExtract2
 
@@ -51,16 +51,6 @@ $Apps = @(
             }
             $url = (Invoke-WebRequest 'https://www.betterbird.eu/downloads/getloc.php?os=win&lang=en-US&version=release&portable=true' -UseBasicParsing).Content.Trim()
             eget.exe dl --extract-all $url
-        }
-    },
-    [PSCustomObject]@{
-        ID          = "AutoHotkey64.exe"
-        Name        = "AutoHotkey"
-        Source      = "GitHub"
-        Changelog   = "https://www.autohotkey.com/docs/v2/ChangeLog.htm"
-        QueryTarget = "AutoHotkey/AutoHotkey"
-        Action      = {
-            eget.exe dl --file "AutoHotkey.chm,AutoHotkey64.exe,UX/WindowSpy.ahk" --asset "zip" --rename "UX/WindowSpy.ahk=WindowSpy.ahk" AutoHotkey/AutoHotkey
         }
     },
     [PSCustomObject]@{
