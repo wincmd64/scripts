@@ -6,6 +6,7 @@
 
 #Requires AutoHotkey v2.0
 #SingleInstance Force
+#NoTrayIcon
 
 ; ---------------- Test list (edit freely) ----------------
 ; Only checks that a per-program firewall rule can actually affect.
