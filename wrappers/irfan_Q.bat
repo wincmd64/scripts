@@ -14,7 +14,6 @@
 setlocal
 
 :: [SETTINGS]
-set "name=IrfanView"
 set "app=i_view64.exe"
 set "dir=%~dp0"
 cd /d "%dir%"
@@ -35,7 +34,7 @@ if exist "%app%" (
     cls
 )
 :: update logic
-if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & echo. & pause
+if not defined current_version (echo. & echo  Download IrfanView to "%dir%" ? & echo. & pause
 ) else (
     echo. & echo  Current version: %current_version%
     echo   Latest version: %latest_version%
@@ -44,7 +43,7 @@ if not defined current_version (echo. & echo  Download %name% to "%dir%" ? & ech
 
 :check_task
 tasklist /fi "imagename eq %app%" | find /i "%app%" >nul
-if not errorlevel 1 (echo. & echo  [!] %name% is running. Please close it to continue. & echo. & pause & goto check_task)
+if not errorlevel 1 (echo. & echo  [!] IrfanView is running. Please close it to continue. & echo. & pause & goto check_task)
 
 :: download and unpack
 echo. & echo  Downloading... & echo.
@@ -128,7 +127,7 @@ echo   [5] convert to .ext
 echo   [6] create multipage PDF or TIF from input files
 echo   [7] extract all pages from a multipage file to .ext
 echo   [8] jpg lossless rotate
-echo   [9] set as wallpaper
+echo   [9] set as wallpaper or lock screen
 echo.
 CHOICE /C 123456789 /M "Your choice?:" >nul 2>&1
 if errorlevel 9 goto Option_9
@@ -207,6 +206,10 @@ pushd "%~dp1"
 del listfile.txt
 color A & timeout 1 & exit
 :Option_9
+echo  1 = set as wallpaper
+echo  2 = set as lock screen
+CHOICE /C 12 /M "Your choice?:" >nul 2>&1
+if errorlevel 2 goto LockScreen
 <nul set /p "= Gathering display info... "
 powershell -C "exit (Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorBasicDisplayParams).Count"
 set nMons=%ERRORLEVEL%
@@ -226,6 +229,17 @@ echo %mon_num%| findstr /r "^[1-9][0-9]*$" >nul
 if errorlevel 1 goto SelectMonitor
 if %mon_num% GTR %nMons% goto SelectMonitor
 start "" "%app%" "%~1" /wall=4 /monitor=%mon_num% /cmdexit
+color A & timeout 1 & exit
+:LockScreen
+:: WinRT LockScreen.SetImageFileAsync (current user, no admin, Windows PowerShell 5.1)
+set "lockimg=%~f1"
+set "ps=Add-Type -A System.Runtime.WindowsRuntime; $m=[WindowsRuntimeSystemExtensions].GetMethods()|?{$_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1};"
+set "ps=%ps% $op=($m|?{$_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1'})[0]; $ac=($m|?{$_.GetParameters()[0].ParameterType.Name -eq 'IAsyncAction'})[0];"
+set "ps=%ps% $F=[Windows.Storage.StorageFile,Windows.Storage,ContentType=WindowsRuntime]; $L=[Windows.System.UserProfile.LockScreen,Windows.System.UserProfile,ContentType=WindowsRuntime];"
+set "ps=%ps% $t=$op.MakeGenericMethod($F).Invoke($null,@($F::GetFileFromPathAsync($env:lockimg))); $t.Wait(-1)|Out-Null;"
+set "ps=%ps% $t=$ac.Invoke($null,@($L::SetImageFileAsync($t.Result))); $t.Wait(-1)|Out-Null"
+powershell -NoP -C "%ps%"
+if errorlevel 1 (color C & echo. & echo  Error: failed to set lock screen. & echo. & pause & exit)
 color A & timeout 1 & exit
 
 :shortcut
